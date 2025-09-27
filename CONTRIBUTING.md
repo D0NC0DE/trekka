@@ -23,7 +23,7 @@ Prefer passing env at runtime via `--dart-define`:
 
 ### 📦 Install
 ```bash
-git clone https://github.com/your-org/trekka.git
+git clone https://github.com/trekka-hq/trekka.git
 cd trekka
 flutter pub get
 ```
@@ -241,8 +241,8 @@ Report security vulnerabilities privately: **security@trekka.app**.
 
 ## 8) Support & Links
 
-- Issues: https://github.com/your-org/trekka/issues  
-- Discussions: https://github.com/your-org/trekka/discussions  
+- Issues: https://github.com/trekka-hq/trekka/issues  
+- Discussions: https://github.com/trekka-hq/trekka/discussions  
 - Engineering: dev@trekka.app • Security: security@trekka.app • Product: pm@trekka.app
 
 > Keep the **README** pitch‑focused. This doc is the **source of truth** for development.

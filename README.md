@@ -63,7 +63,7 @@ lib/
 ### Install & Run
 ```bash
 # 1) Clone
-git clone https://github.com/your-org/trekka.git
+git clone https://github.com/trekka-hq/trekka.git
 cd trekka
 
 # 2) Install deps
@@ -107,8 +107,8 @@ dart format --set-exit-if-changed .
 
 ## 🧑‍🤝‍🧑 Community & Contributing
 
-- Issues: **https://github.com/your-org/trekka/issues**  
-- Discussions: **https://github.com/your-org/trekka/discussions**  
+- Issues: **https://github.com/trekka-hq/trekka/issues**  
+- Discussions: **https://github.com/trekka-hq/trekka/discussions**  
 - Developer workflow, commit style (✨ 🐞 📝 ♻️ …), and PR checklist: **[CONTRIBUTING.md](./CONTRIBUTING.md)**
 
 > **Status:** Trekka is a **proprietary** project, **temporarily public for the Hedera Hackathon Judging Period (Oct 1 – Nov 2, 2025)**. See **CONTRIBUTING.md** for usage policy, licensing details, and **post‑judging restrictions**.
