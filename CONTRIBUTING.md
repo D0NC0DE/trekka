@@ -140,7 +140,7 @@ We keep `main` stable and use `dev` as the integration branch.
 ```
 
 ### Branch Types
-- `main` — production/stable releases  
+- `main` — production/stable releases 
 - `dev` — ongoing integration  
 - `feature/*` — new features (e.g., `feature/quests-claim-flow`)  
 - `bugfix/*` — non‑critical fixes  
