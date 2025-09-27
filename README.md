@@ -15,7 +15,9 @@ We turn real‑world gigs into quests with **instant on‑chain payouts**, **pri
 </p>
 
 > **Vision (Pitch):**  
+> 
 > Trekka is a **decentralized gamified geo-playground** built on **Hedera Hashgraph**, transforming everyday tasks—such as sales promos, lead generation, merchant onboarding, ride hailing, courier services, recycling bounties, and P2P marketplace trades—into engaging quests with **instant payouts, real-time tracking, XP rewards, and fair earnings**.  
+>
 > By enabling organizations and individuals to hire a dynamic network of providers and pay **only for performance**, Trekka reduces inefficiencies, eliminates middleman fees, and fosters a transparent, fun, and sustainable gig economy.
 
 ---
