@@ -65,14 +65,16 @@ We follow a **feature‑first MVVM** with repositories and DI.
 lib/
 ├─ main.dart                 # Entry point (tiny, runs bootstrap)
 │
-├─ app/                      # Composition root (startup wiring)
+├─ app/                      # Composition root (startup wiring + ProviderScope)
 │  ├─ app.dart                # MaterialApp.router (theme + router)
-│  ├─ bootstrap.dart          # WidgetsBinding.init, setupDependencies()
+│  ├─ bootstrap.dart          # WidgetsBinding.init, ProviderScope, setupDependencies()
 │  ├─ router/                 # go_router routes + guards
 │  ├─ di/                     # Dependency injection setup
-│  └─ theme/                  # ThemeData + design tokens
+│  └─ theme/                  # ThemeData + typography helpers
 │
 ├─ core/                     # Shared, feature-agnostic utilities
+│  ├─ design/                 # Global colors, spacing, iconography tokens
+│  ├─ router/                 # Route names/paths shared by app & features
 │  ├─ error/                  # Exceptions, Failures
 │  ├─ extension/              # Extension methods (ContextX, StringX)
 │  ├─ network/                # ApiClient, interceptors
