@@ -62,11 +62,11 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#000000"
-  image: assets/icons/tekka_splash.png
+  image: assets/icons/trekka_splash.png
 
   android_12:
     color: "#000000"
-    image: assets/icons/tekka_splash.png
+    image: assets/icons/trekka_splash.png
     icon_background_color: "#000000"
     
 # The following section is specific to Flutter packages.
@@ -127,9 +127,11 @@ flutter:
           style: italic
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/
+    - assets/gifs/
+    - assets/icons/
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
