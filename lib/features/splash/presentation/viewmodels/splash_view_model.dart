@@ -5,8 +5,9 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:trekka/core/router/route_paths.dart';
 
 const Duration splashInitialDelay = Duration(milliseconds: 100);
-const Duration splashAnimationDuration = Duration(milliseconds: 500);
-const Duration splashLoaderDisplayDuration = Duration(seconds: 10);
+const Duration splashExpandDuration = Duration(milliseconds: 3000);
+const Duration splashLoaderDelay = Duration(milliseconds: 100);
+const Duration splashLoaderMinimumDuration = Duration(milliseconds: 2000);
 
 final splashViewModelProvider =
     StateNotifierProvider.autoDispose<SplashViewModel, SplashViewState>(
@@ -21,19 +22,27 @@ class SplashViewModel extends StateNotifier<SplashViewState> {
 
     state = state.copyWith(hasStarted: true);
 
-    await Future<void>.delayed(splashInitialDelay);
+    if (splashInitialDelay > Duration.zero) {
+      await Future<void>.delayed(splashInitialDelay);
+    }
 
-    for (int index = 1; index < totalLogoSteps; index++) {
-      if (!mounted) return;
-      await Future<void>.delayed(splashAnimationDuration);
-      if (!mounted) return;
-      state = state.copyWith(currentLogoIndex: index);
+    if (!mounted) return;
+    state = state.copyWith(
+      currentLogoIndex: totalLogoSteps - 1,
+      currentAnimationDuration: splashExpandDuration,
+    );
+
+    await Future<void>.delayed(splashExpandDuration);
+
+    if (!mounted) return;
+    if (splashLoaderDelay > Duration.zero) {
+      await Future<void>.delayed(splashLoaderDelay);
     }
 
     if (!mounted) return;
     state = state.copyWith(showLoader: true);
 
-    await Future<void>.delayed(splashLoaderDisplayDuration);
+    await Future<void>.delayed(splashLoaderMinimumDuration);
 
     if (!mounted) return;
     state = state.copyWith(navigationTarget: RoutePaths.placeholder);
@@ -50,6 +59,7 @@ class SplashViewState {
     required this.currentLogoIndex,
     required this.showLoader,
     required this.hasStarted,
+    required this.currentAnimationDuration,
     this.navigationTarget,
   });
 
@@ -57,17 +67,20 @@ class SplashViewState {
       : currentLogoIndex = 0,
         showLoader = false,
         navigationTarget = null,
-        hasStarted = false;
+        hasStarted = false,
+        currentAnimationDuration = Duration.zero;
 
   final int currentLogoIndex;
   final bool showLoader;
   final bool hasStarted;
+  final Duration currentAnimationDuration;
   final String? navigationTarget;
 
   SplashViewState copyWith({
     int? currentLogoIndex,
     bool? showLoader,
     bool? hasStarted,
+    Duration? currentAnimationDuration,
     String? navigationTarget,
     bool clearNavigationTarget = false,
   }) {
@@ -75,6 +88,8 @@ class SplashViewState {
       currentLogoIndex: currentLogoIndex ?? this.currentLogoIndex,
       showLoader: showLoader ?? this.showLoader,
       hasStarted: hasStarted ?? this.hasStarted,
+      currentAnimationDuration:
+          currentAnimationDuration ?? this.currentAnimationDuration,
       navigationTarget: clearNavigationTarget
           ? null
           : navigationTarget ?? this.navigationTarget,

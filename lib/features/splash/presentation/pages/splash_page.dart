@@ -15,9 +15,6 @@ const ValueKey<String> _logoImageKey = ValueKey<String>('splash_logo_image');
 const ValueKey<String> _loaderImageKey = ValueKey<String>('splash_loader_image');
 const _logoSizes = <Size>[
   Size(60, 49),
-  Size(90, 74),
-  Size(120, 98),
-  Size(180, 148),
   Size(230, 189),
 ];
 
@@ -69,7 +66,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             AnimatedContainer(
-              duration: splashAnimationDuration,
+              duration: state.currentAnimationDuration,
               curve: Curves.easeInOut,
               width: size.width,
               height: size.height,
