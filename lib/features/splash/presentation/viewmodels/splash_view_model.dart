@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/legacy.dart';
 
-import 'package:trekka/core/router/route_paths.dart';
-
 const Duration splashInitialDelay = Duration(milliseconds: 100);
 const Duration splashExpandDuration = Duration(milliseconds: 3000);
 const Duration splashLoaderDelay = Duration(milliseconds: 100);
 const Duration splashLoaderMinimumDuration = Duration(milliseconds: 2000);
+const Duration splashFogFadeDuration = Duration(milliseconds: 1500);
+const Duration splashContentFadeDuration = Duration(milliseconds: 600);
 
 final splashViewModelProvider =
     StateNotifierProvider.autoDispose<SplashViewModel, SplashViewState>(
@@ -45,12 +45,27 @@ class SplashViewModel extends StateNotifier<SplashViewState> {
     await Future<void>.delayed(splashLoaderMinimumDuration);
 
     if (!mounted) return;
-    state = state.copyWith(navigationTarget: RoutePaths.placeholder);
-  }
+    state = state.copyWith(
+      showLoader: false,
+      backgroundVisible: true,
+      fogOpacity: 1.0,
+      particlesActive: true,
+      logoGlow: true,
+      contentOpacity: 0.0,
+    );
 
-  void clearNavigationRequest() {
-    if (state.navigationTarget == null) return;
-    state = state.copyWith(clearNavigationTarget: true);
+    await Future<void>.delayed(splashContentFadeDuration);
+
+    if (!mounted) return;
+    state = state.copyWith(fogOpacity: 0.0);
+
+    await Future<void>.delayed(splashFogFadeDuration);
+
+    if (!mounted) return;
+    state = state.copyWith(
+      particlesActive: false,
+      logoGlow: false,
+    );
   }
 }
 
@@ -60,29 +75,44 @@ class SplashViewState {
     required this.showLoader,
     required this.hasStarted,
     required this.currentAnimationDuration,
-    this.navigationTarget,
+    required this.backgroundVisible,
+    required this.fogOpacity,
+    required this.particlesActive,
+    required this.logoGlow,
+    required this.contentOpacity,
   });
 
   const SplashViewState.initial()
       : currentLogoIndex = 0,
         showLoader = false,
-        navigationTarget = null,
         hasStarted = false,
-        currentAnimationDuration = Duration.zero;
+        currentAnimationDuration = Duration.zero,
+        backgroundVisible = false,
+        fogOpacity = 1.0,
+        particlesActive = false,
+        logoGlow = false,
+        contentOpacity = 1.0;
 
   final int currentLogoIndex;
   final bool showLoader;
   final bool hasStarted;
   final Duration currentAnimationDuration;
-  final String? navigationTarget;
+  final bool backgroundVisible;
+  final double fogOpacity;
+  final bool particlesActive;
+  final bool logoGlow;
+  final double contentOpacity;
 
   SplashViewState copyWith({
     int? currentLogoIndex,
     bool? showLoader,
     bool? hasStarted,
     Duration? currentAnimationDuration,
-    String? navigationTarget,
-    bool clearNavigationTarget = false,
+    bool? backgroundVisible,
+    double? fogOpacity,
+    bool? particlesActive,
+    bool? logoGlow,
+    double? contentOpacity,
   }) {
     return SplashViewState(
       currentLogoIndex: currentLogoIndex ?? this.currentLogoIndex,
@@ -90,9 +120,11 @@ class SplashViewState {
       hasStarted: hasStarted ?? this.hasStarted,
       currentAnimationDuration:
           currentAnimationDuration ?? this.currentAnimationDuration,
-      navigationTarget: clearNavigationTarget
-          ? null
-          : navigationTarget ?? this.navigationTarget,
+      backgroundVisible: backgroundVisible ?? this.backgroundVisible,
+      fogOpacity: fogOpacity ?? this.fogOpacity,
+      particlesActive: particlesActive ?? this.particlesActive,
+      logoGlow: logoGlow ?? this.logoGlow,
+      contentOpacity: contentOpacity ?? this.contentOpacity,
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'package:go_router/go_router.dart';
 
 import 'package:trekka/core/router/route_paths.dart';
-import 'package:trekka/features/placeholder/presentation/pages/placeholder_page.dart';
 import 'package:trekka/features/splash/presentation/pages/splash_page.dart';
 
 GoRouter createAppRouter() {
@@ -12,11 +11,6 @@ GoRouter createAppRouter() {
         path: RoutePaths.splash,
         name: 'splash',
         builder: (context, state) => const SplashPage(),
-      ),
-      GoRoute(
-        path: RoutePaths.placeholder,
-        name: 'placeholder',
-        builder: (context, state) => const PlaceholderPage(),
       ),
     ],
   );
