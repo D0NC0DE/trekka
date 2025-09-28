@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 
+import 'package:go_router/go_router.dart';
+
+import 'package:trekka/app/router/app_router.dart';
 import 'package:trekka/app/theme/app_theme.dart';
-import 'package:trekka/features/placeholder/presentation/pages/placeholder_page.dart';
 
 class TrekkaApp extends StatelessWidget {
   const TrekkaApp({super.key});
 
+  static final GoRouter _router = createAppRouter();
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Trekka',
       theme: buildAppTheme(),
-      home: const PlaceholderPage(),
+      routerConfig: _router,
     );
   }
 }

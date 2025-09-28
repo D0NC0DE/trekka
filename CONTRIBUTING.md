@@ -23,7 +23,7 @@ Prefer passing env at runtime via `--dart-define`:
 
 ### 📦 Install
 ```bash
-git clone https://github.com/your-org/trekka.git
+git clone https://github.com/trekka-hq/trekka.git
 cd trekka
 flutter pub get
 ```
@@ -65,14 +65,16 @@ We follow a **feature‑first MVVM** with repositories and DI.
 lib/
 ├─ main.dart                 # Entry point (tiny, runs bootstrap)
 │
-├─ app/                      # Composition root (startup wiring)
+├─ app/                      # Composition root (startup wiring + ProviderScope)
 │  ├─ app.dart                # MaterialApp.router (theme + router)
-│  ├─ bootstrap.dart          # WidgetsBinding.init, setupDependencies()
+│  ├─ bootstrap.dart          # WidgetsBinding.init, ProviderScope, setupDependencies()
 │  ├─ router/                 # go_router routes + guards
 │  ├─ di/                     # Dependency injection setup
-│  └─ theme/                  # ThemeData + design tokens
+│  └─ theme/                  # ThemeData + typography helpers
 │
 ├─ core/                     # Shared, feature-agnostic utilities
+│  ├─ design/                 # Global colors, spacing, iconography tokens
+│  ├─ router/                 # Route names/paths shared by app & features
 │  ├─ error/                  # Exceptions, Failures
 │  ├─ extension/              # Extension methods (ContextX, StringX)
 │  ├─ network/                # ApiClient, interceptors
@@ -138,7 +140,7 @@ We keep `main` stable and use `dev` as the integration branch.
 ```
 
 ### Branch Types
-- `main` — production/stable releases  
+- `main` — production/stable releases 
 - `dev` — ongoing integration  
 - `feature/*` — new features (e.g., `feature/quests-claim-flow`)  
 - `bugfix/*` — non‑critical fixes  
@@ -159,6 +161,8 @@ git push origin feature/<name>
 
 We use **Conventional Commits with emoji prefixes** to keep history clean, readable, and fun — reflecting Trekka’s gamified spirit.
 
+Use `🚢 ship:` when a feature has completed rollout and is officially delivered to users.
+
 ### Examples
 ```bash
 🌍 feat: add map clustering for nearby quests
@@ -171,6 +175,7 @@ We use **Conventional Commits with emoji prefixes** to keep history clean, reada
 ⚡ perf: optimize location hash lookup
 🧹 chore: upgrade dependencies
 🚀 deploy: update production config
+🚢 ship: announce release of quest hubs
 ````
 
 ### Emoji Key
@@ -187,6 +192,7 @@ We use **Conventional Commits with emoji prefixes** to keep history clean, reada
 |     ⚡ | perf     | Performance improvements            |
 |    🧹 | chore    | Tooling, infra, dependency updates  |
 |    🚀 | deploy   | Deployment or release configuration |
+|    🚢 | ship     | Feature successfully shipped to users |
 
 
 **Branch naming**
@@ -239,8 +245,8 @@ Report security vulnerabilities privately: **security@trekka.app**.
 
 ## 8) Support & Links
 
-- Issues: https://github.com/your-org/trekka/issues  
-- Discussions: https://github.com/your-org/trekka/discussions  
+- Issues: https://github.com/trekka-hq/trekka/issues  
+- Discussions: https://github.com/trekka-hq/trekka/discussions  
 - Engineering: dev@trekka.app • Security: security@trekka.app • Product: pm@trekka.app
 
 > Keep the **README** pitch‑focused. This doc is the **source of truth** for development.
