@@ -161,6 +161,8 @@ git push origin feature/<name>
 
 We use **Conventional Commits with emoji prefixes** to keep history clean, readable, and fun — reflecting Trekka’s gamified spirit.
 
+Use `🚢 ship:` when a feature has completed rollout and is officially delivered to users.
+
 ### Examples
 ```bash
 🌍 feat: add map clustering for nearby quests
@@ -173,6 +175,7 @@ We use **Conventional Commits with emoji prefixes** to keep history clean, reada
 ⚡ perf: optimize location hash lookup
 🧹 chore: upgrade dependencies
 🚀 deploy: update production config
+🚢 ship: announce release of quest hubs
 ````
 
 ### Emoji Key
@@ -189,6 +192,7 @@ We use **Conventional Commits with emoji prefixes** to keep history clean, reada
 |     ⚡ | perf     | Performance improvements            |
 |    🧹 | chore    | Tooling, infra, dependency updates  |
 |    🚀 | deploy   | Deployment or release configuration |
+|    🚢 | ship     | Feature successfully shipped to users |
 
 
 **Branch naming**

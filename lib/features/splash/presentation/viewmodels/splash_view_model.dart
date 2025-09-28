@@ -6,7 +6,7 @@ const Duration splashInitialDelay = Duration(milliseconds: 100);
 const Duration splashExpandDuration = Duration(milliseconds: 3000);
 const Duration splashLoaderDelay = Duration(milliseconds: 100);
 const Duration splashLoaderMinimumDuration = Duration(milliseconds: 2000);
-const Duration splashFogFadeDuration = Duration(milliseconds: 1500);
+const Duration splashFogFadeDuration = Duration(milliseconds: 3500);
 const Duration splashContentFadeDuration = Duration(milliseconds: 600);
 
 final splashViewModelProvider =
@@ -52,11 +52,13 @@ class SplashViewModel extends StateNotifier<SplashViewState> {
       particlesActive: true,
       logoGlow: true,
       contentOpacity: 0.0,
+      readyForHome: false,
     );
 
     await Future<void>.delayed(splashContentFadeDuration);
 
     if (!mounted) return;
+    // TODO: Trigger wind ambience when the fog begins clearing.
     state = state.copyWith(fogOpacity: 0.0);
 
     await Future<void>.delayed(splashFogFadeDuration);
@@ -65,6 +67,7 @@ class SplashViewModel extends StateNotifier<SplashViewState> {
     state = state.copyWith(
       particlesActive: false,
       logoGlow: false,
+      readyForHome: true,
     );
   }
 }
@@ -80,6 +83,7 @@ class SplashViewState {
     required this.particlesActive,
     required this.logoGlow,
     required this.contentOpacity,
+    required this.readyForHome,
   });
 
   const SplashViewState.initial()
@@ -91,7 +95,8 @@ class SplashViewState {
         fogOpacity = 1.0,
         particlesActive = false,
         logoGlow = false,
-        contentOpacity = 1.0;
+        contentOpacity = 1.0,
+        readyForHome = false;
 
   final int currentLogoIndex;
   final bool showLoader;
@@ -102,6 +107,7 @@ class SplashViewState {
   final bool particlesActive;
   final bool logoGlow;
   final double contentOpacity;
+  final bool readyForHome;
 
   SplashViewState copyWith({
     int? currentLogoIndex,
@@ -113,6 +119,7 @@ class SplashViewState {
     bool? particlesActive,
     bool? logoGlow,
     double? contentOpacity,
+    bool? readyForHome,
   }) {
     return SplashViewState(
       currentLogoIndex: currentLogoIndex ?? this.currentLogoIndex,
@@ -125,6 +132,7 @@ class SplashViewState {
       particlesActive: particlesActive ?? this.particlesActive,
       logoGlow: logoGlow ?? this.logoGlow,
       contentOpacity: contentOpacity ?? this.contentOpacity,
+      readyForHome: readyForHome ?? this.readyForHome,
     );
   }
 }

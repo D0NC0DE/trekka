@@ -3,13 +3,15 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:trekka/core/design/tokens.dart';
+import 'package:trekka/core/router/route_paths.dart';
 
 import '../viewmodels/splash_view_model.dart';
 import '../widgets/fog_particle_field.dart';
 
-const _backgroundAssetPath = 'assets/images/home-bg.png';
+const _backgroundAssetPath = 'assets/images/splash_bg.png';
 const _logoAssetPath = 'assets/icons/trekka_ani.png';
 const _loaderAssetPath = 'assets/gifs/loader.gif';
 const _loaderRotationRadians = -22.17 * (math.pi / 180);
@@ -38,6 +40,19 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<SplashViewState>(
+      splashViewModelProvider,
+      (SplashViewState? previous, SplashViewState next) {
+        final bool wasReady = previous?.readyForHome ?? false;
+        if (!wasReady && next.readyForHome) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            context.go(RoutePaths.home);
+          });
+        }
+      },
+    );
+
     final SplashViewState state = ref.watch(splashViewModelProvider);
     final Size size = _logoSizes[state.currentLogoIndex];
 
@@ -56,27 +71,36 @@ class _SplashPageState extends ConsumerState<SplashPage> {
             ),
           ),
           AnimatedOpacity(
+            key: const ValueKey('splashFogOverlay'),
             duration: state.fogOpacity >= 1.0
                 ? const Duration(milliseconds: 120)
                 : splashFogFadeDuration,
             curve: Curves.easeOut,
             opacity: state.backgroundVisible ? state.fogOpacity : 0.0,
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: <Color>[
-                        Colors.white.withValues(alpha: 0.55),
-                        Colors.white.withValues(alpha: 0.35),
-                        Colors.white.withValues(alpha: 0.20),
-                      ],
+            child: Transform.scale(
+              scale: 1.0,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ClipRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: <Color>[
+                              Colors.white.withValues(alpha: 0.72),
+                              Colors.white.withValues(alpha: 0.52),
+                              Colors.white.withValues(alpha: 0.34),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
@@ -116,6 +140,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
                       ),
                       const SizedBox(height: 10),
                       AnimatedOpacity(
+                        key: const ValueKey('splashLoaderOpacity'),
                         duration: const Duration(milliseconds: 300),
                         opacity: state.showLoader ? 1.0 : 0.0,
                         child: Transform.rotate(
