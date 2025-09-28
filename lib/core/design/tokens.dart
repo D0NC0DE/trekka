@@ -11,6 +11,7 @@ class AppColors {
   static const Color primary = Color(0xFF00A896);
   static const Color primaryBright = Color(0xFF02C39A);
   static const Color deepTeal = Color(0xFF05668D);
+  static const Color black = Color(0xFF000000);
 }
 
 class AppSpacing {

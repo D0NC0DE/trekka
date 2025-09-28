@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'tokens.dart';
 import 'typography.dart';
+import 'package:trekka/core/design/tokens.dart';
 
 ThemeData buildAppTheme() {
   final ColorScheme colorScheme = ColorScheme.fromSeed(
