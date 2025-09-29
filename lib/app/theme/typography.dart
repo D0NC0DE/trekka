@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:trekka/core/design/tokens.dart';
 
 TextTheme buildTextTheme(TextTheme base) {
   return base.copyWith(
@@ -13,7 +14,12 @@ TextTheme buildTextTheme(TextTheme base) {
     bodyLarge: base.bodyLarge?.copyWith(fontWeight: FontWeight.w400),
     bodyMedium: base.bodyMedium?.copyWith(fontWeight: FontWeight.w400),
     bodySmall: base.bodySmall?.copyWith(fontWeight: FontWeight.w400),
-    labelLarge: base.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+    labelLarge: base.labelLarge?.copyWith(
+      fontWeight: FontWeight.w600,
+      fontSize: 16,
+      height: 20 / 16,
+      color: AppColors.accentAmber,
+    ),
     labelMedium: base.labelMedium?.copyWith(fontWeight: FontWeight.w600),
     labelSmall: base.labelSmall?.copyWith(fontWeight: FontWeight.w500),
   );

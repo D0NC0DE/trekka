@@ -12,6 +12,9 @@ class AppColors {
   static const Color primaryBright = Color(0xFF02C39A);
   static const Color deepTeal = Color(0xFF05668D);
   static const Color black = Color(0xFF000000);
+  static const Color shadowSoftBlack = Color(0x26000000);
+  static const Color shadowStrongBlack = Color(0xBF000000);
+  static const Color shadowMidBlack = Color(0x40000000);
 }
 
 class AppSpacing {
@@ -31,4 +34,5 @@ class AppRadius {
   static const double sm = 8;
   static const double md = 16;
   static const double lg = 24;
+  static const double pill = 22;
 }
