@@ -44,4 +44,19 @@ class AppShadows {
       blurStyle: BlurStyle.inner,
     ),
   ];
+
+  static const List<BoxShadow> homePointBadgeInner = <BoxShadow>[
+    BoxShadow(
+      color: AppColors.badgeInnerHighlight,
+      offset: Offset(-1, -2),
+      blurRadius: 4,
+      blurStyle: BlurStyle.inner,
+    ),
+    BoxShadow(
+      color: AppColors.badgeInnerShade,
+      offset: Offset(0, 4),
+      blurRadius: 4,
+      blurStyle: BlurStyle.inner,
+    ),
+  ];
 }

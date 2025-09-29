@@ -5,15 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/router/route_paths.dart';
 
 import '../viewmodels/splash_view_model.dart';
 import '../widgets/fog_particle_field.dart';
 
-const _backgroundAssetPath = 'assets/images/splash_bg.png';
-const _logoAssetPath = 'assets/icons/trekka_ani.png';
-const _loaderAssetPath = 'assets/gifs/loader.gif';
 const _loaderRotationRadians = -22.17 * (math.pi / 180);
 
 const _logoSizes = <Size>[Size(60, 49), Size(230, 189)];
@@ -66,7 +64,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
             curve: Curves.easeOut,
             opacity: state.backgroundVisible ? 1.0 : 0.0,
             child: Image.asset(
-              _backgroundAssetPath,
+              AppAssetImages.splashBackground,
               fit: BoxFit.cover,
             ),
           ),
@@ -133,7 +131,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
                           height: size.height,
                           decoration: const BoxDecoration(),
                           child: Image.asset(
-                            _logoAssetPath,
+                            AppAssetIcons.trekkaAnimated,
                             fit: BoxFit.contain,
                           ),
                         ),
@@ -149,7 +147,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
                             height: 46,
                             width: 46,
                             child: Image.asset(
-                              _loaderAssetPath,
+                              AppAssetGifs.loader,
                               fit: BoxFit.contain,
                             ),
                           ),

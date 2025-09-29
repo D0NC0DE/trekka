@@ -38,31 +38,33 @@ class HomeNavOption extends StatelessWidget {
         child: SizedBox(
           height: 60,
           child: InnerShadow(
-          borderRadius: radius,
-          shadows: inner,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: activeBg,
-              borderRadius: radius,
-              border: Border.all(color: borderColor, width: 1),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 5, right: 18),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  SizedBox(width: 50, height: 52, child: buildIcon()),
-                  const SizedBox(width: 6),
-                  Text(
-                    label.toUpperCase(),
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                ],
+            borderRadius: radius,
+            shadows: inner,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: activeBg,
+                borderRadius: radius,
+                border: Border.all(color: borderColor, width: 1),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 5, right: 18),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    SizedBox(width: 50, height: 52, child: buildIcon()),
+                    const SizedBox(width: 6),
+                    Text(
+                      label.toUpperCase(),
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: AppColors.accentAmber,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
       );
     }
 

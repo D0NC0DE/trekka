@@ -12,9 +12,12 @@ class AppColors {
   static const Color primaryBright = Color(0xFF02C39A);
   static const Color deepTeal = Color(0xFF05668D);
   static const Color black = Color(0xFF000000);
+  static const Color overlayFadeBlack = Color(0x59000000);
   static const Color shadowSoftBlack = Color(0x26000000);
   static const Color shadowStrongBlack = Color(0xBF000000);
   static const Color shadowMidBlack = Color(0x40000000);
+  static const Color badgeInnerHighlight = Color(0x40916A0F);
+  static const Color badgeInnerShade = Color(0x33A77A11);
 }
 
 class AppSpacing {
@@ -22,7 +25,10 @@ class AppSpacing {
 
   static const double xs = 4;
   static const double sm = 8;
+  static const double smLg = 12;
+  static const double smXl = 14;
   static const double md = 16;
+  static const double mdLg = 20;
   static const double lg = 24;
   static const double xl = 32;
   static const double xxl = 40;
@@ -35,4 +41,13 @@ class AppRadius {
   static const double md = 16;
   static const double lg = 24;
   static const double pill = 22;
+}
+class AppFontWeights {
+  AppFontWeights._();
+
+  static const FontWeight regular = FontWeight.w400;
+  static const FontWeight medium = FontWeight.w500;
+  static const FontWeight semiBold = FontWeight.w600;
+  static const FontWeight bold = FontWeight.w700;
+  static const FontWeight extraBold = FontWeight.w800;
 }
