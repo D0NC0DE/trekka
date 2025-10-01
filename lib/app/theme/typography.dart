@@ -23,6 +23,7 @@ TextTheme buildTextTheme(TextTheme base) {
     labelMedium: base.labelMedium?.copyWith(
       fontSize: AppSpacing.smXl,
       fontWeight: AppFontWeights.semiBold,
+      height: 1.0,
       letterSpacing: 0,
     ),
     labelSmall: base.labelSmall?.copyWith(

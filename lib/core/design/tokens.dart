@@ -8,6 +8,7 @@ class AppColors {
   static const Color divider = Color(0xFFE0E0E0);
   static const Color accentBurntOrange = Color(0xFFF4A261);
   static const Color accentAmber = Color(0xFFFFD166);
+  static const Color accentPinpoint = Color(0xFFFFC460);
   static const Color primary = Color(0xFF00A896);
   static const Color primaryBright = Color(0xFF02C39A);
   static const Color deepTeal = Color(0xFF05668D);
@@ -18,6 +19,8 @@ class AppColors {
   static const Color shadowMidBlack = Color(0x40000000);
   static const Color badgeInnerHighlight = Color(0x40916A0F);
   static const Color badgeInnerShade = Color(0x33A77A11);
+  static const Color overlayBlurBlack = Color(0xB2000000);
+  static const Color overlayDenseBlack = Color(0xE5000000);
 }
 
 class AppSpacing {
@@ -25,6 +28,7 @@ class AppSpacing {
 
   static const double xs = 4;
   static const double sm = 8;
+  static const double smMd = 10;
   static const double smLg = 12;
   static const double smXl = 14;
   static const double md = 16;
