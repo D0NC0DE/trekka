@@ -6,6 +6,8 @@ class AppAssetImages {
 
   static const String homeBackground = 'assets/images/home_bg.png';
   static const String splashBackground = 'assets/images/splash_bg.png';
+
+  static const String authSheetBackground = 'assets/images/auth_sheet_bg.png';
 }
 
 @immutable
@@ -20,21 +22,27 @@ class AppAssetIcons {
   // Home Action Icons
   static const String pinpoint = 'assets/icons/pinpoint.png';
   
-  static const String courierPin = 'assets/icons/courier.png';
-  static const String hailingPin = 'assets/icons/hailing.png';
-  static const String marketplacePin = 'assets/icons/marketplace.png';
-  static const String questOnlinePin = 'assets/icons/quest_online.png';
-  static const String questPhysicalPin = 'assets/icons/quest_phy.png';
-  static const String recyclePin = 'assets/icons/recycle.png';
+  static const String courierPin = 'assets/icons/pins/courier.png';
+  static const String hailingPin = 'assets/icons/pins/hailing.png';
+  static const String marketplacePin = 'assets/icons/pins/marketplace.png';
+  static const String questOnlinePin = 'assets/icons/pins/quest_online.png';
+  static const String questPhysicalPin = 'assets/icons/pins/quest_phy.png';
+  static const String recyclePin = 'assets/icons/pins/recycle.png';
 
   // Home Tab Icons
-  static const String homeTab = 'assets/icons/home_tab.png';
-  static const String historyTab = 'assets/icons/history_tab.png';
-  static const String profileTab = 'assets/icons/profile_tab.png';
+  static const String homeTab = 'assets/icons/tabs/home.png';
+  static const String historyTab = 'assets/icons/tabs/history.png';
+  static const String profileTab = 'assets/icons/tabs/profile.png';
 
   // Home App Bar Icons
   static const String trekkaPoint = 'assets/icons/trekka_point.png';
   static const String notification = 'assets/icons/notification.png';
+
+  // Social Icons
+  static const String google = 'assets/icons/socials/google.png';
+  static const String facebook = 'assets/icons/socials/facebook.png';
+  static const String apple = 'assets/icons/socials/apple.png';
+  static const String x = 'assets/icons/socials/x.png';
 }
 
 @immutable
