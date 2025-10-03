@@ -5,10 +5,15 @@ import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/features/home/presentation/widgets/home_point_badge.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const HomeAppBar({super.key});
+  const HomeAppBar({
+    super.key,
+    this.onNotificationPressed,
+  });
 
   static const double _topPadding = 12;
   static const double _bottomPadding = 30;
+
+  final VoidCallback? onNotificationPressed;
 
   @override
   Size get preferredSize => const Size.fromHeight(
@@ -35,7 +40,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
               const Spacer(),
               _ActionIcon(
                 assetPath: AppAssetIcons.notification,
-                onPressed: () {},
+                onPressed: onNotificationPressed ?? () {},
               ),
             ],
           ),

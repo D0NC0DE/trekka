@@ -4,7 +4,7 @@ import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/shadows.dart';
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/widgets/inner_shadow.dart';
-import 'package:trekka/features/home/presentation/widgets/home_nav_option.dart';
+import 'package:trekka/features/home/presentation/widgets/home_nav_option.dart'; 
 
 class HomeBottomNav extends StatefulWidget {
   const HomeBottomNav({super.key, this.initialIndex = 0, this.onChanged});
