@@ -50,4 +50,5 @@ class AppAssetGifs {
   const AppAssetGifs._();
 
   static const String loader = 'assets/gifs/loader.gif';
+  static const String loading = 'assets/gifs/loading.gif';
 }

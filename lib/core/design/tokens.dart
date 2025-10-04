@@ -5,7 +5,9 @@ class AppColors {
 
   static const Color backgroundAlt = Color(0xFFF5F9FA);
   static const Color white = Color(0xFFFFFFFF);
-  static const Color white40 = Color(0x40FFFFFF);
+  static const Color white75 = Color(0xBFFFFFFF);
+  static const Color white50 = Color(0x80FFFFFF);
+  static const Color white25 = Color(0x40FFFFFF);
   static const Color divider = Color(0xFFE0E0E0);
   static const Color accentBurntOrange = Color(0xFFF4A261);
   static const Color accentAmber = Color(0xFFFFD166);
@@ -25,6 +27,8 @@ class AppColors {
   static const Color overlayDenseBlack = Color(0xE5000000);
   static const Color transparentGraphite = Color(0x00666666);
   static const Color midnightGreen = Color(0xFF000A09);
+  static const Color textPrimary = Color(0xE50F0400);
+  static const Color textPrimary50 = Color(0x800F0400);
 }
 
 class AppSpacing {
@@ -40,6 +44,9 @@ class AppSpacing {
   static const double lg = 24;
   static const double xl = 32;
   static const double xxl = 40;
+  static const double xxxl = 50;
+  static const double xxxxl = 60;
+  static const double xxxxxl = 70;
 }
 
 class AppRadius {

@@ -59,4 +59,34 @@ class AppShadows {
       blurStyle: BlurStyle.inner,
     ),
   ];
+
+  static const List<BoxShadow> textFieldInner = <BoxShadow>[
+    BoxShadow(
+      color: AppColors.shadowMidBlack,
+      offset: Offset(-1, -2),
+      blurRadius: 4,
+      blurStyle: BlurStyle.inner,
+    ),
+    BoxShadow(
+      color: AppColors.shadowMidBlack,
+      offset: Offset(2, 2),
+      blurRadius: 4,
+      blurStyle: BlurStyle.inner,
+    ),
+  ];
+
+  static const List<BoxShadow> buttonInner = <BoxShadow>[
+    BoxShadow(
+      color: AppColors.shadowMidBlack,
+      offset: Offset(-1, -2),
+      blurRadius: 4,
+      blurStyle: BlurStyle.inner,
+    ),
+    BoxShadow(
+      color: AppColors.shadowMidBlack,
+      offset: Offset(2, 2),
+      blurRadius: 4,
+      blurStyle: BlurStyle.inner,
+    ),
+  ];
 }

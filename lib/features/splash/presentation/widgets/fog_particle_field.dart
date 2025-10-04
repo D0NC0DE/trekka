@@ -59,6 +59,8 @@ class _FogParticlePainter extends CustomPainter {
   _FogParticlePainter({required this.progress});
 
   final double progress;
+  
+  static final Paint _paint = Paint();
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -113,17 +115,17 @@ class _FogParticlePainter extends CustomPainter {
       final double modulation = 0.75 + 0.25 * math.sin(angle + particle.radius);
       final double opacity = particle.maxOpacity * modulation;
       final double clampedOpacity = opacity.clamp(0.0, 1.0).toDouble();
-      final Paint paint = Paint()
-        ..shader = RadialGradient(
-          colors: <Color>[
-            Colors.white.withValues(alpha: clampedOpacity),
-            Colors.white.withValues(alpha: 0.0),
-          ],
-        ).createShader(
-          Rect.fromCircle(center: particle.center, radius: particle.radius),
-        );
+      
+      _paint.shader = RadialGradient(
+        colors: <Color>[
+          Colors.white.withValues(alpha: clampedOpacity),
+          Colors.white.withValues(alpha: 0.0),
+        ],
+      ).createShader(
+        Rect.fromCircle(center: particle.center, radius: particle.radius),
+      );
 
-      canvas.drawCircle(particle.center, particle.radius, paint);
+      canvas.drawCircle(particle.center, particle.radius, _paint);
     }
   }
 

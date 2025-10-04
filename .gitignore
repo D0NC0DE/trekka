@@ -36,7 +36,6 @@ build/
 /build/
 coverage/
 flutter_*.png
-lib/generated_plugin_registrant.dart
 **/Flutter/ephemeral/
 
 # Key/identity files
