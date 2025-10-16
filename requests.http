@@ -1,0 +1,2 @@
+# Get the welcome message
+GET http://localhost:3000/api/v1/
