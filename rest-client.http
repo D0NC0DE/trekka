@@ -1,5 +1,81 @@
-#### Get the welcome message
-GET http://localhost:3000
+@BASE_URL = http://localhost:3001
+@API_VERSION = /api/v1
+
+#### === WELCOME ===
+GET {{BASE_URL}}
+
+#### === AUTHENTICATION ===
+@AUTH_URL = {{BASE_URL}}{{API_VERSION}}/auth
+
+### Authenticate a user with google
+POST {{AUTH_URL}}/google
+
+### Authenticate a user with email and otp
+POST {{AUTH_URL}}/email/request
+Content-Type: application/json
+
+{
+  "email": "user@example.com"
+}
+
+### verify a user's otp
+POST {{AUTH_URL}}/email/verify
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "otp": "12345678"
+}
+
+### logout a user
+POST {{AUTH_URL}}/logout
+
+### refresh a user's token
+POST {{AUTH_URL}}/refresh
 
 
+#### === USERS ===
+@USERS_URL = {{BASE_URL}}{{API_VERSION}}/users
+@USER_URL = {{USERS_URL}}/me
+@USER_ID = 1
+### get a user's profile
+GET {{USER_URL}}
 
+### Get a user by id
+GET {{USERS_URL}}/{{USER_ID}}
+
+### Update a user
+PUT {{USER_URL}}
+
+### Delete a user
+DELETE {{USER_URL}}
+
+#TODO: Add endpoints for users that want to be providers of services
+
+
+#### === WALLETS ===
+@WALLETS_URL = {{BASE_URL}}{{API_VERSION}}/wallets
+@WALLET_URL = {{WALLETS_URL}}/me
+
+### Get a user's wallet Information
+GET {{WALLET_URL}}
+
+### Get wallet balance
+GET {{WALLET_URL}}/balance
+
+### Get wallet address
+GET {{WALLET_URL}}/address
+
+### Withdraw from wallet
+POST {{WALLET_URL}}/withdraw/request
+
+### Verify a withdrawal
+POST {{WALLET_URL}}/withdraw/verify
+
+### Export a user's wallet
+POST {{WALLET_URL}}/export/request
+
+### Verify export is from the correct user
+POST {{WALLET_URL}}/export/verify
+
+//TODO: Admin endpoints for managing wallets
