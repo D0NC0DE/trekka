@@ -6,7 +6,8 @@ GET {{BASE_URL}}
 
 #### === AUTHENTICATION ===
 @AUTH_URL = {{BASE_URL}}{{API_VERSION}}/auth
-
+@ACCESS_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJzZ3l5d2oxb2Ftb2llYW42enA4YThjYzMiLCJlbWFpbCI6Im5pbGVrMjE5MzNAZWx5Z2lmdHMuY29tIiwidXNlcm5hbWUiOiJuaWxlazIxOTMzIiwiaWF0IjoxNzYxMDg1ODQ3LCJleHAiOjE3NjEwODY3NDd9._zEHNli-3qW_9qRGL6xrz4cWoKhubrcF2vY9WB-8c8w
+@REFRESH_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJzZ3l5d2oxb2Ftb2llYW42enA4YThjYzMiLCJlbWFpbCI6Im5pbGVrMjE5MzNAZWx5Z2lmdHMuY29tIiwidXNlcm5hbWUiOiJuaWxlazIxOTMzIiwiaWF0IjoxNzYxMDg1ODQ3LCJleHAiOjE3NjE2OTA2NDd9.tk3H-5aas_3WVfaloXlt61MAtJ9DOpuvCpKkcUU7Hmc
 ### Authenticate a user with google
 POST {{AUTH_URL}}/google
 
@@ -15,24 +16,41 @@ POST {{AUTH_URL}}/email/request
 Content-Type: application/json
 
 {
-  "email": "user@example.com"
+  "email": "nilek21933@elygifts.com"
+}
+
+### Resend a user's otp
+POST {{AUTH_URL}}/email/resend
+Content-Type: application/json
+
+{
+  "email": "melojit607@fogdiver.com"
 }
 
 ### verify a user's otp
 POST {{AUTH_URL}}/email/verify
 Content-Type: application/json
 
-{
-  "email": "user@example.com",
-  "otp": "12345678"
+{ 
+  "email": "nilek21933@elygifts.com",
+  "otp": "8CF5B5BA"
 }
 
 ### logout a user
 POST {{AUTH_URL}}/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "{{REFRESH_TOKEN}}"
+}
 
 ### refresh a user's token
 POST {{AUTH_URL}}/refresh
+Content-Type: application/json
 
+{
+  "refreshToken": "{{REFRESH_TOKEN}}"
+}
 
 #### === USERS ===
 @USERS_URL = {{BASE_URL}}{{API_VERSION}}/users
@@ -72,10 +90,16 @@ POST {{WALLET_URL}}/withdraw/request
 ### Verify a withdrawal
 POST {{WALLET_URL}}/withdraw/verify
 
+### Resend a withdrawal OTP
+POST {{WALLET_URL}}/withdraw/resend
+
 ### Export a user's wallet
 POST {{WALLET_URL}}/export/request
 
 ### Verify export is from the correct user
 POST {{WALLET_URL}}/export/verify
+
+### Resend an export OTP
+POST {{WALLET_URL}}/export/resend
 
 //TODO: Admin endpoints for managing wallets

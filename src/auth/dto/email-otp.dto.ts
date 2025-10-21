@@ -1,11 +1,11 @@
 import { IsEmail, IsString, Length } from 'class-validator';
 
-export class RequestEmailOtpDto {
+export class RequestAuthOtpDto {
   @IsEmail()
   email: string;
 }
 
-export class VerifyEmailOtpDto {
+export class VerifyAuthOtpDto {
   @IsEmail()
   email: string;
   

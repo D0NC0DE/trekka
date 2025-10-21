@@ -1,7 +1,9 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RequestEmailOtpDto, VerifyEmailOtpDto } from './dto';
+import { RequestAuthOtpDto, VerifyAuthOtpDto, RefreshTokenDto } from './dto';
+import { SkipAuth } from './decorator';
 
+@SkipAuth()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -12,22 +14,27 @@ export class AuthController {
   }
 
   @Post('email/request')
-  requestEmailOtp(@Body() payload: RequestEmailOtpDto): string {
-    return this.authService.requestEmailOtp(payload);
+  requestAuthOtp(@Body() payload: RequestAuthOtpDto) {
+    return this.authService.requestAuthOtp(payload);
+  }
+
+  @Post('email/resend')
+  resendOtp(@Body() payload: RequestAuthOtpDto) {
+    return this.authService.resendAuthOtp(payload); 
   }
 
   @Post('email/verify')
-  verifyEmailOtp(@Body() payload: VerifyEmailOtpDto): string {
-    return this.authService.verifyEmailOtp(payload);
+  verifyAuthOtp(@Body() payload: VerifyAuthOtpDto) {
+    return this.authService.verifyAuthOtp(payload);
   }
 
   @Post('logout')
-  logout(): string {
-    return this.authService.logout();
+  logout(@Body() body: RefreshTokenDto) {
+    return this.authService.logout(body.refreshToken);
   }
 
   @Post('refresh')
-  refreshToken(): string {
-    return this.authService.refreshToken();
+  refreshToken(@Body() body: RefreshTokenDto) {
+    return this.authService.refreshToken(body.refreshToken);
   }
 }

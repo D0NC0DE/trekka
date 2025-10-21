@@ -1,15 +1,23 @@
 model User {
-  id              String    @id @default(cuid())
+  id              String    @id @default(cuid(2))
   email           String    @unique
   username        String    @unique
   avatar          String?
   isEmailVerified Boolean   @default(false)
   wallet          Wallet?
+  
+  // OTP fields
   otpHash         String?
   otpExpiresAt    DateTime?
   otpPurpose      OtpPurpose?
   otpAttemptCount Int       @default(0)
   otpLastSentAt   DateTime?
+  
+  // Authentication tokens
+  refreshTokenHash String?
+  refreshTokenExpiresAt DateTime?
+  lastLoginAt     DateTime?
+  
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -17,7 +25,7 @@ model User {
 }
 
 model Wallet {
-  id           String   @id @default(cuid())
+  id           String   @id @default(cuid(2))
   userId       String   @unique
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   address      String   @unique
@@ -30,8 +38,7 @@ model Wallet {
 }
 
 enum OtpPurpose {
-  SIGNUP
-  LOGIN
+  AUTH
   WITHDRAW
   EXPORT_KEY
 }
