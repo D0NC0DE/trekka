@@ -7,7 +7,7 @@ export type SafeUser = {
   id: string;
   email: string;
   username: string;
-  avatar: string | null;
+  avatar: number; 
   isEmailVerified: boolean;
   lastLoginAt: Date | null;
   createdAt: Date;
@@ -21,7 +21,7 @@ export type UserWithOtp = {
   id: string;
   email: string;
   username: string;
-  avatar: string | null;
+  avatar: number; 
   isEmailVerified: boolean;
   otpHash: string | null;
   otpExpiresAt: Date | null;
@@ -32,14 +32,26 @@ export type UserWithOtp = {
   updatedAt: Date;
 };
 
-// /**
-//  * User with refresh token fields (for internal auth operations)
-//  */
-// export type UserWithRefreshToken = {
-//   id: string;
-//   refreshTokenHash: string | null;
-//   refreshTokenExpiresAt: Date | null;
-// };
+/**
+ * User with refresh token fields (for internal auth operations)
+ */
+export type UserWithRefreshToken = {
+  id: string;
+  email: string;
+  username: string;
+  refreshTokenHash: string | null;
+  refreshTokenExpiresAt: Date | null;
+};
+
+/**
+ * User with wallet info (for /me endpoint)
+ */
+export type UserWithWallet = SafeUser & {
+  wallet: {
+    id: string;
+    address: string;
+  } | null;
+};
 
 /**
  * Prisma select object for safe user data
@@ -79,5 +91,29 @@ export const userWithOtpSelect = {
   otpLastSentAt: true,
   createdAt: true,
   updatedAt: true,
+} as const;
+
+/**
+ * Prisma select object for refresh token operations
+ */
+export const userWithRefreshTokenSelect = {
+  id: true,
+  email: true,
+  username: true,
+  refreshTokenHash: true,
+  refreshTokenExpiresAt: true,
+} as const;
+
+/**
+ * Prisma select object for user with wallet
+ */
+export const userWithWalletSelect = {
+  ...safeUserSelect,
+  wallet: {
+    select: {
+      id: true,
+      address: true,
+    },
+  },
 } as const;
 

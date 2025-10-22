@@ -1,7 +1,17 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, OtpPurpose } from 'src/generated/prisma/client';
-import { safeUserSelect, userWithOtpSelect, SafeUser, UserWithOtp } from './types';
+import { 
+    safeUserSelect, 
+    userWithOtpSelect, 
+    userWithRefreshTokenSelect,
+    userWithWalletSelect,
+    SafeUser, 
+    UserWithOtp,
+    UserWithRefreshToken,
+    UserWithWallet
+} from './types';
+import { UpdateUserDto } from './dto';
 
 @Injectable()
 export class UsersService {
@@ -27,6 +37,34 @@ export class UsersService {
         return candidate;
     }
 
+    private async reactivateAccount(
+        userId: string,
+        data: {
+            isEmailVerified?: boolean;
+            otpHash?: string;
+            otpExpiresAt?: Date;
+            otpPurpose?: OtpPurpose;
+        }
+    ): Promise<SafeUser> {
+        const reactivatedUser = await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                deletedAt: null,
+                isEmailVerified: data.isEmailVerified ?? false,
+                ...(data.otpHash && {
+                    otpHash: data.otpHash,
+                    otpExpiresAt: data.otpExpiresAt,
+                    otpPurpose: data.otpPurpose,
+                    otpAttemptCount: 0,
+                    otpLastSentAt: new Date(),
+                }),
+            },
+            select: safeUserSelect,
+        });
+
+        return reactivatedUser;
+    }
+
     private async create(data: {
         email: string;
         isEmailVerified?: boolean;
@@ -34,9 +72,16 @@ export class UsersService {
         otpExpiresAt?: Date;
         otpPurpose?: OtpPurpose;
     }): Promise<SafeUser> {
-        const existingUser = await this.findByEmail(data.email);
+        const existingUser = await this.prisma.user.findUnique({
+            where: { email: data.email },
+            select: { id: true, deletedAt: true },
+        });
 
         if (existingUser) {
+            if (existingUser.deletedAt) {
+                return this.reactivateAccount(existingUser.id, data);
+            }
+
             throw new ConflictException('Email already exists');
         }
 
@@ -63,7 +108,7 @@ export class UsersService {
 
     async findByEmail(email: string): Promise<SafeUser | null> {
         const user = await this.prisma.user.findUnique({
-            where: { email },
+            where: { email, deletedAt: null },
             select: safeUserSelect,
         });
 
@@ -74,6 +119,24 @@ export class UsersService {
         const user = await this.prisma.user.findUnique({
             where: { username },
             select: safeUserSelect,
+        });
+
+        return user;
+    }
+
+    async findById(id: string): Promise<SafeUser | null> {
+        const user = await this.prisma.user.findUnique({
+            where: { id, deletedAt: null },
+            select: safeUserSelect,
+        });
+
+        return user;
+    }
+
+    async findByIdWithWallet(id: string): Promise<UserWithWallet | null> {
+        const user = await this.prisma.user.findUnique({
+            where: { id, deletedAt: null },
+            select: userWithWalletSelect,
         });
 
         return user;
@@ -192,16 +255,10 @@ export class UsersService {
         });
     }
 
-    async findByIdWithRefreshToken(userId: string) {
+    async findByIdWithRefreshToken(userId: string): Promise<UserWithRefreshToken | null> {
         return this.prisma.user.findUnique({
-            where: { id: userId },
-            select: {
-                id: true,
-                email: true,
-                username: true,
-                refreshTokenHash: true,
-                refreshTokenExpiresAt: true,
-            },
+            where: { id: userId, deletedAt: null },
+            select: userWithRefreshTokenSelect,
         });
     }
 
@@ -212,5 +269,52 @@ export class UsersService {
                 lastLoginAt: new Date(),
             },
         });
+    }
+
+    async updateUser(userId: string, data: UpdateUserDto): Promise<SafeUser> {
+        const user = await this.findById(userId);
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        if (data.username && data.username !== user.username) {
+            const existingUser = await this.findByUsername(data.username);
+            if (existingUser) {
+                throw new ConflictException('Username already taken');
+            }
+        }
+
+        const updatedUser = await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                ...(data.username && { username: data.username }),
+                ...(data.avatar !== undefined && { avatar: data.avatar }),
+            },
+            select: safeUserSelect,
+        });
+
+        return updatedUser;
+    }
+
+    async softDelete(userId: string): Promise<{ message: string }> {
+        const user = await this.findById(userId);
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                deletedAt: new Date(),
+                refreshTokenHash: null,
+                refreshTokenExpiresAt: null,
+            },
+        });
+
+        return {
+            message: 'Account deleted successfully. You can restore it within 30 days by contacting support.',
+        };
     }
 }

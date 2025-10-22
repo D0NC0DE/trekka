@@ -67,7 +67,7 @@ export class AuthService {
   async resendAuthOtp(payload: RequestAuthOtpDto): Promise<{ message: string }> {
     const user = await this.usersService.findByEmailWithOtp(payload.email);
     if (!user || !user.otpLastSentAt) {
-      throw new BadRequestException('User not found');
+      throw new BadRequestException('Unable to resend verification code. Please request a new code first.');
     }
 
     const result = await this.otpService.regenerateOtpData(user.otpLastSentAt, OtpPurpose.AUTH);
@@ -144,6 +144,7 @@ export class AuthService {
   async logout(refreshToken: string): Promise<{ message: string }> {
     try {
       const payload = await this.tokenService.verifyRefreshToken(refreshToken);
+     
       const user = await this.usersService.findByIdWithRefreshToken(payload.userId);
 
       if (user?.refreshTokenHash) {

@@ -13,7 +13,7 @@ import { IS_PUBLIC_KEY } from '../decorator/auth.decorator';
 export class AuthGuard implements CanActivate {
     constructor(
         private tokenService: TokenService,
-        private reflector: Reflector
+        private reflector: Reflector,
     ) { }
 
     private extractTokenFromHeader(request: Request): string | undefined {

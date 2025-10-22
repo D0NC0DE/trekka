@@ -6,8 +6,8 @@ GET {{BASE_URL}}
 
 #### === AUTHENTICATION ===
 @AUTH_URL = {{BASE_URL}}{{API_VERSION}}/auth
-@ACCESS_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJzZ3l5d2oxb2Ftb2llYW42enA4YThjYzMiLCJlbWFpbCI6Im5pbGVrMjE5MzNAZWx5Z2lmdHMuY29tIiwidXNlcm5hbWUiOiJuaWxlazIxOTMzIiwiaWF0IjoxNzYxMDg1ODQ3LCJleHAiOjE3NjEwODY3NDd9._zEHNli-3qW_9qRGL6xrz4cWoKhubrcF2vY9WB-8c8w
-@REFRESH_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJzZ3l5d2oxb2Ftb2llYW42enA4YThjYzMiLCJlbWFpbCI6Im5pbGVrMjE5MzNAZWx5Z2lmdHMuY29tIiwidXNlcm5hbWUiOiJuaWxlazIxOTMzIiwiaWF0IjoxNzYxMDg1ODQ3LCJleHAiOjE3NjE2OTA2NDd9.tk3H-5aas_3WVfaloXlt61MAtJ9DOpuvCpKkcUU7Hmc
+@ACCESS_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJqcjNiaGt6ZGsxcnQ3OWx0YjA5ejA3M2MiLCJlbWFpbCI6Im5pbGVrMjE5MzNAZWx5Z2lmdHMuY29tIiwidXNlcm5hbWUiOiJuaWxlazIxOTMzIiwiaWF0IjoxNzYxMTM3MDM4LCJleHAiOjE3NjExMzc5Mzh9.UEeUv4Q87BFoWSKD8hLUbUCclimZPd1YXMNIa37FKJI
+@REFRESH_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJqcjNiaGt6ZGsxcnQ3OWx0YjA5ejA3M2MiLCJlbWFpbCI6Im5pbGVrMjE5MzNAZWx5Z2lmdHMuY29tIiwidXNlcm5hbWUiOiJuaWxlazIxOTMzIiwiaWF0IjoxNzYxMTM2NDE5LCJleHAiOjE3NjE3NDEyMTl9.eQOmCqCrv1ZUVnh8YCnqyxFOiX5KB7CnF4AzJxJ6zzM
 ### Authenticate a user with google
 POST {{AUTH_URL}}/google
 
@@ -24,7 +24,7 @@ POST {{AUTH_URL}}/email/resend
 Content-Type: application/json
 
 {
-  "email": "melojit607@fogdiver.com"
+  "email": "nilek21933@elygifts.com"
 }
 
 ### verify a user's otp
@@ -33,7 +33,7 @@ Content-Type: application/json
 
 { 
   "email": "nilek21933@elygifts.com",
-  "otp": "8CF5B5BA"
+  "otp": "C6E1D66A"
 }
 
 ### logout a user
@@ -55,18 +55,46 @@ Content-Type: application/json
 #### === USERS ===
 @USERS_URL = {{BASE_URL}}{{API_VERSION}}/users
 @USER_URL = {{USERS_URL}}/me
-@USER_ID = 1
+@USER_ID = sgyywj1oamoiean6zp8a8cc3
 ### get a user's profile
 GET {{USER_URL}}
+Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Get a user by id
 GET {{USERS_URL}}/{{USER_ID}}
+Authorization: Bearer {{ACCESS_TOKEN}}
 
-### Update a user
-PUT {{USER_URL}}
+### Update user profile (username and/or avatar)
+PATCH {{USER_URL}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
 
-### Delete a user
+{
+  "username": "newusername123",
+  "avatar": 3
+}
+
+### Update only username
+PATCH {{USER_URL}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "username": "cooluser456"
+}
+
+### Update only avatar (select avatar ID 1-10)
+PATCH {{USER_URL}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "avatar": 7
+}
+
+### Delete a user (soft delete)
 DELETE {{USER_URL}}
+Authorization: Bearer {{ACCESS_TOKEN}}
 
 #TODO: Add endpoints for users that want to be providers of services
 
