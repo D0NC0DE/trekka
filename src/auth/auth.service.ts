@@ -122,9 +122,9 @@ export class AuthService {
     );
 
     if (isNewUser) {
-      this.walletsService.createWallet(user.id)
-        .then(() => console.log(`✅ Wallet created for ${user.email}`))
-        .catch((error) => console.error(`❌ Wallet creation failed for ${user.email}:`, error));
+      this.walletsService.ensureWalletExists(user.id)
+        .then(() => console.log(`✅ Wallet ensured for ${user.email}`))
+        .catch((error) => console.error(`❌ Wallet ensure failed for ${user.email}:`, error));
     }
 
     this.emailService.sendWelcomeEmail(user.email, {

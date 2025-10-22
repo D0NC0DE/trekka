@@ -8,14 +8,16 @@ import {
     Client,
     AccountCreateTransaction,
     Hbar,
-    Status
+    Status,
+    AccountBalanceQuery
 } from "@hashgraph/sdk";
 import { EncryptionService } from './encryption.service';
+import { SafeWallet, safeWalletSelect } from './types/wallet.types';
 
 @Injectable()
 export class WalletsService implements OnModuleDestroy {
     private client: Client;
-
+    private readonly INITIAL_BALANCE = 10;
     constructor(
         private prisma: PrismaService,
         private configService: ConfigService,
@@ -71,7 +73,7 @@ export class WalletsService implements OnModuleDestroy {
 
             const txCreateAccount = new AccountCreateTransaction()
                 .setKeyWithoutAlias(accountPublicKey)
-                .setInitialBalance(new Hbar(10));
+                .setInitialBalance(new Hbar(this.INITIAL_BALANCE));
 
             const txCreateAccountResponse = await txCreateAccount.execute(this.client);
             const receiptCreateAccountTx = await txCreateAccountResponse.getReceipt(this.client);
@@ -95,6 +97,7 @@ export class WalletsService implements OnModuleDestroy {
                     userId,
                     address: accountId.toString(),
                     encryptedKey,
+                    balance: this.INITIAL_BALANCE,
                 },
             });
 
@@ -118,14 +121,14 @@ export class WalletsService implements OnModuleDestroy {
 
     async ensureWalletExists(userId: string): Promise<Wallet> {
         let wallet = await this.getWalletByUserId(userId);
-        
+
         if (wallet) {
             return wallet;
         }
 
         console.log(`⚠️  Wallet not found for user ${userId}, creating now...`);
         wallet = await this.createWallet(userId);
-        
+
         return wallet;
     }
 
@@ -138,6 +141,48 @@ export class WalletsService implements OnModuleDestroy {
 
         const decryptedKey = this.encryptionService.decrypt(wallet.encryptedKey, aad);
         return PrivateKey.fromStringECDSA(decryptedKey);
+    }
+
+    async getAccountBalance(accountId: string): Promise<number> {
+        try {
+            const query = new AccountBalanceQuery()
+                .setAccountId(AccountId.fromString(accountId));
+
+            const balance = await query.execute(this.client);
+            return balance.hbars.toBigNumber().toNumber();
+        } catch (error) {
+            console.error('❌ Failed to get account balance:', error);
+            throw new InternalServerErrorException('Failed to get account balance');
+        }
+    }
+
+    async getWalletBalance(userId: string): Promise<number> {
+        try {
+            const wallet = await this.ensureWalletExists(userId);
+            return await this.getAccountBalance(wallet.address);
+        } catch (error) {
+            console.error('❌ Failed to get wallet balance:', error);
+            throw new InternalServerErrorException('Failed to get wallet balance');
+        }
+    }
+
+    async getWalletInfo(userId: string): Promise<SafeWallet> {
+        try {
+            const wallet = await this.ensureWalletExists(userId);
+            
+            const realTimeBalance = await this.getAccountBalance(wallet.address);
+            
+            const updatedWallet = await this.prisma.wallet.update({
+                where: { id: wallet.id },
+                data: { balance: realTimeBalance },
+                select: safeWalletSelect
+            });
+            
+            return updatedWallet;
+        } catch (error) {
+            console.error('❌ Failed to get wallet info with updated balance:', error);
+            throw new InternalServerErrorException('Failed to get wallet info');
+        }
     }
 
     onModuleDestroy() {

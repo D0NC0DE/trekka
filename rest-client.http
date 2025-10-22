@@ -6,8 +6,8 @@ GET {{BASE_URL}}
 
 #### === AUTHENTICATION ===
 @AUTH_URL = {{BASE_URL}}{{API_VERSION}}/auth
-@ACCESS_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJqcjNiaGt6ZGsxcnQ3OWx0YjA5ejA3M2MiLCJlbWFpbCI6Im5pbGVrMjE5MzNAZWx5Z2lmdHMuY29tIiwidXNlcm5hbWUiOiJuaWxlazIxOTMzIiwiaWF0IjoxNzYxMTM3MDM4LCJleHAiOjE3NjExMzc5Mzh9.UEeUv4Q87BFoWSKD8hLUbUCclimZPd1YXMNIa37FKJI
-@REFRESH_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJqcjNiaGt6ZGsxcnQ3OWx0YjA5ejA3M2MiLCJlbWFpbCI6Im5pbGVrMjE5MzNAZWx5Z2lmdHMuY29tIiwidXNlcm5hbWUiOiJuaWxlazIxOTMzIiwiaWF0IjoxNzYxMTM2NDE5LCJleHAiOjE3NjE3NDEyMTl9.eQOmCqCrv1ZUVnh8YCnqyxFOiX5KB7CnF4AzJxJ6zzM
+@ACCESS_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJqcjNiaGt6ZGsxcnQ3OWx0YjA5ejA3M2MiLCJlbWFpbCI6Im5pbGVrMjE5MzNAZWx5Z2lmdHMuY29tIiwidXNlcm5hbWUiOiJjb29sdXNlcjQ1NiIsImlhdCI6MTc2MTE0MzA0NCwiZXhwIjoxNzYxMTQzOTQ0fQ.YpZZcSrcEV12v084LuzYC2N2QGur_7X9lGXBGFNEu1Y
+@REFRESH_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJqcjNiaGt6ZGsxcnQ3OWx0YjA5ejA3M2MiLCJlbWFpbCI6Im5pbGVrMjE5MzNAZWx5Z2lmdHMuY29tIiwidXNlcm5hbWUiOiJjb29sdXNlcjQ1NiIsImlhdCI6MTc2MTE0MzA0NCwiZXhwIjoxNzYxNzQ3ODQ0fQ.WPziLAmq9B_LoH9Hs50qfMrmJbnnCfqaLRskCaiF15c
 ### Authenticate a user with google
 POST {{AUTH_URL}}/google
 
@@ -33,7 +33,7 @@ Content-Type: application/json
 
 { 
   "email": "nilek21933@elygifts.com",
-  "otp": "C6E1D66A"
+  "otp": "5F6165D0"
 }
 
 ### logout a user
@@ -55,7 +55,7 @@ Content-Type: application/json
 #### === USERS ===
 @USERS_URL = {{BASE_URL}}{{API_VERSION}}/users
 @USER_URL = {{USERS_URL}}/me
-@USER_ID = sgyywj1oamoiean6zp8a8cc3
+@USER_ID = jr3bhkzdk1rt79ltb09z073c
 ### get a user's profile
 GET {{USER_URL}}
 Authorization: Bearer {{ACCESS_TOKEN}}
@@ -105,12 +105,15 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Get a user's wallet Information
 GET {{WALLET_URL}}
+Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Get wallet balance
 GET {{WALLET_URL}}/balance
+Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Get wallet address
 GET {{WALLET_URL}}/address
+Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Withdraw from wallet
 POST {{WALLET_URL}}/withdraw/request
