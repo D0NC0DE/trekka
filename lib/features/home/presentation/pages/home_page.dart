@@ -8,22 +8,27 @@ import 'package:trekka/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:trekka/features/home/presentation/widgets/home_bottom_nav.dart';
 import 'package:trekka/features/home/presentation/widgets/home_pins_layer.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   static const double _navInsetWide = 47;
   static const double _navCompactContentWidth = 264;
+
+  int _currentIndex = 0;
 
   Future<void> _showAuthSheet(BuildContext context) {
     // TODO: Show Auth sheet when user is not authenticated
     return AuthSheet.show(context);
   }
 
-  void _onNavChanged(BuildContext context, int index) {
-    // TODO: OnCancel if still not authenticated go back to home
-    if (index == 1 || index == 2) {
-      _showAuthSheet(context);
-    }
+  void _onNavChanged(int index) {
+    if (_currentIndex == index) return;
+    setState(() => _currentIndex = index);
   }
 
   @override
@@ -31,6 +36,7 @@ class HomePage extends StatelessWidget {
     final bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
     final Size screenSize = MediaQuery.of(context).size;
     final double navHorizontalInset = _resolveBottomNavInset(screenSize.width);
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
@@ -47,7 +53,7 @@ class HomePage extends StatelessWidget {
           fit: StackFit.expand,
           children: <Widget>[
             Image.asset(AppAssetImages.homeBackground, fit: BoxFit.cover),
-            HomePinsLayer(onPinTap: () => _showAuthSheet(context)),
+            _buildTabBody(context),
             Align(
               alignment: Alignment.bottomCenter,
               child: isIOS
@@ -56,8 +62,8 @@ class HomePage extends StatelessWidget {
                       child: _ResponsiveNavInset(
                         horizontalInset: navHorizontalInset,
                         child: HomeBottomNav(
-                          onChanged: (int index) =>
-                              _onNavChanged(context, index),
+                          initialIndex: _currentIndex,
+                          onChanged: _onNavChanged,
                         ),
                       ),
                     )
@@ -66,8 +72,8 @@ class HomePage extends StatelessWidget {
                       child: _ResponsiveNavInset(
                         horizontalInset: navHorizontalInset,
                         child: HomeBottomNav(
-                          onChanged: (int index) =>
-                              _onNavChanged(context, index),
+                          initialIndex: _currentIndex,
+                          onChanged: _onNavChanged,
                         ),
                       ),
                     ),
@@ -76,6 +82,25 @@ class HomePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildTabBody(BuildContext context) {
+    switch (_currentIndex) {
+      case 0:
+        return HomePinsLayer(onPinTap: () => _showAuthSheet(context));
+      case 1:
+        return const _TabPlaceholder(
+          title: 'History',
+          message: 'Track quests and rewards -- coming soon.',
+        );
+      case 2:
+        return const _TabPlaceholder(
+          title: 'Profile',
+          message: 'Customize your Trekka identity -- coming soon.',
+        );
+      default:
+        return const SizedBox.shrink();
+    }
   }
 
   double _resolveBottomNavInset(double width) {
@@ -111,6 +136,47 @@ class _ResponsiveNavInset extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: _maxNavWidth),
         child: child,
+      ),
+    );
+  }
+}
+
+class _TabPlaceholder extends StatelessWidget {
+  const _TabPlaceholder({
+    required this.title,
+    required this.message,
+  });
+
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              title.toUpperCase(),
+              textAlign: TextAlign.center,
+              style: textTheme.headlineSmall?.copyWith(
+                letterSpacing: 1.6,
+                color: AppColors.accentAmber,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: textTheme.bodyLarge?.copyWith(
+                color: AppColors.white75,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

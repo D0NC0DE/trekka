@@ -64,7 +64,7 @@ class _HomePinState extends State<HomePin> with SingleTickerProviderStateMixin {
             return CustomPaint(
               painter: _BlurredRingPainter(
                 color: isDisabled
-                    ? AppColors.overlayBlurBlack.withOpacity(0.35)
+                    ? AppColors.overlayFadeBlack
                     : _viewModel.ringColor.value ?? AppColors.overlayBlurBlack,
                 strokeWidth: HomePinAnimationSpec.borderWidth,
                 blurSigma: HomePinAnimationSpec.blurSigma,
