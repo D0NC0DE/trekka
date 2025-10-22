@@ -1,13 +1,23 @@
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:trekka/app/di/auth_providers.dart';
+import 'package:trekka/core/utils/result.dart';
 import 'package:trekka/core/utils/validators.dart';
+import 'package:trekka/features/auth/domain/repositories/auth_repository.dart';
 
 final authEmailViewModelProvider =
     StateNotifierProvider.autoDispose<AuthEmailViewModel, AuthEmailViewState>(
-  (ref) => AuthEmailViewModel(),
+  (ref) => AuthEmailViewModel(
+    authRepository: ref.watch(authRepositoryProvider),
+  ),
 );
 
 class AuthEmailViewModel extends StateNotifier<AuthEmailViewState> {
-  AuthEmailViewModel() : super(const AuthEmailViewState.initial());
+  AuthEmailViewModel({
+    required AuthRepository authRepository,
+  })  : _authRepository = authRepository,
+        super(const AuthEmailViewState.initial());
+
+  final AuthRepository _authRepository;
 
   void updateEmail(String email) {
     final bool isValid = Validators.isValidEmail(email);
@@ -22,24 +32,25 @@ class AuthEmailViewModel extends StateNotifier<AuthEmailViewState> {
   }) async {
     if (!state.isValidEmail || state.isLoading) return;
 
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, errorMessage: null);
 
-    try {
-      // TODO: Implement actual API call to send OTP
-      await Future<void>.delayed(const Duration(seconds: 2));
+    final Result<String> result =
+        await _authRepository.requestEmailOtp(state.email);
 
-      if (mounted) {
+    if (!mounted) return;
+
+    result.when(
+      success: (String message) {
         state = state.copyWith(isLoading: false);
         onSuccess(state.email);
-      }
-    } catch (e) {
-      if (mounted) {
+      },
+      failure: (failure) {
         state = state.copyWith(
           isLoading: false,
-          errorMessage: e.toString(),
+          errorMessage: failure.message,
         );
-      }
-    }
+      },
+    );
   }
 
   void clearError() {

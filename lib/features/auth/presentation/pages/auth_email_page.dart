@@ -9,10 +9,7 @@ import 'package:trekka/features/auth/presentation/widgets/auth_divider.dart';
 import 'package:trekka/features/auth/presentation/widgets/social_login_buttons.dart';
 
 class AuthEmailPage extends ConsumerStatefulWidget {
-  const AuthEmailPage({
-    super.key,
-    required this.onContinue,
-  });
+  const AuthEmailPage({super.key, required this.onContinue});
 
   final ValueChanged<String> onContinue;
 
@@ -38,15 +35,15 @@ class _AuthEmailPageState extends ConsumerState<AuthEmailPage> {
   }
 
   void _onEmailChanged() {
-    ref.read(authEmailViewModelProvider.notifier).updateEmail(
-          _emailController.text,
-        );
+    ref
+        .read(authEmailViewModelProvider.notifier)
+        .updateEmail(_emailController.text);
   }
 
   Future<void> _handleContinue() async {
-    await ref.read(authEmailViewModelProvider.notifier).continueWithEmail(
-          onSuccess: widget.onContinue,
-        );
+    await ref
+        .read(authEmailViewModelProvider.notifier)
+        .continueWithEmail(onSuccess: widget.onContinue);
   }
 
   @override
@@ -93,4 +90,3 @@ class _AuthEmailPageState extends ConsumerState<AuthEmailPage> {
     );
   }
 }
-

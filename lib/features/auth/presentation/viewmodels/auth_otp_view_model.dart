@@ -2,20 +2,33 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:trekka/app/di/auth_providers.dart';
 import 'package:trekka/core/utils/otp_helpers.dart';
+import 'package:trekka/core/utils/result.dart';
+import 'package:trekka/features/auth/domain/repositories/auth_repository.dart';
 
 const Duration otpResendDuration = Duration(seconds: 120);
 
-final authOtpViewModelProvider =
-    StateNotifierProvider.autoDispose<AuthOtpViewModel, AuthOtpViewState>(
-  (ref) => AuthOtpViewModel(),
+final authOtpViewModelProvider = StateNotifierProvider.autoDispose
+    .family<AuthOtpViewModel, AuthOtpViewState, String>(
+  (ref, email) => AuthOtpViewModel(
+    email: email,
+    authRepository: ref.watch(authRepositoryProvider),
+  ),
 );
 
 class AuthOtpViewModel extends StateNotifier<AuthOtpViewState> {
-  AuthOtpViewModel() : super(const AuthOtpViewState.initial()) {
+  AuthOtpViewModel({
+    required String email,
+    required AuthRepository authRepository,
+  })  : _email = email,
+        _authRepository = authRepository,
+        super(const AuthOtpViewState.initial()) {
     _startResendTimer();
   }
 
+  final String _email;
+  final AuthRepository _authRepository;
   Timer? _timer;
 
   @override
@@ -65,38 +78,61 @@ class AuthOtpViewModel extends StateNotifier<AuthOtpViewState> {
   }) async {
     if (!OtpHelpers.isValidOtp(state.otp) || state.isLoading) return;
 
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, errorMessage: null);
 
-    try {
-      // TODO: Implement actual API call to verify OTP
-      await Future<void>.delayed(const Duration(seconds: 2));
+    // Clean OTP (remove dashes)
+    final String cleanedOtp = OtpHelpers.cleanOtp(state.otp);
 
-      if (mounted) {
+    final Result<Map<String, dynamic>> result =
+        await _authRepository.verifyEmailOtp(
+      email: _email,
+      otp: cleanedOtp,
+    );
+
+    if (!mounted) return;
+
+    result.when(
+      success: (response) {
+        // TODO: Save tokens from response
+        // final String accessToken = response['accessToken'];
+        // final String refreshToken = response['refreshToken'];
+
         state = state.copyWith(isLoading: false);
         onSuccess();
-      }
-    } catch (e) {
-      if (mounted) {
+      },
+      failure: (failure) {
         state = state.copyWith(
           isLoading: false,
-          errorMessage: e.toString(),
+          errorMessage: failure.message,
         );
-      }
-    }
+      },
+    );
   }
 
   Future<void> resendOtp({
     required VoidCallback onSuccess,
   }) async {
-    if (state.resendCountdown > 0) return;
+    if (state.resendCountdown > 0 || state.isLoading) return;
 
-    try {
-      // TODO: Implement actual API call to resend OTP
-      onSuccess();
-      _startResendTimer();
-    } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
-    }
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    final Result<String> result = await _authRepository.resendEmailOtp(_email);
+
+    if (!mounted) return;
+
+    result.when(
+      success: (message) {
+        state = state.copyWith(isLoading: false);
+        onSuccess();
+        _startResendTimer();
+      },
+      failure: (failure) {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: failure.message,
+        );
+      },
+    );
   }
 
   void clearError() {

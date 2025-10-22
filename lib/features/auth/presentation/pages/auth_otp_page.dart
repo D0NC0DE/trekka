@@ -40,13 +40,15 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
   }
 
   void _onOtpChanged() {
-    ref.read(authOtpViewModelProvider.notifier).updateOtp(
+    ref.read(authOtpViewModelProvider(widget.email).notifier).updateOtp(
           _otpController.text,
         );
   }
 
   Future<void> _handlePaste() async {
-    await ref.read(authOtpViewModelProvider.notifier).pasteFromClipboard(
+    await ref
+        .read(authOtpViewModelProvider(widget.email).notifier)
+        .pasteFromClipboard(
           onPaste: (formattedOtp) {
             _otpController.text = formattedOtp;
             _otpController.selection = TextSelection.fromPosition(
@@ -57,7 +59,7 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
   }
 
   Future<void> _handleVerify() async {
-    await ref.read(authOtpViewModelProvider.notifier).verifyOtp(
+    await ref.read(authOtpViewModelProvider(widget.email).notifier).verifyOtp(
           onSuccess: () {
             if (widget.onVerify != null) {
               widget.onVerify!();
@@ -67,7 +69,7 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
   }
 
   Future<void> _handleResend() async {
-    await ref.read(authOtpViewModelProvider.notifier).resendOtp(
+    await ref.read(authOtpViewModelProvider(widget.email).notifier).resendOtp(
           onSuccess: () {
             if (widget.onResend != null) {
               widget.onResend!();
@@ -78,7 +80,7 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(authOtpViewModelProvider);
+    final state = ref.watch(authOtpViewModelProvider(widget.email));
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
@@ -95,7 +97,7 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
           ),
           const SizedBox(height: AppSpacing.smLg),
           Text(
-            'Enter the 8-digit verification code sent to',
+            'Enter the 8-character verification code sent to',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               height: 1.0,
               color: AppColors.white,
@@ -111,11 +113,12 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
           const SizedBox(height: AppSpacing.xxl),
           AppTextField(
             controller: _otpController,
-            hintText: '8-digit verification code',
-            keyboardType: TextInputType.number,
+            hintText: 'e.g., 5F6165D0',
+            keyboardType: TextInputType.text,
             textInputAction: TextInputAction.done,
             enabled: !state.isLoading,
             inputFormatters: [OtpDashFormatter()],
+            textCapitalization: TextCapitalization.characters,
             onSubmitted: (_) => _handleVerify(),
             suffixIcon: Padding(
               padding: const EdgeInsets.symmetric(
@@ -154,6 +157,17 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
                   ),
             ),
           ),
+          if (state.errorMessage != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              state.errorMessage!,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.error,
+                  ),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.md),
           AppButton(
             onPressed: !state.isLoading && state.isValidOtp
                 ? _handleVerify
