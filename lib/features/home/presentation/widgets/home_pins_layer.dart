@@ -65,16 +65,17 @@ class _HomePinsLayerState extends State<HomePinsLayer> {
   Widget build(BuildContext context) {
     return Stack(
       children: _placements
-          .map(
-            (_PinPlacement placement) => Align(
+          .map((_PinPlacement placement) {
+            final bool isDisabled = HomePinViewModel.isTypeDisabled(placement.pinType);
+            return Align(
               alignment: placement.alignment,
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
-                onTap: widget.onPinTap,
+                onTap: isDisabled ? null : widget.onPinTap,
                 child: HomePin(pinType: placement.pinType),
               ),
-            ),
-          )
+            );
+          })
           .toList(),
     );
   }

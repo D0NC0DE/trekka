@@ -19,6 +19,13 @@ class HomePin extends StatefulWidget {
 }
 
 class _HomePinState extends State<HomePin> with SingleTickerProviderStateMixin {
+  static const ColorFilter _disabledColorFilter = ColorFilter.matrix(<double>[
+    0.2126, 0.7152, 0.0722, 0, 0,
+    0.2126, 0.7152, 0.0722, 0, 0,
+    0.2126, 0.7152, 0.0722, 0, 0,
+    0, 0, 0, 1, 0,
+  ]);
+
   late final HomePinViewModel _viewModel;
 
   @override
@@ -27,6 +34,7 @@ class _HomePinState extends State<HomePin> with SingleTickerProviderStateMixin {
     _viewModel = HomePinViewModel(vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      if (HomePinViewModel.isTypeDisabled(widget.pinType)) return;
       _viewModel.start();
     });
   }
@@ -40,6 +48,7 @@ class _HomePinState extends State<HomePin> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final HomePinDisplay display = _viewModel.resolveDisplay(widget.pinType, widget.label);
+    final bool isDisabled = display.isDisabled;
     final String formattedLabel = display.label
         .split(RegExp(r'\s+'))
         .where((String word) => word.isNotEmpty)
@@ -54,7 +63,9 @@ class _HomePinState extends State<HomePin> with SingleTickerProviderStateMixin {
           builder: (BuildContext context, Widget? child) {
             return CustomPaint(
               painter: _BlurredRingPainter(
-                color: _viewModel.ringColor.value ?? AppColors.overlayBlurBlack,
+                color: isDisabled
+                    ? AppColors.overlayBlurBlack.withOpacity(0.35)
+                    : _viewModel.ringColor.value ?? AppColors.overlayBlurBlack,
                 strokeWidth: HomePinAnimationSpec.borderWidth,
                 blurSigma: HomePinAnimationSpec.blurSigma,
               ),
@@ -68,10 +79,7 @@ class _HomePinState extends State<HomePin> with SingleTickerProviderStateMixin {
                     child: SizedBox(
                       width: _viewModel.iconWidth.value,
                       height: _viewModel.iconHeight.value,
-                      child: Image.asset(
-                        display.assetPath,
-                        fit: BoxFit.contain,
-                      ),
+                      child: _buildIcon(display.assetPath, isDisabled),
                     ),
                   ),
                 ),
@@ -88,7 +96,9 @@ class _HomePinState extends State<HomePin> with SingleTickerProviderStateMixin {
               height: _viewModel.pinpointHeight.value,
               child: Image.asset(
                 AppAssetIcons.pinpoint,
-                color: AppColors.accentPinpoint,
+                color: isDisabled
+                    ? AppColors.white25
+                    : AppColors.accentPinpoint,
                 fit: BoxFit.contain,
               ),
             );
@@ -102,12 +112,46 @@ class _HomePinState extends State<HomePin> with SingleTickerProviderStateMixin {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     fontSize: AppSpacing.smMd,
-                    color: AppColors.accentAmber,
+                    color: isDisabled ? AppColors.white50 : AppColors.accentAmber,
                   ),
             );
           },
         ),
+        if (isDisabled)
+          const SizedBox(height: AppSpacing.xs),
+        if (isDisabled)
+          Builder(
+            builder: (BuildContext context) {
+              return Text(
+                'COMING SOON',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      letterSpacing: 0.6,
+                      color: AppColors.white25,
+                    ),
+              );
+            },
+          ),
       ],
+    );
+  }
+
+  Widget _buildIcon(String assetPath, bool isDisabled) {
+    final Widget image = Image.asset(
+      assetPath,
+      fit: BoxFit.contain,
+    );
+
+    if (!isDisabled) {
+      return image;
+    }
+
+    return ColorFiltered(
+      colorFilter: _disabledColorFilter,
+      child: Opacity(
+        opacity: 0.55,
+        child: image,
+      ),
     );
   }
 }
