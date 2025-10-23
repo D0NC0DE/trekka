@@ -75,6 +75,16 @@ class _AuthEmailPageState extends ConsumerState<AuthEmailPage> {
             enabled: !state.isLoading,
             onSubmitted: (_) => _handleContinue(),
           ),
+          if (state.errorMessage != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              state.errorMessage!,
+              textAlign: TextAlign.center,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.error),
+            ),
+          ],
           const SizedBox(height: AppSpacing.mdLg),
           AppButton(
             onPressed: state.isValidEmail && !state.isLoading

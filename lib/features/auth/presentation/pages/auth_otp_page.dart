@@ -22,6 +22,7 @@ class AuthOtpPage extends ConsumerStatefulWidget {
   ConsumerState<AuthOtpPage> createState() => _AuthOtpPageState();
 }
 
+//TODO: Add Ability to change the email
 class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
   late TextEditingController _otpController;
 

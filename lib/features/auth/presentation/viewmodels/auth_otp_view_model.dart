@@ -187,13 +187,17 @@ class AuthOtpViewState {
     String? otp,
     bool? isLoading,
     int? resendCountdown,
-    String? errorMessage,
+    Object? errorMessage = _noChange,
   }) {
     return AuthOtpViewState(
       otp: otp ?? this.otp,
       isLoading: isLoading ?? this.isLoading,
       resendCountdown: resendCountdown ?? this.resendCountdown,
-      errorMessage: errorMessage,
+      errorMessage: identical(errorMessage, _noChange)
+          ? this.errorMessage
+          : errorMessage as String?,
     );
   }
+
+  static const Object _noChange = Object();
 }

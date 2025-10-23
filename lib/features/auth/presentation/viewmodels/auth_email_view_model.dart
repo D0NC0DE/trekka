@@ -81,14 +81,17 @@ class AuthEmailViewState {
     String? email,
     bool? isValidEmail,
     bool? isLoading,
-    String? errorMessage,
+    Object? errorMessage = _noChange,
   }) {
     return AuthEmailViewState(
       email: email ?? this.email,
       isValidEmail: isValidEmail ?? this.isValidEmail,
       isLoading: isLoading ?? this.isLoading,
-      errorMessage: errorMessage,
+      errorMessage: identical(errorMessage, _noChange)
+          ? this.errorMessage
+          : errorMessage as String?,
     );
   }
-}
 
+  static const Object _noChange = Object();
+}
