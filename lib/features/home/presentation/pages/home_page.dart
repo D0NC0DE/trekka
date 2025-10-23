@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-
 import 'package:trekka/app/utils/auth_guard.dart';
 import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/tokens.dart';
@@ -15,6 +13,21 @@ import 'package:trekka/features/home/presentation/viewmodels/home_pin_view_model
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
+
+  static const double _navInsetWide = 47;
+  static const double _navCompactContentWidth = 264;
+
+  Future<void> _showAuthSheet(BuildContext context) {
+    // TODO: Show Auth sheet when user is not authenticated
+    return AuthSheet.show(context);
+  }
+
+  void _onNavChanged(BuildContext context, int index) {
+    // TODO: OnCancel if still not authenticated go back to home
+    if (index == 1 || index == 2) {
+      _showAuthSheet(context);
+    }
+  }
 
   @override
   ConsumerState<HomePage> createState() => _HomePageState();

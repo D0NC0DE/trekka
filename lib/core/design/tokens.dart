@@ -31,6 +31,7 @@ class AppColors {
   static const Color textPrimary50 = Color(0x800F0400);
   static const Color error = Color(0xFFEF4444);
   static const Color warning = Color(0xFFF59E0B);
+
 }
 
 class AppSpacing {
