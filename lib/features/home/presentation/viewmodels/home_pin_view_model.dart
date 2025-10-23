@@ -41,10 +41,12 @@ class HomePinDisplay {
   const HomePinDisplay({
     required this.assetPath,
     required this.label,
+    this.isDisabled = false,
   });
 
   final String assetPath;
   final String label;
+  final bool isDisabled;
 }
 
 class HomePinViewModel {
@@ -102,6 +104,7 @@ class HomePinViewModel {
     HomePinType.logisticsCourier: HomePinDisplay(
       assetPath: AppAssetIcons.courierPin,
       label: 'Logistics Courier',
+      isDisabled: true,
     ),
     HomePinType.logisticsHailing: HomePinDisplay(
       assetPath: AppAssetIcons.hailingPin,
@@ -114,10 +117,12 @@ class HomePinViewModel {
     HomePinType.questOnline: HomePinDisplay(
       assetPath: AppAssetIcons.questOnlinePin,
       label: 'Quest Online',
+      isDisabled: true,
     ),
     HomePinType.questPhysical: HomePinDisplay(
       assetPath: AppAssetIcons.questPhysicalPin,
       label: 'Quest Physical',
+      isDisabled: true,
     ),
     HomePinType.recycling: HomePinDisplay(
       assetPath: AppAssetIcons.recyclePin,
@@ -125,8 +130,16 @@ class HomePinViewModel {
     ),
   };
 
-  HomePinDisplay resolveDisplay(HomePinType type, String? overrideLabel) {
-    final HomePinDisplay defaults = _defaultDisplays[type] ?? _defaultDisplays[HomePinType.logisticsCourier]!;
+  static HomePinDisplay _defaultFor(HomePinType type) {
+    return _defaultDisplays[type] ?? _defaultDisplays[HomePinType.logisticsCourier]!;
+  }
+
+  static bool isTypeDisabled(HomePinType type) {
+    return _defaultFor(type).isDisabled;
+  }
+
+  static HomePinDisplay resolveDisplayFor(HomePinType type, String? overrideLabel) {
+    final HomePinDisplay defaults = _defaultFor(type);
     if (overrideLabel == null || overrideLabel.isEmpty) {
       return defaults;
     }
@@ -134,7 +147,12 @@ class HomePinViewModel {
     return HomePinDisplay(
       assetPath: defaults.assetPath,
       label: overrideLabel,
+      isDisabled: defaults.isDisabled,
     );
+  }
+
+  HomePinDisplay resolveDisplay(HomePinType type, String? overrideLabel) {
+    return resolveDisplayFor(type, overrideLabel);
   }
 
   void start() {
@@ -179,4 +197,3 @@ class HomePinViewModel {
     _controller.dispose();
   }
 }
-
