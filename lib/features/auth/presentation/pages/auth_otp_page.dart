@@ -40,9 +40,9 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
   }
 
   void _onOtpChanged() {
-    ref.read(authOtpViewModelProvider(widget.email).notifier).updateOtp(
-          _otpController.text,
-        );
+    ref
+        .read(authOtpViewModelProvider(widget.email).notifier)
+        .updateOtp(_otpController.text);
   }
 
   Future<void> _handlePaste() async {
@@ -59,7 +59,9 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
   }
 
   Future<void> _handleVerify() async {
-    await ref.read(authOtpViewModelProvider(widget.email).notifier).verifyOtp(
+    await ref
+        .read(authOtpViewModelProvider(widget.email).notifier)
+        .verifyOtp(
           onSuccess: () {
             if (widget.onVerify != null) {
               widget.onVerify!();
@@ -69,7 +71,9 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
   }
 
   Future<void> _handleResend() async {
-    await ref.read(authOtpViewModelProvider(widget.email).notifier).resendOtp(
+    await ref
+        .read(authOtpViewModelProvider(widget.email).notifier)
+        .resendOtp(
           onSuccess: () {
             if (widget.onResend != null) {
               widget.onResend!();
@@ -146,15 +150,13 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
                   ? 'Resend in ${state.formattedResendTime}'
                   : 'Resend Code',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: AppSpacing.md,
-                    color: !state.canResend
-                        ? AppColors.white50
-                        : AppColors.white,
-                    decoration: !state.canResend
-                        ? TextDecoration.none
-                        : TextDecoration.underline,
-                    decorationColor: AppColors.white,
-                  ),
+                fontSize: AppSpacing.md,
+                color: !state.canResend ? AppColors.white50 : AppColors.white,
+                decoration: !state.canResend
+                    ? TextDecoration.none
+                    : TextDecoration.underline,
+                decorationColor: AppColors.white,
+              ),
             ),
           ),
           if (state.errorMessage != null) ...[
@@ -162,9 +164,9 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
             Text(
               state.errorMessage!,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.error,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.error),
             ),
           ],
           const SizedBox(height: AppSpacing.md),

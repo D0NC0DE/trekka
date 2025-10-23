@@ -24,5 +24,11 @@ class ApiConstants {
   // User endpoints
   static const String usersBase = '$apiVersion/users';
   static const String usersMe = '$usersBase/me';
-}
+  static const String usersById = '$usersBase/:id';
 
+  // Wallet endpoints
+  static const String walletsBase = '$apiVersion/wallets';
+  static const String walletsMe = '$walletsBase/me';
+  static const String walletsBalance = '$walletsMe/balance';
+  static const String walletsAddress = '$walletsMe/address';
+}

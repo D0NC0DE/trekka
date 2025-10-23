@@ -142,10 +142,7 @@ class _ResponsiveNavInset extends StatelessWidget {
 }
 
 class _TabPlaceholder extends StatelessWidget {
-  const _TabPlaceholder({
-    required this.title,
-    required this.message,
-  });
+  const _TabPlaceholder({required this.title, required this.message});
 
   final String title;
   final String message;
@@ -171,9 +168,7 @@ class _TabPlaceholder extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: textTheme.bodyLarge?.copyWith(
-                color: AppColors.white75,
-              ),
+              style: textTheme.bodyLarge?.copyWith(color: AppColors.white75),
             ),
           ],
         ),

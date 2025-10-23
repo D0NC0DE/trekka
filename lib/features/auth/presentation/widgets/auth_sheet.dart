@@ -40,12 +40,13 @@ class _AuthSheetState extends State<AuthSheet> {
 
   void _handleVerify() {
     debugPrint('OTP verified for: $_email');
-    // TODO: Handle successful OTP verification
+    if (!mounted) return;
+    Navigator.of(context).pop(true);
   }
 
   void _handleResend() {
     debugPrint('Resending OTP to: $_email');
-    // TODO: Handle resend OTP
+    // Handle resend OTP
   }
 
   Widget _buildEmailScreen() {

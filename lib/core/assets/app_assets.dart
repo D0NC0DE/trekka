@@ -5,7 +5,7 @@ class AppAssetImages {
   const AppAssetImages._();
 
   static const String homeBackground = 'assets/images/home_bg.png';
-  static const String splashBackground = 'assets/images/splash_bg.png';
+  static const String splashBackground = 'assets/images/home_bg.png';
 
   static const String authSheetBackground = 'assets/images/auth_sheet_bg.png';
 }

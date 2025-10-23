@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:trekka/app/di/auth_providers.dart';
+import 'package:trekka/app/di/auth_state_providers.dart';
 import 'package:trekka/core/utils/otp_helpers.dart';
 import 'package:trekka/core/utils/result.dart';
 import 'package:trekka/features/auth/domain/repositories/auth_repository.dart';
@@ -14,6 +15,13 @@ final authOtpViewModelProvider = StateNotifierProvider.autoDispose
   (ref, email) => AuthOtpViewModel(
     email: email,
     authRepository: ref.watch(authRepositoryProvider),
+    onSignIn: (accessToken, refreshToken, userJson) async {
+      await ref.read(authStateProvider.notifier).signIn(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        userJson: userJson,
+      );
+    },
   ),
 );
 
@@ -21,14 +29,18 @@ class AuthOtpViewModel extends StateNotifier<AuthOtpViewState> {
   AuthOtpViewModel({
     required String email,
     required AuthRepository authRepository,
+    required Future<void> Function(String, String, Map<String, dynamic>)
+        onSignIn,
   })  : _email = email,
         _authRepository = authRepository,
+        _onSignIn = onSignIn,
         super(const AuthOtpViewState.initial()) {
     _startResendTimer();
   }
 
   final String _email;
   final AuthRepository _authRepository;
+  final Future<void> Function(String, String, Map<String, dynamic>) _onSignIn;
   Timer? _timer;
 
   @override
@@ -91,11 +103,18 @@ class AuthOtpViewModel extends StateNotifier<AuthOtpViewState> {
 
     if (!mounted) return;
 
-    result.when(
-      success: (response) {
-        // TODO: Save tokens from response
-        // final String accessToken = response['accessToken'];
-        // final String refreshToken = response['refreshToken'];
+    await result.when(
+      success: (response) async {
+        // Extract tokens and user from response
+        final Map<String, dynamic> tokens =
+            response['tokens'] as Map<String, dynamic>;
+        final String accessToken = tokens['accessToken'] as String;
+        final String refreshToken = tokens['refreshToken'] as String;
+        final Map<String, dynamic> userJson =
+            response['user'] as Map<String, dynamic>;
+
+        // Sign in through callback (saves tokens + user, loads wallet)
+        await _onSignIn(accessToken, refreshToken, userJson);
 
         state = state.copyWith(isLoading: false);
         onSuccess();
@@ -178,4 +197,3 @@ class AuthOtpViewState {
     );
   }
 }
-
