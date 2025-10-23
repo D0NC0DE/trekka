@@ -2,45 +2,42 @@
 class OtpHelpers {
   OtpHelpers._();
 
-  /// Maximum number of characters allowed in an OTP code.
+  /// Maximum number of digits allowed in an OTP code.
   static const int maxOtpLength = 8;
 
-  /// Formats an alphanumeric string with dashes between each character.
+  /// Formats a numeric string with dashes between each digit.
   ///
-  /// Example: "5F6165D0" → "5-F-6-1-6-5-D-0"
+  /// Example: "12345678" → "1-2-3-4-5-6-7-8"
   ///
-  /// Only alphanumeric characters (0-9, A-Z) are preserved and converted to uppercase,
-  /// limited to [maxOtpLength] characters.
+  /// Only numeric characters are preserved, limited to [maxOtpLength] digits.
   static String formatOtpWithDashes(String input) {
-    // Only keep alphanumeric characters and convert to uppercase
-    final String alphanumericOnly =
-        input.toUpperCase().replaceAll(RegExp(r'[^0-9A-Z]'), '');
-    final String limitedChars = alphanumericOnly.length > maxOtpLength
-        ? alphanumericOnly.substring(0, maxOtpLength)
-        : alphanumericOnly;
+    final String digitsOnly = input.replaceAll(RegExp(r'[^0-9]'), '');
+    final String limitedDigits = digitsOnly.length > maxOtpLength
+        ? digitsOnly.substring(0, maxOtpLength)
+        : digitsOnly;
 
-    // Add dashes between each character
+    // Add dashes between each digit
     final StringBuffer formatted = StringBuffer();
-    for (int i = 0; i < limitedChars.length; i++) {
+    for (int i = 0; i < limitedDigits.length; i++) {
       if (i > 0) {
         formatted.write('-');
       }
-      formatted.write(limitedChars[i]);
+      formatted.write(limitedDigits[i]);
     }
 
     return formatted.toString();
   }
 
-  /// Removes all non-alphanumeric characters from OTP input.
+  /// Removes all non-numeric characters from OTP input.
   ///
-  /// Example: "5-F-6-1-6-5-D-0" → "5F6165D0"
+  /// Example: "1-2-3-4-5-6-7-8" → "12345678"
   static String cleanOtp(String input) {
-    return input.toUpperCase().replaceAll(RegExp(r'[^0-9A-Z]'), '');
+    return input.replaceAll(RegExp(r'[^0-9]'), '');
   }
 
   /// Validates if an OTP code is complete and valid.
   ///
-  /// Returns `true` if the OTP has exactly [maxOtpLength] alphanumeric characters.
+  /// Returns `true` if the OTP has exactly [maxOtpLength] digits.
   static bool isValidOtp(String input) {
     final String cleaned = cleanOtp(input);
     return cleaned.length == maxOtpLength;

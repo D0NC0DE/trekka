@@ -1,23 +1,13 @@
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:trekka/app/di/auth_providers.dart';
-import 'package:trekka/core/utils/result.dart';
 import 'package:trekka/core/utils/validators.dart';
-import 'package:trekka/features/auth/domain/repositories/auth_repository.dart';
 
 final authEmailViewModelProvider =
     StateNotifierProvider.autoDispose<AuthEmailViewModel, AuthEmailViewState>(
-  (ref) => AuthEmailViewModel(
-    authRepository: ref.watch(authRepositoryProvider),
-  ),
+  (ref) => AuthEmailViewModel(),
 );
 
 class AuthEmailViewModel extends StateNotifier<AuthEmailViewState> {
-  AuthEmailViewModel({
-    required AuthRepository authRepository,
-  })  : _authRepository = authRepository,
-        super(const AuthEmailViewState.initial());
-
-  final AuthRepository _authRepository;
+  AuthEmailViewModel() : super(const AuthEmailViewState.initial());
 
   void updateEmail(String email) {
     final bool isValid = Validators.isValidEmail(email);
@@ -32,25 +22,24 @@ class AuthEmailViewModel extends StateNotifier<AuthEmailViewState> {
   }) async {
     if (!state.isValidEmail || state.isLoading) return;
 
-    state = state.copyWith(isLoading: true, errorMessage: null);
+    state = state.copyWith(isLoading: true);
 
-    final Result<String> result =
-        await _authRepository.requestEmailOtp(state.email);
+    try {
+      // TODO: Implement actual API call to send OTP
+      await Future<void>.delayed(const Duration(seconds: 2));
 
-    if (!mounted) return;
-
-    result.when(
-      success: (String message) {
+      if (mounted) {
         state = state.copyWith(isLoading: false);
         onSuccess(state.email);
-      },
-      failure: (failure) {
+      }
+    } catch (e) {
+      if (mounted) {
         state = state.copyWith(
           isLoading: false,
-          errorMessage: failure.message,
+          errorMessage: e.toString(),
         );
-      },
-    );
+      }
+    }
   }
 
   void clearError() {
@@ -81,17 +70,14 @@ class AuthEmailViewState {
     String? email,
     bool? isValidEmail,
     bool? isLoading,
-    Object? errorMessage = _noChange,
+    String? errorMessage,
   }) {
     return AuthEmailViewState(
       email: email ?? this.email,
       isValidEmail: isValidEmail ?? this.isValidEmail,
       isLoading: isLoading ?? this.isLoading,
-      errorMessage: identical(errorMessage, _noChange)
-          ? this.errorMessage
-          : errorMessage as String?,
+      errorMessage: errorMessage,
     );
   }
-
-  static const Object _noChange = Object();
 }
+

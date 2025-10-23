@@ -12,7 +12,6 @@ import 'package:trekka/features/auth/presentation/pages/auth_otp_page.dart';
 class AuthSheet extends StatefulWidget {
   const AuthSheet({super.key});
 
-  //TODO: Improve the animation of the sheet
   /// Show auth modal from anywhere in the app.
   static Future<void> show(BuildContext context, {bool isDismissible = true}) {
     return AppBottomSheet.show(
@@ -41,13 +40,12 @@ class _AuthSheetState extends State<AuthSheet> {
 
   void _handleVerify() {
     debugPrint('OTP verified for: $_email');
-    if (!mounted) return;
-    Navigator.of(context).pop(true);
+    // TODO: Handle successful OTP verification
   }
 
   void _handleResend() {
     debugPrint('Resending OTP to: $_email');
-    // Handle resend OTP
+    // TODO: Handle resend OTP
   }
 
   Widget _buildEmailScreen() {
