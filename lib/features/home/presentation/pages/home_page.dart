@@ -1,30 +1,30 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+
+import 'package:trekka/app/utils/auth_guard.dart';
 import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/tokens.dart';
-import 'package:trekka/features/auth/presentation/widgets/auth_sheet.dart';
 import 'package:trekka/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:trekka/features/home/presentation/widgets/home_bottom_nav.dart';
 import 'package:trekka/features/home/presentation/widgets/home_pins_layer.dart';
+import 'package:trekka/features/home/presentation/viewmodels/home_pin_view_model.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   static const double _navInsetWide = 47;
   static const double _navCompactContentWidth = 264;
 
   int _currentIndex = 0;
-
-  Future<void> _showAuthSheet(BuildContext context) {
-    // TODO: Show Auth sheet when user is not authenticated
-    return AuthSheet.show(context);
-  }
 
   void _onNavChanged(int index) {
     if (_currentIndex == index) return;
@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: HomeAppBar(
-          onNotificationPressed: () => _showAuthSheet(context),
+          onNotificationPressed: _handleNotificationTap,
         ),
         backgroundColor: Colors.black,
         body: Stack(
@@ -87,7 +87,9 @@ class _HomePageState extends State<HomePage> {
   Widget _buildTabBody(BuildContext context) {
     switch (_currentIndex) {
       case 0:
-        return HomePinsLayer(onPinTap: () => _showAuthSheet(context));
+        return HomePinsLayer(
+          onPinTap: _handlePinTap,
+        );
       case 1:
         return const _TabPlaceholder(
           title: 'History',
@@ -101,6 +103,33 @@ class _HomePageState extends State<HomePage> {
       default:
         return const SizedBox.shrink();
     }
+  }
+
+  Future<void> _handlePinTap(HomePinType pinType) async {
+    await _runAuthenticated(() {
+      _showComingSoon(
+        HomePinViewModel.resolveDisplayFor(pinType, null).label,
+      );
+    });
+  }
+
+  Future<void> _handleNotificationTap() async {
+    await _runAuthenticated(() => _showComingSoon('Notifications'));
+  }
+
+  Future<void> _runAuthenticated(FutureOr<void> Function() action) async {
+    final AuthGuard authGuard = ref.read(authGuardProvider);
+    await authGuard.runAuthenticated(context, action);
+  }
+
+  void _showComingSoon(String label) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$label is coming soon.'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   double _resolveBottomNavInset(double width) {

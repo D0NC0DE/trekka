@@ -2,36 +2,50 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:trekka/core/error/exceptions.dart';
 import 'package:trekka/core/network/api_constants.dart';
 import 'package:trekka/core/network/network_logger_interceptor.dart';
 
 /// HTTP client for making API requests
 class ApiClient {
-  ApiClient({
-    required String baseUrl,
-    bool enableLogging = true,
-  }) : _dio = Dio(
-          BaseOptions(
-            baseUrl: baseUrl,
-            connectTimeout: const Duration(seconds: 30),
-            receiveTimeout: const Duration(seconds: 30),
-            sendTimeout: const Duration(seconds: 30),
-            headers: <String, dynamic>{
-              ApiConstants.contentType: ApiConstants.applicationJson,
-              ApiConstants.accept: ApiConstants.applicationJson,
-            },
-          ),
-        ) {
+  ApiClient({required String baseUrl, bool enableLogging = true})
+    : _dio = Dio(
+        BaseOptions(
+          baseUrl: baseUrl,
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+          sendTimeout: const Duration(seconds: 30),
+          headers: <String, dynamic>{
+            ApiConstants.contentType: ApiConstants.applicationJson,
+            ApiConstants.accept: ApiConstants.applicationJson,
+          },
+        ),
+      ),
+      _refreshDio = Dio(
+        BaseOptions(
+          baseUrl: baseUrl,
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+          sendTimeout: const Duration(seconds: 30),
+          headers: <String, dynamic>{
+            ApiConstants.contentType: ApiConstants.applicationJson,
+            ApiConstants.accept: ApiConstants.applicationJson,
+          },
+        ),
+      ) {
     if (enableLogging) {
       _dio.interceptors.add(NetworkLoggerInterceptor());
+      _refreshDio.interceptors.add(NetworkLoggerInterceptor());
     }
   }
 
   final Dio _dio;
+  final Dio _refreshDio;
   QueuedInterceptorsWrapper? _authInterceptor;
   Future<String?> Function()? _refreshTokenProvider;
-  Future<void> Function(String accessToken, String refreshToken)? _onTokensUpdated;
+  Future<void> Function(String accessToken, String refreshToken)?
+  _onTokensUpdated;
   Future<void> Function()? _onUnauthorized;
   Completer<void>? _refreshCompleter;
 
@@ -130,7 +144,8 @@ class ApiClient {
   /// Configure automatic token refresh handling for authenticated requests.
   void configureAuthRefresh({
     required Future<String?> Function() getRefreshToken,
-    required Future<void> Function(String accessToken, String refreshToken) onTokensUpdated,
+    required Future<void> Function(String accessToken, String refreshToken)
+    onTokensUpdated,
     required Future<void> Function() onUnauthorized,
   }) {
     _refreshTokenProvider = getRefreshToken;
@@ -153,7 +168,9 @@ class ApiClient {
               _dio.options.headers[ApiConstants.authorization];
 
           try {
-            final Response<dynamic> response = await _dio.fetch<dynamic>(requestOptions);
+            final Response<dynamic> response = await _dio.fetch<dynamic>(
+              requestOptions,
+            );
             handler.resolve(response);
             return;
           } catch (_) {
@@ -170,11 +187,11 @@ class ApiClient {
           requestOptions.extra[_retryKey] = true;
           requestOptions.headers[ApiConstants.authorization] =
               _dio.options.headers[ApiConstants.authorization];
-
-          final Response<dynamic> response = await _dio.fetch<dynamic>(requestOptions);
+          final Response<dynamic> response = await _dio.fetch<dynamic>(
+            requestOptions,
+          );
           handler.resolve(response);
-        } catch (refreshError, stackTrace) {
-          await _handleRefreshFailure(refreshError, stackTrace);
+        } catch (_) {
           handler.next(error);
         }
       },
@@ -216,15 +233,13 @@ class ApiClient {
 
           String message = 'Server error occurred';
           if (data is Map<String, dynamic>) {
-            message = data['message'] as String? ??
+            message =
+                data['message'] as String? ??
                 data['error'] as String? ??
                 message;
           }
 
-          return ServerException(
-            message: message,
-            statusCode: statusCode,
-          );
+          return ServerException(message: message, statusCode: statusCode);
 
         case DioExceptionType.cancel:
           return const ServerException(message: 'Request cancelled');
@@ -260,7 +275,8 @@ class ApiClient {
   }
 
   bool _shouldRetryWithUpdatedToken(RequestOptions requestOptions) {
-    final String? currentAuthHeader = _dio.options.headers[ApiConstants.authorization] as String?;
+    final String? currentAuthHeader =
+        _dio.options.headers[ApiConstants.authorization] as String?;
     if (currentAuthHeader == null) return false;
     final String? requestAuthHeader =
         requestOptions.headers[ApiConstants.authorization] as String?;
@@ -289,7 +305,7 @@ class ApiClient {
         throw const AuthException(message: 'Missing refresh token');
       }
 
-      final Response<dynamic> response = await _dio.post<dynamic>(
+      final Response<dynamic> response = await _refreshDio.post<dynamic>(
         ApiConstants.refresh,
         data: <String, dynamic>{'refreshToken': refreshToken},
         options: Options(
@@ -301,9 +317,13 @@ class ApiClient {
         ),
       );
 
+      debugPrint('🔴 Refresh response: ${response.data}');
+
       final Map<String, dynamic> data = _normalizeResponseData(response.data);
       final Map<String, dynamic>? tokens =
-          data['tokens'] is Map<String, dynamic> ? data['tokens'] as Map<String, dynamic> : null;
+          data['tokens'] is Map<String, dynamic>
+          ? data['tokens'] as Map<String, dynamic>
+          : null;
       final String? newAccessToken =
           tokens?['accessToken'] as String? ?? data['accessToken'] as String?;
       final String? newRefreshTokenRaw =
@@ -313,7 +333,8 @@ class ApiClient {
         throw const AuthException(message: 'Invalid refresh response');
       }
 
-      final String resolvedRefreshToken = (newRefreshTokenRaw == null || newRefreshTokenRaw.isEmpty)
+      final String resolvedRefreshToken =
+          (newRefreshTokenRaw == null || newRefreshTokenRaw.isEmpty)
           ? refreshToken
           : newRefreshTokenRaw;
 
@@ -321,9 +342,10 @@ class ApiClient {
       await _onTokensUpdated!.call(newAccessToken, resolvedRefreshToken);
 
       completer.complete();
-    } catch (e) {
+    } catch (e, stackTrace) {
+      await _handleRefreshFailure(e, stackTrace);
       if (!completer.isCompleted) {
-        completer.completeError(e);
+        completer.completeError(e, stackTrace);
       }
     } finally {
       _refreshCompleter = null;

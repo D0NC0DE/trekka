@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:trekka/app/state/auth_state.dart';
+import 'package:trekka/core/error/failures.dart';
 import 'package:trekka/core/network/api_client.dart';
 import 'package:trekka/core/storage/auth_storage_service.dart';
 import 'package:trekka/core/utils/result.dart';
@@ -115,10 +116,41 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> _fetchAndSetUserData() async {
     final Result<User> result = await _usersRepository.getMe();
 
-    result.when(
-      success: (User user) {
-        state = Authenticated(user: user);
-        // Save updated user to cache
+    if (result is Success<User>) {
+      final User user = result.data;
+      state = Authenticated(user: user);
+      _authStorage.saveUserJson(
+        UserDto(
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          avatar: user.avatar,
+          isEmailVerified: user.isEmailVerified,
+          lastLoginAt: user.lastLoginAt,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        ).toJson(),
+      );
+      _loadWalletData();
+      return;
+    }
+
+    final Failure failure = (result as Error<User>).error;
+    if (await _handleAuthRelatedFailure(failure)) {
+      return;
+    }
+
+    state = const Unauthenticated();
+  }
+
+  /// Refresh user data in background (don't show loading state)
+  Future<void> _refreshUserData() async {
+    final Result<User> result = await _usersRepository.getMe();
+
+    if (result is Success<User>) {
+      final User user = result.data;
+      if (state is Authenticated) {
+        state = (state as Authenticated).copyWith(user: user);
         _authStorage.saveUserJson(
           UserDto(
             id: user.id,
@@ -131,42 +163,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
             updatedAt: user.updatedAt,
           ).toJson(),
         );
-        // Load wallet after user is loaded
-        _loadWalletData();
-      },
-      failure: (failure) {
-        state = const Unauthenticated();
-      },
-    );
-  }
+      }
+      return;
+    }
 
-  /// Refresh user data in background (don't show loading state)
-  Future<void> _refreshUserData() async {
-    final Result<User> result = await _usersRepository.getMe();
-
-    result.when(
-      success: (User user) {
-        if (state is Authenticated) {
-          state = (state as Authenticated).copyWith(user: user);
-          // Save updated user to cache
-          _authStorage.saveUserJson(
-            UserDto(
-              id: user.id,
-              email: user.email,
-              username: user.username,
-              avatar: user.avatar,
-              isEmailVerified: user.isEmailVerified,
-              lastLoginAt: user.lastLoginAt,
-              createdAt: user.createdAt,
-              updatedAt: user.updatedAt,
-            ).toJson(),
-          );
-        }
-      },
-      failure: (_) {
-        // Silently fail - keep cached user data
-      },
-    );
+    final Failure failure = (result as Error<User>).error;
+    await _handleAuthRelatedFailure(failure);
   }
 
   /// Load wallet data in background
@@ -177,22 +179,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     final Result<Wallet> result = await _walletsRepository.getMyWallet();
 
-    result.when(
-      success: (Wallet wallet) {
-        if (state is Authenticated) {
-          state = (state as Authenticated).copyWith(
-            wallet: wallet,
-            isLoadingWallet: false,
-          );
-        }
-      },
-      failure: (_) {
-        // Wallet loading failed - user might not have a wallet yet
-        if (state is Authenticated) {
-          state = (state as Authenticated).copyWith(isLoadingWallet: false);
-        }
-      },
-    );
+    if (result is Success<Wallet>) {
+      final Wallet wallet = result.data;
+      if (state is Authenticated) {
+        state = (state as Authenticated).copyWith(
+          wallet: wallet,
+          isLoadingWallet: false,
+        );
+      }
+      return;
+    }
+
+    final Failure failure = (result as Error<Wallet>).error;
+    final bool handled = await _handleAuthRelatedFailure(failure);
+    if (handled || state is! Authenticated) {
+      return;
+    }
+
+    state = (state as Authenticated).copyWith(isLoadingWallet: false);
   }
 
   /// Refresh wallet data
@@ -218,5 +222,26 @@ class AuthNotifier extends StateNotifier<AuthState> {
         ).toJson(),
       );
     }
+  }
+
+  Future<bool> _handleAuthRelatedFailure(Failure failure) async {
+    if (failure is AuthFailure) {
+      await signOut();
+      return true;
+    }
+
+    if (failure is ServerFailure) {
+      final int? statusCode = failure.statusCode;
+      if (statusCode != null && _isAuthStatusCode(statusCode)) {
+        await signOut();
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool _isAuthStatusCode(int statusCode) {
+    return statusCode == 400 || statusCode == 401 || statusCode == 403;
   }
 }
