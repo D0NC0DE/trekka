@@ -21,7 +21,6 @@ class AppTextField extends StatefulWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.inputFormatters,
-    this.textCapitalization = TextCapitalization.none,
   });
 
   final TextEditingController? controller;
@@ -37,7 +36,6 @@ class AppTextField extends StatefulWidget {
   final Widget? prefixIcon;
   final Widget? suffixIcon;
   final List<TextInputFormatter>? inputFormatters;
-  final TextCapitalization textCapitalization;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -94,7 +92,6 @@ class _AppTextFieldState extends State<AppTextField> {
           enabled: widget.enabled,
           maxLines: widget.maxLines,
           inputFormatters: widget.inputFormatters,
-          textCapitalization: widget.textCapitalization,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             height: isActive ? 1.25 : 1.0,
             fontWeight: isActive

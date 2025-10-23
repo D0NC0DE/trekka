@@ -1,17 +1,14 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trekka/app/utils/auth_guard.dart';
+
 import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/tokens.dart';
+import 'package:trekka/features/auth/presentation/widgets/auth_sheet.dart';
 import 'package:trekka/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:trekka/features/home/presentation/widgets/home_bottom_nav.dart';
 import 'package:trekka/features/home/presentation/widgets/home_pins_layer.dart';
-import 'package:trekka/features/home/presentation/viewmodels/home_pin_view_model.dart';
 
-class HomePage extends ConsumerStatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   static const double _navInsetWide = 47;
@@ -30,26 +27,10 @@ class HomePage extends ConsumerStatefulWidget {
   }
 
   @override
-  ConsumerState<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends ConsumerState<HomePage> {
-  static const double _navInsetWide = 47;
-  static const double _navCompactContentWidth = 264;
-
-  int _currentIndex = 0;
-
-  void _onNavChanged(int index) {
-    if (_currentIndex == index) return;
-    setState(() => _currentIndex = index);
-  }
-
-  @override
   Widget build(BuildContext context) {
     final bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
     final Size screenSize = MediaQuery.of(context).size;
     final double navHorizontalInset = _resolveBottomNavInset(screenSize.width);
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
@@ -59,14 +40,14 @@ class _HomePageState extends ConsumerState<HomePage> {
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: HomeAppBar(
-          onNotificationPressed: _handleNotificationTap,
+          onNotificationPressed: () => _showAuthSheet(context),
         ),
         backgroundColor: Colors.black,
         body: Stack(
           fit: StackFit.expand,
           children: <Widget>[
             Image.asset(AppAssetImages.homeBackground, fit: BoxFit.cover),
-            _buildTabBody(context),
+            HomePinsLayer(onPinTap: () => _showAuthSheet(context)),
             Align(
               alignment: Alignment.bottomCenter,
               child: isIOS
@@ -75,8 +56,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                       child: _ResponsiveNavInset(
                         horizontalInset: navHorizontalInset,
                         child: HomeBottomNav(
-                          initialIndex: _currentIndex,
-                          onChanged: _onNavChanged,
+                          onChanged: (int index) =>
+                              _onNavChanged(context, index),
                         ),
                       ),
                     )
@@ -85,62 +66,14 @@ class _HomePageState extends ConsumerState<HomePage> {
                       child: _ResponsiveNavInset(
                         horizontalInset: navHorizontalInset,
                         child: HomeBottomNav(
-                          initialIndex: _currentIndex,
-                          onChanged: _onNavChanged,
+                          onChanged: (int index) =>
+                              _onNavChanged(context, index),
                         ),
                       ),
                     ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildTabBody(BuildContext context) {
-    switch (_currentIndex) {
-      case 0:
-        return HomePinsLayer(
-          onPinTap: _handlePinTap,
-        );
-      case 1:
-        return const _TabPlaceholder(
-          title: 'History',
-          message: 'Track quests and rewards -- coming soon.',
-        );
-      case 2:
-        return const _TabPlaceholder(
-          title: 'Profile',
-          message: 'Customize your Trekka identity -- coming soon.',
-        );
-      default:
-        return const SizedBox.shrink();
-    }
-  }
-
-  Future<void> _handlePinTap(HomePinType pinType) async {
-    await _runAuthenticated(() {
-      _showComingSoon(
-        HomePinViewModel.resolveDisplayFor(pinType, null).label,
-      );
-    });
-  }
-
-  Future<void> _handleNotificationTap() async {
-    await _runAuthenticated(() => _showComingSoon('Notifications'));
-  }
-
-  Future<void> _runAuthenticated(FutureOr<void> Function() action) async {
-    final AuthGuard authGuard = ref.read(authGuardProvider);
-    await authGuard.runAuthenticated(context, action);
-  }
-
-  void _showComingSoon(String label) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$label is coming soon.'),
-        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -178,42 +111,6 @@ class _ResponsiveNavInset extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: _maxNavWidth),
         child: child,
-      ),
-    );
-  }
-}
-
-class _TabPlaceholder extends StatelessWidget {
-  const _TabPlaceholder({required this.title, required this.message});
-
-  final String title;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final TextTheme textTheme = Theme.of(context).textTheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              title.toUpperCase(),
-              textAlign: TextAlign.center,
-              style: textTheme.headlineSmall?.copyWith(
-                letterSpacing: 1.6,
-                color: AppColors.accentAmber,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: textTheme.bodyLarge?.copyWith(color: AppColors.white75),
-            ),
-          ],
-        ),
       ),
     );
   }

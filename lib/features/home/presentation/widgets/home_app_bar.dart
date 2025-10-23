@@ -5,7 +5,10 @@ import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/features/home/presentation/widgets/home_point_badge.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const HomeAppBar({super.key, this.onNotificationPressed});
+  const HomeAppBar({
+    super.key,
+    this.onNotificationPressed,
+  });
 
   static const double _topPadding = 12;
   static const double _bottomPadding = 30;
@@ -14,8 +17,8 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(
-    _topPadding + HomePointBadge.height + _bottomPadding,
-  );
+        _topPadding + HomePointBadge.height + _bottomPadding,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +64,11 @@ class _ActionIcon extends StatelessWidget {
       child: IconButton(
         onPressed: onPressed,
         padding: EdgeInsets.zero,
-        icon: Image.asset(assetPath, width: 30, height: 30),
+        icon: Image.asset(
+          assetPath,
+          width: 30,
+          height: 30,
+        ),
       ),
     );
   }

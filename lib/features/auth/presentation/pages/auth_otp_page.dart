@@ -22,7 +22,6 @@ class AuthOtpPage extends ConsumerStatefulWidget {
   ConsumerState<AuthOtpPage> createState() => _AuthOtpPageState();
 }
 
-//TODO: Add Ability to change the email
 class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
   late TextEditingController _otpController;
 
@@ -41,15 +40,13 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
   }
 
   void _onOtpChanged() {
-    ref
-        .read(authOtpViewModelProvider(widget.email).notifier)
-        .updateOtp(_otpController.text);
+    ref.read(authOtpViewModelProvider.notifier).updateOtp(
+          _otpController.text,
+        );
   }
 
   Future<void> _handlePaste() async {
-    await ref
-        .read(authOtpViewModelProvider(widget.email).notifier)
-        .pasteFromClipboard(
+    await ref.read(authOtpViewModelProvider.notifier).pasteFromClipboard(
           onPaste: (formattedOtp) {
             _otpController.text = formattedOtp;
             _otpController.selection = TextSelection.fromPosition(
@@ -60,9 +57,7 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
   }
 
   Future<void> _handleVerify() async {
-    await ref
-        .read(authOtpViewModelProvider(widget.email).notifier)
-        .verifyOtp(
+    await ref.read(authOtpViewModelProvider.notifier).verifyOtp(
           onSuccess: () {
             if (widget.onVerify != null) {
               widget.onVerify!();
@@ -72,9 +67,7 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
   }
 
   Future<void> _handleResend() async {
-    await ref
-        .read(authOtpViewModelProvider(widget.email).notifier)
-        .resendOtp(
+    await ref.read(authOtpViewModelProvider.notifier).resendOtp(
           onSuccess: () {
             if (widget.onResend != null) {
               widget.onResend!();
@@ -85,7 +78,7 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(authOtpViewModelProvider(widget.email));
+    final state = ref.watch(authOtpViewModelProvider);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
@@ -102,7 +95,7 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
           ),
           const SizedBox(height: AppSpacing.smLg),
           Text(
-            'Enter the 8-character verification code sent to',
+            'Enter the 8-digit verification code sent to',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               height: 1.0,
               color: AppColors.white,
@@ -118,12 +111,11 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
           const SizedBox(height: AppSpacing.xxl),
           AppTextField(
             controller: _otpController,
-            hintText: 'e.g., 5F6165D0',
-            keyboardType: TextInputType.text,
+            hintText: '8-digit verification code',
+            keyboardType: TextInputType.number,
             textInputAction: TextInputAction.done,
             enabled: !state.isLoading,
             inputFormatters: [OtpDashFormatter()],
-            textCapitalization: TextCapitalization.characters,
             onSubmitted: (_) => _handleVerify(),
             suffixIcon: Padding(
               padding: const EdgeInsets.symmetric(
@@ -151,26 +143,17 @@ class _AuthOtpPageState extends ConsumerState<AuthOtpPage> {
                   ? 'Resend in ${state.formattedResendTime}'
                   : 'Resend Code',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: AppSpacing.md,
-                color: !state.canResend ? AppColors.white50 : AppColors.white,
-                decoration: !state.canResend
-                    ? TextDecoration.none
-                    : TextDecoration.underline,
-                decorationColor: AppColors.white,
-              ),
+                    fontSize: AppSpacing.md,
+                    color: !state.canResend
+                        ? AppColors.white50
+                        : AppColors.white,
+                    decoration: !state.canResend
+                        ? TextDecoration.none
+                        : TextDecoration.underline,
+                    decorationColor: AppColors.white,
+                  ),
             ),
           ),
-          if (state.errorMessage != null) ...[
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              state.errorMessage!,
-              textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.error),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.md),
           AppButton(
             onPressed: !state.isLoading && state.isValidOtp
                 ? _handleVerify

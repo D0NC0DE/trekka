@@ -32,17 +32,6 @@ class _HomeBottomNavState extends State<HomeBottomNav> {
     _selectedIndex = widget.initialIndex.clamp(0, 2);
   }
 
-  @override
-  void didUpdateWidget(covariant HomeBottomNav oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.initialIndex != oldWidget.initialIndex &&
-        widget.initialIndex != _selectedIndex) {
-      setState(() {
-        _selectedIndex = widget.initialIndex.clamp(0, 2);
-      });
-    }
-  }
-
   void _onTap(int index) {
     if (_selectedIndex == index) return;
     setState(() => _selectedIndex = index);

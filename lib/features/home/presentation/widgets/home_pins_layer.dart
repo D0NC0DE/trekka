@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+
 import 'package:trekka/features/home/presentation/widgets/home_pin.dart';
 import 'package:trekka/features/home/presentation/viewmodels/home_pin_view_model.dart';
 
@@ -10,7 +11,7 @@ class HomePinsLayer extends StatefulWidget {
     required this.onPinTap,
   });
 
-  final Future<void> Function(HomePinType) onPinTap;
+  final VoidCallback onPinTap;
 
   @override
   State<HomePinsLayer> createState() => _HomePinsLayerState();
@@ -64,23 +65,18 @@ class _HomePinsLayerState extends State<HomePinsLayer> {
   Widget build(BuildContext context) {
     return Stack(
       children: _placements
-          .map((_PinPlacement placement) {
-            return Align(
+          .map(
+            (_PinPlacement placement) => Align(
               alignment: placement.alignment,
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
-                onTap: () => _handlePinTap(placement.pinType),
+                onTap: widget.onPinTap,
                 child: HomePin(pinType: placement.pinType),
               ),
-            );
-          })
+            ),
+          )
           .toList(),
     );
-  }
-
-  Future<void> _handlePinTap(HomePinType pinType) async {
-    if (HomePinViewModel.isTypeDisabled(pinType)) return;
-    await widget.onPinTap(pinType);
   }
 }
 
