@@ -48,7 +48,21 @@ GoRouter createAppRouter() {
       GoRoute(
         path: RoutePaths.logisticsHailing,
         name: 'logisticsHailing',
-        builder: (context, state) => const LogisticsHailingPage(),
+        pageBuilder: (context, state) => CustomTransitionPage<void>(
+          key: state.pageKey,
+          transitionDuration: const Duration(milliseconds: 1000),
+          reverseTransitionDuration: const Duration(milliseconds: 400),
+          child: const LogisticsHailingPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final Animation<double> fadeIn = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeIn,
+              reverseCurve: Curves.easeOut,
+            );
+
+            return FadeTransition(opacity: fadeIn, child: child);
+          },
+        ),
       ),
     ],
   );

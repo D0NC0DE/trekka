@@ -1,12 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// A reusable bottom sheet wrapper that provides consistent behavior across the app.
-///
-/// Features:
-/// - Tap outside to dismiss
-/// - Keyboard-aware (adjusts for keyboard insets)
-/// - Configurable height
-/// - Transparent background with custom content
 class AppBottomSheet {
   /// Shows a bottom sheet with consistent app-wide styling and behavior.
   ///
@@ -34,6 +27,12 @@ class AppBottomSheet {
       backgroundColor: Colors.transparent,
       isDismissible: isDismissible,
       enableDrag: isDismissible,
+      sheetAnimationStyle: const AnimationStyle(
+        curve: Curves.easeIn,
+        reverseCurve: Curves.easeOut,
+        duration: Duration(milliseconds: 500),
+        reverseDuration: Duration(milliseconds: 500),
+      ),
       builder: (BuildContext sheetContext) {
         final double bottomInset = MediaQuery.of(
           sheetContext,
@@ -64,4 +63,3 @@ class AppBottomSheet {
     );
   }
 }
-
