@@ -82,7 +82,9 @@ export class AuthService {
       otp: result.otpData.code,
       expiresInMinutes: this.getExpiryMinutes(result.otpData.expiresAt),
       purpose: OtpPurpose.AUTH,
-    });
+    })
+      .then(() => console.log(`✅ Email sent to ${user.email}`))
+      .catch((error) => console.error(`❌ Email failed for ${user.email}:`, error));;
 
     return {
       message: 'Verification code sent to your email',
@@ -144,7 +146,7 @@ export class AuthService {
   async logout(refreshToken: string): Promise<{ message: string }> {
     try {
       const payload = await this.tokenService.verifyRefreshToken(refreshToken);
-     
+
       const user = await this.usersService.findByIdWithRefreshToken(payload.userId);
 
       if (user?.refreshTokenHash) {
@@ -154,7 +156,7 @@ export class AuthService {
         }
       }
     } catch (error) { }
-    
+
     return { message: 'Logged out successfully' };
   }
 
@@ -181,7 +183,7 @@ export class AuthService {
       throw new BadRequestException('Refresh token expired - please login');
     }
 
-    const { tokens, refreshTokenHash, refreshTokenExpiresAt } = 
+    const { tokens, refreshTokenHash, refreshTokenExpiresAt } =
       await this.tokenService.generateAuthTokens({
         userId: user.id,
         email: user.email,
