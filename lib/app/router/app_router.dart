@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:trekka/core/router/route_paths.dart';
 import 'package:trekka/features/home/presentation/pages/home_page.dart';
+import 'package:trekka/features/logistics/presentation/pages/logistics_hailing_page.dart';
 import 'package:trekka/features/splash/presentation/pages/splash_page.dart';
 
 GoRouter createAppRouter() {
@@ -43,6 +44,11 @@ GoRouter createAppRouter() {
             );
           },
         ),
+      ),
+      GoRoute(
+        path: RoutePaths.logisticsHailing,
+        name: 'logisticsHailing',
+        builder: (context, state) => const LogisticsHailingPage(),
       ),
     ],
   );

@@ -43,6 +43,9 @@ class AppAssetIcons {
   static const String facebook = 'assets/icons/socials/facebook.png';
   static const String apple = 'assets/icons/socials/apple.png';
   static const String x = 'assets/icons/socials/x.png';
+
+  // Map Markers
+  static const String riderMarker = 'assets/icons/markers/user.png';
 }
 
 @immutable

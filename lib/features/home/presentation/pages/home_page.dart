@@ -3,11 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:go_router/go_router.dart';
 
 import 'package:trekka/app/utils/auth_guard.dart';
 import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/tokens.dart';
+import 'package:trekka/core/router/route_paths.dart';
 import 'package:trekka/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:trekka/features/home/presentation/widgets/home_bottom_nav.dart';
 import 'package:trekka/features/home/presentation/widgets/home_pins_layer.dart';
@@ -106,10 +107,18 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Future<void> _handlePinTap(HomePinType pinType) async {
-    await _runAuthenticated(() {
-      _showComingSoon(
-        HomePinViewModel.resolveDisplayFor(pinType, null).label,
-      );
+    await _runAuthenticated(() async {
+      if (!mounted) return;
+
+      switch (pinType) {
+        case HomePinType.logisticsHailing:
+          context.push(RoutePaths.logisticsHailing);
+          break;
+        default:
+          _showComingSoon(
+            HomePinViewModel.resolveDisplayFor(pinType, null).label,
+          );
+      }
     });
   }
 
