@@ -1,0 +1,47 @@
+model User {
+  id              String    @id @default(cuid(2))
+  email           String    @unique
+  username        String    @unique
+  avatar          Int       @default(1) // Preset avatar ID (1-10)
+  isEmailVerified Boolean   @default(false)
+  wallet          Wallet?
+  
+  // OTP fields
+  otpHash         String?
+  otpExpiresAt    DateTime?
+  otpPurpose      OtpPurpose?
+  otpAttemptCount Int       @default(0)
+  otpLastSentAt   DateTime?
+  
+  // Authentication tokens
+  refreshTokenHash String?
+  refreshTokenExpiresAt DateTime?
+  lastLoginAt     DateTime?
+  
+  // Soft delete
+  deletedAt       DateTime?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Wallet {
+  id           String   @id @default(cuid(2))
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  address      String   @unique
+  encryptedKey String   // Encrypted private key
+  balance      Decimal  @default(0) @db.Decimal(20, 8)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("wallets")
+}
+
+enum OtpPurpose {
+  AUTH
+  WITHDRAW
+  EXPORT_KEY
+}

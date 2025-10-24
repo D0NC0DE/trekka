@@ -119,6 +119,7 @@ Examples:
 ```bash
 🌍 feat: add payouts endpoint (hedera transfer)
 🛠️ fix: handle invalid GPS proof error case
+🚢 ship: release v1.0.0 to production
 📖 docs: document /quests API
 🎨 style: consistent DTO property ordering
 ♻️ refactor: split verification service

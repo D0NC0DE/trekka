@@ -1,0 +1,136 @@
+@BASE_URL = http://localhost:3001
+@API_VERSION = /api/v1
+
+#### === WELCOME ===
+GET {{BASE_URL}}
+
+#### === AUTHENTICATION ===
+@AUTH_URL = {{BASE_URL}}{{API_VERSION}}/auth
+@ACCESS_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJqcjNiaGt6ZGsxcnQ3OWx0YjA5ejA3M2MiLCJlbWFpbCI6Im5pbGVrMjE5MzNAZWx5Z2lmdHMuY29tIiwidXNlcm5hbWUiOiJjb29sdXNlcjQ1NiIsImlhdCI6MTc2MTE0MzA0NCwiZXhwIjoxNzYxMTQzOTQ0fQ.YpZZcSrcEV12v084LuzYC2N2QGur_7X9lGXBGFNEu1Y
+@REFRESH_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJqcjNiaGt6ZGsxcnQ3OWx0YjA5ejA3M2MiLCJlbWFpbCI6Im5pbGVrMjE5MzNAZWx5Z2lmdHMuY29tIiwidXNlcm5hbWUiOiJjb29sdXNlcjQ1NiIsImlhdCI6MTc2MTE0MzA0NCwiZXhwIjoxNzYxNzQ3ODQ0fQ.WPziLAmq9B_LoH9Hs50qfMrmJbnnCfqaLRskCaiF15c
+### Authenticate a user with google
+POST {{AUTH_URL}}/google
+
+### Authenticate a user with email and otp
+POST {{AUTH_URL}}/email/request
+Content-Type: application/json
+
+{
+  "email": "nilek21933@elygifts.com"
+}
+
+### Resend a user's otp
+POST {{AUTH_URL}}/email/resend
+Content-Type: application/json
+
+{
+  "email": "nilek21933@elygifts.com"
+}
+
+### verify a user's otp
+POST {{AUTH_URL}}/email/verify
+Content-Type: application/json
+
+{ 
+  "email": "nilek21933@elygifts.com",
+  "otp": "5F6165D0"
+}
+
+### logout a user
+POST {{AUTH_URL}}/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "{{REFRESH_TOKEN}}"
+}
+
+### refresh a user's token
+POST {{AUTH_URL}}/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{REFRESH_TOKEN}}"
+}
+
+#### === USERS ===
+@USERS_URL = {{BASE_URL}}{{API_VERSION}}/users
+@USER_URL = {{USERS_URL}}/me
+@USER_ID = jr3bhkzdk1rt79ltb09z073c
+### get a user's profile
+GET {{USER_URL}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Get a user by id
+GET {{USERS_URL}}/{{USER_ID}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Update user profile (username and/or avatar)
+PATCH {{USER_URL}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "username": "newusername123",
+  "avatar": 3
+}
+
+### Update only username
+PATCH {{USER_URL}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "username": "cooluser456"
+}
+
+### Update only avatar (select avatar ID 1-10)
+PATCH {{USER_URL}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "avatar": 7
+}
+
+### Delete a user (soft delete)
+DELETE {{USER_URL}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+#TODO: Add endpoints for users that want to be providers of services
+
+
+#### === WALLETS ===
+@WALLETS_URL = {{BASE_URL}}{{API_VERSION}}/wallets
+@WALLET_URL = {{WALLETS_URL}}/me
+
+### Get a user's wallet Information
+GET {{WALLET_URL}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Get wallet balance
+GET {{WALLET_URL}}/balance
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Get wallet address
+GET {{WALLET_URL}}/address
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Withdraw from wallet
+POST {{WALLET_URL}}/withdraw/request
+
+### Verify a withdrawal
+POST {{WALLET_URL}}/withdraw/verify
+
+### Resend a withdrawal OTP
+POST {{WALLET_URL}}/withdraw/resend
+
+### Export a user's wallet
+POST {{WALLET_URL}}/export/request
+
+### Verify export is from the correct user
+POST {{WALLET_URL}}/export/verify
+
+### Resend an export OTP
+POST {{WALLET_URL}}/export/resend
+
+//TODO: Admin endpoints for managing wallets
