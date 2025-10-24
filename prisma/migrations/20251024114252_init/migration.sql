@@ -1,18 +1,22 @@
 -- CreateEnum
-CREATE TYPE "OtpPurpose" AS ENUM ('SIGNUP', 'LOGIN', 'WITHDRAW', 'EXPORT_KEY');
+CREATE TYPE "OtpPurpose" AS ENUM ('AUTH', 'WITHDRAW', 'EXPORT_KEY');
 
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "username" TEXT NOT NULL,
-    "avatar" TEXT,
+    "avatar" INTEGER NOT NULL DEFAULT 1,
     "isEmailVerified" BOOLEAN NOT NULL DEFAULT false,
     "otpHash" TEXT,
     "otpExpiresAt" TIMESTAMP(3),
     "otpPurpose" "OtpPurpose",
     "otpAttemptCount" INTEGER NOT NULL DEFAULT 0,
     "otpLastSentAt" TIMESTAMP(3),
+    "refreshTokenHash" TEXT,
+    "refreshTokenExpiresAt" TIMESTAMP(3),
+    "lastLoginAt" TIMESTAMP(3),
+    "deletedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

@@ -10,7 +10,7 @@ import { EmailModule } from './email/email.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guard/auth.guard';
-import { StorageModule } from './storage/storage.module';
+// import { StorageModule } from './storage/storage.module';
 @Module({
   imports: [
     ThrottlerModule.forRoot([
@@ -39,7 +39,7 @@ import { StorageModule } from './storage/storage.module';
     WalletsModule,
     PrismaModule,
     EmailModule,
-    StorageModule
+    // StorageModule
   ],
   controllers: [AppController],
   providers: [
