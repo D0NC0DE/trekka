@@ -60,7 +60,7 @@ export class WalletsService implements OnModuleDestroy {
     async createWallet(userId: string): Promise<Wallet> {
         try {
             // Check if user already has a wallet
-            const existingWallet = await this.prisma.wallet.findUnique({
+            const existingWallet = await this.prisma.extendedPrismaClient().wallet.findUnique({
                 where: { userId }
             });
 
@@ -92,7 +92,7 @@ export class WalletsService implements OnModuleDestroy {
                 aad,
             );
 
-            const wallet = await this.prisma.wallet.create({
+            const wallet = await this.prisma.extendedPrismaClient().wallet.create({
                 data: {
                     userId,
                     address: accountId.toString(),
@@ -114,7 +114,7 @@ export class WalletsService implements OnModuleDestroy {
     }
 
     async getWalletByUserId(userId: string): Promise<Wallet | null> {
-        return this.prisma.wallet.findUnique({
+        return this.prisma.extendedPrismaClient().wallet.findUnique({
             where: { userId }
         });
     }
@@ -172,7 +172,7 @@ export class WalletsService implements OnModuleDestroy {
             
             const realTimeBalance = await this.getAccountBalance(wallet.address);
             
-            const updatedWallet = await this.prisma.wallet.update({
+            const updatedWallet = await this.prisma.extendedPrismaClient().wallet.update({
                 where: { id: wallet.id },
                 data: { balance: realTimeBalance },
                 select: safeWalletSelect
