@@ -148,6 +148,7 @@ flutter:
     - assets/icons/tabs/
     - assets/icons/socials/
     - assets/icons/markers/
+    - assets/map_styles/
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

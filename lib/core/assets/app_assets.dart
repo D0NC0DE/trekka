@@ -45,7 +45,7 @@ class AppAssetIcons {
   static const String x = 'assets/icons/socials/x.png';
 
   // Map Markers
-  static const String riderMarker = 'assets/icons/markers/user.png';
+  static const String riderMarker = 'assets/icons/markers/user_24.png';
 }
 
 @immutable
@@ -54,4 +54,12 @@ class AppAssetGifs {
 
   static const String loader = 'assets/gifs/loader.gif';
   static const String loading = 'assets/gifs/loading.gif';
+}
+
+@immutable
+class AppAssetMapStyles {
+  const AppAssetMapStyles._();
+
+  static const String dark = 'assets/map_styles/dark.json';
+  static const String light = 'assets/map_styles/light.json';
 }

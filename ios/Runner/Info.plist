@@ -4,6 +4,11 @@
 	<dict>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>This app needs access to your location when it is open to provide logistics services.</string>
+		<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+		<dict>
+			<key>TemporaryAccess</key>
+			<string>The Trekka App requires temporary access to the device's precise location.</string>
+			</dict>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
