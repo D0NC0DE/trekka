@@ -1,10 +1,9 @@
-import 'package:go_router/go_router.dart';
-
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:trekka/core/router/route_paths.dart';
 import 'package:trekka/features/home/presentation/pages/home_page.dart';
-import 'package:trekka/features/logistics/presentation/pages/logistics_hailing_page.dart';
+import 'package:trekka/features/logistics/presentation/pages/logistics_page.dart';
 import 'package:trekka/features/splash/presentation/pages/splash_page.dart';
 
 GoRouter createAppRouter() {
@@ -52,7 +51,7 @@ GoRouter createAppRouter() {
           key: state.pageKey,
           transitionDuration: const Duration(milliseconds: 1000),
           reverseTransitionDuration: const Duration(milliseconds: 400),
-          child: const LogisticsHailingPage(),
+          child: const LogisticsPage(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             final Animation<double> fadeIn = CurvedAnimation(
               parent: animation,

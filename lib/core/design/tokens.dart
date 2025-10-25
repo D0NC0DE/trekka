@@ -15,6 +15,12 @@ class AppColors {
   static const Color primary = Color(0xFF00A896);
   static const Color primaryBright = Color(0xFF02C39A);
   static const Color deepTeal = Color(0xFF05668D);
+  static const Color deepTeal50 = Color(0x8005668D);
+  static const Color tealGradientStart = Color(0xFF04A597);
+  static const Color tealGradientEnd = Color(0xFF028E91);
+  static const Color tealDark = Color(0xFF008375);
+  static const Color tealBrightGradientStart = Color(0xFF01BF97);
+  static const Color tealBrightGradientEnd = Color(0xFF008D7A);
   static const Color black = Color(0xFF000000);
   static const Color surfaceMuted = Color(0xFFF6F6F6);
   static const Color overlayFadeBlack = Color(0x59000000);
@@ -31,6 +37,8 @@ class AppColors {
   static const Color textPrimary50 = Color(0x800F0400);
   static const Color error = Color(0xFFEF4444);
   static const Color warning = Color(0xFFF59E0B);
+  static const Color logisticsActionActive = Color(0xFFFFD166);
+  static const Color logisticsActionInactive = Color(0xFFD9D9D9);
 }
 
 class AppSpacing {

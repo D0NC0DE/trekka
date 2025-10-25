@@ -9,10 +9,10 @@ import 'package:trekka/app/utils/auth_guard.dart';
 import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/router/route_paths.dart';
+import 'package:trekka/features/home/presentation/viewmodels/home_pin_view_model.dart';
 import 'package:trekka/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:trekka/features/home/presentation/widgets/home_bottom_nav.dart';
 import 'package:trekka/features/home/presentation/widgets/home_pins_layer.dart';
-import 'package:trekka/features/home/presentation/viewmodels/home_pin_view_model.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -46,9 +46,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
       child: Scaffold(
         extendBodyBehindAppBar: true,
-        appBar: HomeAppBar(
-          onNotificationPressed: _handleNotificationTap,
-        ),
+        appBar: HomeAppBar(onNotificationPressed: _handleNotificationTap),
         backgroundColor: Colors.black,
         body: Stack(
           fit: StackFit.expand,
@@ -88,9 +86,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget _buildTabBody(BuildContext context) {
     switch (_currentIndex) {
       case 0:
-        return HomePinsLayer(
-          onPinTap: _handlePinTap,
-        );
+        return HomePinsLayer(onPinTap: _handlePinTap);
       case 1:
         return const _TabPlaceholder(
           title: 'History',

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/utils/input_formatters.dart';
-import 'package:trekka/core/widgets/app_button.dart';
-import 'package:trekka/core/widgets/app_text_field.dart';
+import 'package:trekka/core/widgets/button/app_button.dart';
+import 'package:trekka/core/widgets/input/app_text_field.dart';
 import 'package:trekka/features/auth/presentation/viewmodels/auth_otp_view_model.dart';
 
 class AuthOtpPage extends ConsumerStatefulWidget {

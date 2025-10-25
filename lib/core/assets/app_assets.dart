@@ -45,7 +45,14 @@ class AppAssetIcons {
   static const String x = 'assets/icons/socials/x.png';
 
   // Map Markers
-  static const String riderMarker = 'assets/icons/markers/user_24.png';
+  static const String riderMarker = 'assets/icons/markers/user.png';
+
+  // Action Icons
+  static const String back = 'assets/icons/actions/back.png';
+  static const String journey = 'assets/icons/actions/journey.png';
+  static const String courier = 'assets/icons/actions/courier.png';
+  static const String myLocation = 'assets/icons/actions/my_location.png';
+  static const String search = 'assets/icons/actions/search.png';
 }
 
 @immutable

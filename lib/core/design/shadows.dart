@@ -89,4 +89,13 @@ class AppShadows {
       blurStyle: BlurStyle.inner,
     ),
   ];
+
+  static const List<BoxShadow> floatingButton = <BoxShadow>[
+    BoxShadow(
+      color: Color(0x80000000),
+      offset: Offset(0, 0),
+      blurRadius: 4,
+      spreadRadius: 0,
+    ),
+  ];
 }
