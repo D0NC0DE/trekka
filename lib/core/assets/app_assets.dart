@@ -53,6 +53,7 @@ class AppAssetIcons {
   static const String courier = 'assets/icons/actions/courier.png';
   static const String myLocation = 'assets/icons/actions/my_location.png';
   static const String search = 'assets/icons/actions/search.png';
+  static const String close = 'assets/icons/actions/close.png';
 }
 
 @immutable

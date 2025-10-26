@@ -10,20 +10,24 @@ import 'package:trekka/core/design/tokens.dart';
 class LocationSearchField extends StatelessWidget {
   const LocationSearchField({
     this.controller,
+    this.focusNode,
     this.hintText = 'Where to go?',
     this.onTap,
     this.onChanged,
     this.readOnly = false,
     this.enabled = true,
+    this.autofocus = false,
     super.key,
   });
 
   final TextEditingController? controller;
+  final FocusNode? focusNode;
   final String hintText;
   final VoidCallback? onTap;
   final ValueChanged<String>? onChanged;
   final bool readOnly;
   final bool enabled;
+  final bool autofocus;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +61,8 @@ class LocationSearchField extends StatelessWidget {
                     )
                   : TextField(
                       controller: controller,
+                      focusNode: focusNode,
+                      autofocus: autofocus,
                       onChanged: onChanged,
                       enabled: enabled,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(

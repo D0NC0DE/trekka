@@ -1,26 +1,46 @@
 import 'package:flutter/material.dart';
 
+import 'package:trekka/features/logistics/domain/entities/logistics_stage.dart';
 import 'package:trekka/features/logistics/presentation/widgets/floating_location_button.dart';
 import 'package:trekka/features/logistics/presentation/widgets/logistics_modal.dart';
 
 class LogisticsSheetOverlay extends StatelessWidget {
-  const LogisticsSheetOverlay({required this.onLocationPressed, super.key});
+  const LogisticsSheetOverlay({
+    required this.stage,
+    required this.onLocationPressed,
+    required this.onNext,
+    required this.onBack,
+    required this.onCancel,
+    super.key,
+  });
 
+  final LogisticsStage stage;
   final VoidCallback onLocationPressed;
+  final VoidCallback onNext;
+  final VoidCallback onBack;
+  final VoidCallback onCancel;
 
   @override
   Widget build(BuildContext context) {
+    final bool isCloseButton = stage == LogisticsStage.enterDestination;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
-        // Floating My Location Button (12px above modal)
         Padding(
           padding: const EdgeInsets.only(right: 12, bottom: 12),
-          child: FloatingLocationButton(onPressed: onLocationPressed),
+          child: FloatingLocationButton(
+            onPressed: isCloseButton ? onBack : onLocationPressed,
+            isCloseButton: isCloseButton,
+          ),
         ),
-        // Logistics Modal
-        const LogisticsModal(),
+        LogisticsModal(
+          stage: stage,
+          onNext: onNext,
+          onBack: onBack,
+          onCancel: onCancel,
+        ),
       ],
     );
   }

@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/widgets/button/gradient_back_button.dart';
+import 'package:trekka/features/logistics/domain/entities/logistics_stage.dart';
 import 'package:trekka/features/logistics/presentation/widgets/logistics_sheet_overlay.dart';
 
 class LogisticsPage extends StatefulWidget {
@@ -25,7 +26,7 @@ class _LogisticsPageState extends State<LogisticsPage>
   final CameraPosition _initialCameraPosition = const CameraPosition(
     target: _fallbackCenter,
     zoom: _fallbackZoom,
-    tilt: 180,
+    tilt: 20,
   );
 
   GoogleMapController? _mapController;
@@ -36,6 +37,7 @@ class _LogisticsPageState extends State<LogisticsPage>
   LatLng? _userLocation;
   bool _isLocating = false;
   bool _showBottomSheet = false;
+  LogisticsStage _currentStage = LogisticsStage.initial;
   late final AnimationController _sheetAnimationController;
   late final Animation<Offset> _sheetSlideAnimation;
 
@@ -46,13 +48,13 @@ class _LogisticsPageState extends State<LogisticsPage>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _sheetSlideAnimation = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _sheetAnimationController,
-      curve: Curves.easeIn,
-    ));
+    _sheetSlideAnimation =
+        Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _sheetAnimationController,
+            curve: Curves.easeIn,
+          ),
+        );
     _loadMarkerIcon();
     _loadMapStyles();
     _primeWithLastKnownPosition();
@@ -218,14 +220,67 @@ class _LogisticsPageState extends State<LogisticsPage>
     if (_userLocation != null && _mapController != null) {
       _mapController!.animateCamera(
         CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: _userLocation!,
-            zoom: _userZoom,
-            tilt: 20,
-          ),
+          CameraPosition(target: _userLocation!, zoom: _userZoom, tilt: 20),
         ),
       );
     }
+  }
+
+  void _handleNextStage() {
+    setState(() {
+      switch (_currentStage) {
+        case LogisticsStage.initial:
+          _currentStage = LogisticsStage.enterDestination;
+          break;
+        case LogisticsStage.enterDestination:
+          _currentStage = LogisticsStage.confirmRequest;
+          break;
+        case LogisticsStage.confirmRequest:
+          _currentStage = LogisticsStage.waitingForDriver;
+          break;
+        case LogisticsStage.waitingForDriver:
+          _currentStage = LogisticsStage.driverEnRoute;
+          break;
+        case LogisticsStage.driverEnRoute:
+          _currentStage = LogisticsStage.driverArrived;
+          break;
+        case LogisticsStage.driverArrived:
+          _currentStage = LogisticsStage.inProgress;
+          break;
+        case LogisticsStage.inProgress:
+          _currentStage = LogisticsStage.completed;
+          break;
+        case LogisticsStage.completed:
+          // Reset or close modal
+          _currentStage = LogisticsStage.initial;
+          break;
+      }
+    });
+  }
+
+  void _handleBackStage() {
+    if (_currentStage.canGoBack) {
+      setState(() {
+        switch (_currentStage) {
+          case LogisticsStage.enterDestination:
+            _currentStage = LogisticsStage.initial;
+            break;
+          case LogisticsStage.confirmRequest:
+            _currentStage = LogisticsStage.enterDestination;
+            break;
+          default:
+            // Other stages cannot go back
+            break;
+        }
+      });
+    }
+  }
+
+  void _handleCancelRide() {
+    setState(() {
+      _currentStage = LogisticsStage.initial;
+    });
+    // TODO: Cancel any active ride requests
   }
 
   @override
@@ -236,94 +291,113 @@ class _LogisticsPageState extends State<LogisticsPage>
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light.copyWith(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
-      ),
-      child: Scaffold(
-        backgroundColor: AppColors.midnightGreen,
-        body: Stack(
-          children: <Widget>[
-            GoogleMap(
-              initialCameraPosition: _userLocation != null
-                  ? CameraPosition(target: _userLocation!, zoom: _userZoom, tilt: 20)
-                  : _initialCameraPosition,
-              markers: _buildMarkers(),
-              style: _mapStyle,
-              myLocationEnabled: _userLocation != null,
-              myLocationButtonEnabled: false,
-              zoomControlsEnabled: false,
-              zoomGesturesEnabled: true,
-              scrollGesturesEnabled: true,
-              tiltGesturesEnabled: true,
-              rotateGesturesEnabled: true,
-              mapType: MapType.normal,
-              compassEnabled: false,
-              mapToolbarEnabled: false,
-              onMapCreated: (GoogleMapController controller) {
-                _mapController = controller;
-                if (_userLocation != null) {
-                  controller.animateCamera(
-                    CameraUpdate.newCameraPosition(
-                      CameraPosition(
+    return PopScope(
+      canPop: _currentStage == LogisticsStage.initial,
+      onPopInvokedWithResult: (bool didPop, Object? result) {
+        if (!didPop && _currentStage.canGoBack) {
+          _handleBackStage();
+        }
+      },
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light.copyWith(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
+        child: Scaffold(
+          backgroundColor: AppColors.midnightGreen,
+          resizeToAvoidBottomInset: false,
+          body: Stack(
+            children: <Widget>[
+              GoogleMap(
+                initialCameraPosition: _userLocation != null
+                    ? CameraPosition(
                         target: _userLocation!,
                         zoom: _userZoom,
                         tilt: 20,
+                      )
+                    : _initialCameraPosition,
+                markers: _buildMarkers(),
+                style: _mapStyle,
+                myLocationEnabled: _userLocation != null,
+                myLocationButtonEnabled: false,
+                zoomControlsEnabled: false,
+                zoomGesturesEnabled: true,
+                scrollGesturesEnabled: true,
+                tiltGesturesEnabled: true,
+                rotateGesturesEnabled: true,
+                mapType: MapType.normal,
+                compassEnabled: false,
+                mapToolbarEnabled: false,
+                onMapCreated: (GoogleMapController controller) {
+                  _mapController = controller;
+                  if (_userLocation != null) {
+                    controller.animateCamera(
+                      CameraUpdate.newCameraPosition(
+                        CameraPosition(
+                          target: _userLocation!,
+                          zoom: _userZoom,
+                          tilt: 20,
+                        ),
+                      ),
+                    );
+                  }
+                  // Show bottom sheet when map is created
+                  if (!_showBottomSheet) {
+                    setState(() => _showBottomSheet = true);
+                    _sheetAnimationController.forward();
+                  }
+                },
+              ),
+              if (_isLocating)
+                SafeArea(
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        top: AppSpacing.lg,
+                        left: AppSpacing.lg,
+                        right: AppSpacing.lg,
+                      ),
+                      // child: const _LocatingBanner(),
+                    ),
+                  ),
+                ),
+              // Hide back button in enterDestination stage
+              if (_currentStage != LogisticsStage.enterDestination)
+                SafeArea(
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                        vertical: AppSpacing.sm,
+                      ),
+                      child: GradientBackButton(
+                        onPressed: () => Navigator.of(context).maybePop(),
                       ),
                     ),
-                  );
-                }
-                // Show bottom sheet when map is created
-                if (!_showBottomSheet) {
-                  setState(() => _showBottomSheet = true);
-                  _sheetAnimationController.forward();
-                }
-              },
-            ),
-            if (_isLocating)
-              SafeArea(
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      top: AppSpacing.lg,
-                      left: AppSpacing.lg,
-                      right: AppSpacing.lg,
+                  ),
+                ),
+              // Bottom sheet overlay with floating button
+              if (_showBottomSheet)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: SlideTransition(
+                    position: _sheetSlideAnimation,
+                    child: LogisticsSheetOverlay(
+                      stage: _currentStage,
+                      onLocationPressed: _handleLocationButtonPressed,
+                      onNext: _handleNextStage,
+                      onBack: _handleBackStage,
+                      onCancel: _handleCancelRide,
                     ),
-                    // child: const _LocatingBanner(),
                   ),
                 ),
-              ),
-            SafeArea(
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.sm,
-                  ),
-                  child: GradientBackButton(
-                    onPressed: () => Navigator.of(context).maybePop(),
-                  ),
-                ),
-              ),
-            ),
-            // Bottom sheet overlay with floating button
-            if (_showBottomSheet)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: SlideTransition(
-                  position: _sheetSlideAnimation,
-                  child: LogisticsSheetOverlay(
-                    onLocationPressed: _handleLocationButtonPressed,
-                  ),
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
