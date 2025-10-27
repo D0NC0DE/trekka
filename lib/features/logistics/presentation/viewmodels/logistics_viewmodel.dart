@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:trekka/features/logistics/data/models/place_autocomplete_prediction.dart';
 import 'package:trekka/features/logistics/domain/repositories/geocoding_repository.dart';
+import 'package:trekka/features/logistics/domain/repositories/place_details_repository.dart';
 import 'package:trekka/features/logistics/domain/repositories/places_autocomplete_repository.dart';
 import 'package:trekka/features/logistics/presentation/providers/geocoding_provider.dart';
 import 'package:trekka/features/logistics/presentation/viewmodels/logistics_state.dart';
@@ -12,11 +13,13 @@ import 'package:trekka/features/logistics/presentation/viewmodels/logistics_stat
 class LogisticsViewModel extends Notifier<LogisticsState> {
   late final GeocodingRepository _geocodingRepository;
   late final PlacesAutocompleteRepository _placesRepository;
+  late final PlaceDetailsRepository _placeDetailsRepository;
 
   @override
   LogisticsState build() {
     _geocodingRepository = ref.read(geocodingRepositoryProvider);
     _placesRepository = ref.read(placesAutocompleteRepositoryProvider);
+    _placeDetailsRepository = ref.read(placeDetailsRepositoryProvider);
     return const LogisticsState();
   }
 
@@ -126,9 +129,39 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
     state = state.copyWith(predictions: [], isFetchingPredictions: false);
   }
 
-  void selectPrediction(PlaceAutocompletePrediction prediction) {
-    // TODO: Fetch place details to get LatLng
-    debugPrint('Selected prediction: ${prediction.placeId}');
-    clearPredictions();
+  Future<void> selectPrediction(PlaceAutocompletePrediction prediction) async {
+    LatLng? resolvedLocation;
+    String resolvedAddress = prediction.fullText;
+
+    try {
+      final details = await _placeDetailsRepository.getPlaceDetails(
+        prediction.placeId,
+      );
+
+      if (details != null) {
+        resolvedLocation = details.location ?? resolvedLocation;
+        resolvedAddress = details.formattedAddress ?? resolvedAddress;
+      }
+
+      if (resolvedLocation == null) {
+        final geocode = await _geocodingRepository.geocodeAddress(
+          prediction.fullText,
+        );
+        if (geocode != null) {
+          resolvedLocation = geocode.location;
+          resolvedAddress = geocode.formattedAddress;
+        }
+      }
+
+      if (resolvedLocation != null) {
+        setDestination(resolvedLocation, resolvedAddress);
+      } else {
+        state = state.copyWith(destinationAddress: resolvedAddress);
+      }
+    } catch (error) {
+      debugPrint('Failed to select prediction: $error');
+    } finally {
+      clearPredictions();
+    }
   }
 }

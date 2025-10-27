@@ -10,6 +10,7 @@ import 'package:trekka/core/widgets/connector/route_connector.dart';
 import 'package:trekka/core/widgets/input/location_search_field.dart';
 import 'package:trekka/features/logistics/presentation/providers/logistics_provider.dart';
 import 'package:trekka/features/logistics/presentation/widgets/place_suggestion.dart';
+import 'package:trekka/features/logistics/utils/address_formatter.dart';
 
 /// Content for the enter destination stage
 class EnterDestinationContent extends ConsumerStatefulWidget {
@@ -59,19 +60,11 @@ class _EnterDestinationContentState
     });
   }
 
-  String _shortenAddress(String address) {
-    final parts = address.split(',');
-    if (parts.length > 2) {
-      return '${parts[0]}, ${parts[1].trim()}';
-    }
-    return address;
-  }
-
   @override
   Widget build(BuildContext context) {
     final logisticsState = ref.watch(logisticsViewModelProvider);
     final displayText = logisticsState.userAddress != null
-        ? _shortenAddress(logisticsState.userAddress!)
+        ? AddressFormatter.shortenAddress(logisticsState.userAddress!)
         : 'Your location';
 
     return Column(
@@ -152,7 +145,12 @@ class _EnterDestinationContentState
         ),
 
         if (logisticsState.predictions.isNotEmpty) ...[
-          PlaceSuggestion(logisticsState: logisticsState, controller: _controller, ref: ref),
+          PlaceSuggestion(
+            logisticsState: logisticsState,
+            controller: _controller,
+            ref: ref,
+            onPredictionSelected: widget.onNext,
+          ),
           const SizedBox(height: AppSpacing.sm),
         ],
       ],

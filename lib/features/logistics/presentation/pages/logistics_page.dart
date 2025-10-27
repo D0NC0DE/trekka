@@ -8,9 +8,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/widgets/button/gradient_back_button.dart';
+import 'package:trekka/core/widgets/button/icon_text_button.dart';
 import 'package:trekka/features/logistics/domain/entities/logistics_stage.dart';
 import 'package:trekka/features/logistics/presentation/providers/logistics_provider.dart';
 import 'package:trekka/features/logistics/presentation/widgets/logistics_sheet_overlay.dart';
+import 'package:trekka/core/widgets/sheet/gradient_overlay_modal.dart';
+import 'package:trekka/features/logistics/utils/address_formatter.dart';
 
 class LogisticsPage extends ConsumerStatefulWidget {
   const LogisticsPage({super.key});
@@ -229,6 +232,19 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
     };
   }
 
+  // String _formatAddress(String? address, String fallback) {
+  //   if (address == null || address.trim().isEmpty) {
+  //     return fallback;
+  //   }
+
+  //   final parts = address.split(',');
+  //   if (parts.length > 2) {
+  //     return '${parts[0]}, ${parts[1].trim()}';
+  //   }
+
+  //   return address.trim();
+  // }
+
   // bool _isDarkMode(BuildContext context) {
   //   final MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
   //   if (mediaQuery != null) {
@@ -265,8 +281,9 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
       }
 
       final bool isLastStage = currentIndex >= _stageFlow.length - 1;
-      _currentStage =
-          isLastStage ? LogisticsStage.initial : _stageFlow[currentIndex + 1];
+      _currentStage = isLastStage
+          ? LogisticsStage.initial
+          : _stageFlow[currentIndex + 1];
     });
   }
 
@@ -296,6 +313,22 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
 
   @override
   Widget build(BuildContext context) {
+    final logisticsState = ref.watch(logisticsViewModelProvider);
+    final pickupSummary = AddressFormatter.formatWithFallback(
+      logisticsState.userAddress,
+      'Fetching pickup...',
+    );
+    final destinationSummary = AddressFormatter.formatWithFallback(
+      logisticsState.destinationAddress,
+      'Fetching destination...',
+    );
+    final bool shouldShowBackButton =
+        _currentStage != LogisticsStage.enterDestination &&
+        _currentStage != LogisticsStage.initial &&
+        _currentStage != LogisticsStage.confirmPickupLocation;
+    final bool shouldShowFloatingButton =
+        _currentStage != LogisticsStage.confirmPickupLocation;
+
     return PopScope(
       canPop: _currentStage == LogisticsStage.initial,
       onPopInvokedWithResult: (bool didPop, Object? result) {
@@ -356,8 +389,8 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
                     ),
                   ),
                 ),
-              // Hide back button in enterDestination stage
-              if (_currentStage != LogisticsStage.enterDestination)
+              // Hide back button in enterDestination and confirmPickupLocation
+              if (shouldShowBackButton)
                 SafeArea(
                   child: Align(
                     alignment: Alignment.topLeft,
@@ -370,6 +403,29 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
                         onPressed: () => Navigator.of(context).maybePop(),
                       ),
                     ),
+                  ),
+                ),
+              if (_currentStage == LogisticsStage.confirmPickupLocation)
+                GradientOverlayModal(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      IconTextButton(
+                        text: pickupSummary,
+                        leadingIcon: AppAssetIcons.riderMarker,
+                        onPressed: null,
+                        textColor: AppColors.textPrimary,
+                      ),
+                      const SizedBox(height: AppSpacing.smLg),
+                      IconTextButton(
+                        text: destinationSummary,
+                        leadingIcon: AppAssetIcons.destinationInfo,
+                        trailingIcon: AppAssetIcons.stop,
+                        onPressed: null,
+                        textColor: AppColors.textPrimary,
+                      ),
+                    ],
                   ),
                 ),
               // Bottom sheet overlay with floating button
@@ -386,6 +442,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
                       onNext: _handleNextStage,
                       onBack: _handleBackStage,
                       onCancel: _handleCancelRide,
+                      showFloatingButton: shouldShowFloatingButton,
                     ),
                   ),
                 ),

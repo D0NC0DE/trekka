@@ -11,6 +11,7 @@ class LogisticsSheetOverlay extends StatelessWidget {
     required this.onNext,
     required this.onBack,
     required this.onCancel,
+    this.showFloatingButton = true,
     super.key,
   });
 
@@ -19,6 +20,7 @@ class LogisticsSheetOverlay extends StatelessWidget {
   final VoidCallback onNext;
   final VoidCallback onBack;
   final VoidCallback onCancel;
+  final bool showFloatingButton;
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +30,14 @@ class LogisticsSheetOverlay extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(right: 12, bottom: 12),
-          child: FloatingLocationButton(
-            onPressed: isCloseButton ? onBack : onLocationPressed,
-            isCloseButton: isCloseButton,
+        if (showFloatingButton)
+          Padding(
+            padding: const EdgeInsets.only(right: 12, bottom: 12),
+            child: FloatingLocationButton(
+              onPressed: isCloseButton ? onBack : onLocationPressed,
+              isCloseButton: isCloseButton,
+            ),
           ),
-        ),
         LogisticsModal(
           stage: stage,
           onNext: onNext,

@@ -46,17 +46,18 @@ class IconTextButton extends StatelessWidget {
                 fontWeight: AppFontWeights.semiBold,
                 color: txtColor,
               ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
             ),
           ),
 
-          //TODO: check if this is needed
-          // Optional trailing icon (should be 32x32... )
           if (trailingIcon != null) ...<Widget>[
             const SizedBox(width: AppSpacing.smLg),
             Image.asset(
               trailingIcon!,
-              width: 24,
-              height: 24,
+              width: 32,
+              height: 32,
               fit: BoxFit.contain,
             ),
           ],

@@ -17,7 +17,7 @@ class GradientOverlayModal extends StatelessWidget {
     return SafeArea(
       top: true,
       bottom: false,
-      minimum: EdgeInsets.only(top: AppSpacing.sm),
+      minimum: EdgeInsets.only(top: AppSpacing.sm, left: AppSpacing.smLg, right: AppSpacing.smLg),
       child: Align(
         alignment: Alignment.topCenter,
         child: Material(

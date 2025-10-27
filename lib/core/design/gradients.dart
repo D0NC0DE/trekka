@@ -33,6 +33,15 @@ class AppGradients {
     ],
   );
 
+  static const Gradient logisticsSearchIcon = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[
+      AppColors.logisticsIconStart,
+      AppColors.logisticsIconEnd,
+    ],
+  );
+
   static const Gradient backButton = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,

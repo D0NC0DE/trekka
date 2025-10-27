@@ -10,11 +10,13 @@ class PlaceSuggestion extends StatelessWidget {
     required this.logisticsState,
     required TextEditingController controller,
     required this.ref,
+    required this.onPredictionSelected,
   }) : _controller = controller;
 
   final LogisticsState logisticsState;
   final TextEditingController _controller;
   final WidgetRef ref;
+  final VoidCallback onPredictionSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +31,17 @@ class PlaceSuggestion extends StatelessWidget {
         itemBuilder: (context, index) {
           final prediction = logisticsState.predictions[index];
           final isLast = index == logisticsState.predictions.length - 1;
-    
+
           return Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () {
+              onTap: () async {
                 _controller.text = prediction.fullText;
-                ref
+                FocusScope.of(context).unfocus();
+                await ref
                     .read(logisticsViewModelProvider.notifier)
                     .selectPrediction(prediction);
+                onPredictionSelected();
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(
@@ -76,9 +80,7 @@ class PlaceSuggestion extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   prediction.mainText,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge
+                                  style: Theme.of(context).textTheme.bodyLarge
                                       ?.copyWith(
                                         fontWeight: AppFontWeights.semiBold,
                                         color: AppColors.white,
@@ -87,9 +89,7 @@ class PlaceSuggestion extends StatelessWidget {
                               ),
                               Text(
                                 prediction.formattedDistance ?? '',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
+                                style: Theme.of(context).textTheme.labelSmall
                                     ?.copyWith(
                                       color: AppColors.logisticsActionInactive,
                                       fontWeight: AppFontWeights.medium,
@@ -100,9 +100,7 @@ class PlaceSuggestion extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(
                             prediction.secondaryText,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
+                            style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   color: AppColors.logisticsActionInactive,
                                 ),

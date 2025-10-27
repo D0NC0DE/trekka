@@ -40,6 +40,8 @@ class AppColors {
   static const Color warning = Color(0xFFF59E0B);
   static const Color logisticsActionActive = Color(0xFFFFD166);
   static const Color logisticsActionInactive = Color(0xFFD9D9D9);
+  static const Color logisticsIconStart = Color(0xFF02BF98);
+  static const Color logisticsIconEnd = Color(0xFF018979);
 }
 
 class AppSpacing {
