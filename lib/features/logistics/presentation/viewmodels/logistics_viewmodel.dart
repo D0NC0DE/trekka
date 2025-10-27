@@ -109,8 +109,6 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
       final predictions = await _placesRepository.getPlacePredictions(
         input: input,
         origin: state.userLocation,
-        locationCenter: state.userLocation,
-        radiusMeters: 50000.0,
         regionCode: regionCode,
       );
 

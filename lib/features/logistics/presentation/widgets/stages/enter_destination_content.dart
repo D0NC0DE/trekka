@@ -107,53 +107,95 @@ class _EnterDestinationContentState
 
         // Autocomplete predictions
         if (logisticsState.predictions.isNotEmpty)
-          Container(
-            constraints: const BoxConstraints(maxHeight: 200),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(AppRadius.sm),
-            ),
-            child: ListView.separated(
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 220),
+            child: ListView.builder(
               shrinkWrap: true,
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
               itemCount: logisticsState.predictions.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final prediction = logisticsState.predictions[index];
-                return ListTile(
-                  leading: Icon(
-                    Icons.location_on,
-                    color: AppColors.textPrimary50,
-                  ),
-                  title: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          prediction.mainText,
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(fontWeight: AppFontWeights.semiBold),
+                final isLast = index == logisticsState.predictions.length - 1;
+
+                return Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      _controller.text = prediction.fullText;
+                      ref
+                          .read(logisticsViewModelProvider.notifier)
+                          .selectPrediction(prediction);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.sm,
+                        horizontal: AppSpacing.sm,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: isLast
+                                ? Colors.transparent
+                                : const Color(0x40D9D9D9),
+                          ),
                         ),
                       ),
-                      if (prediction.formattedDistance != null)
-                        Text(
-                          prediction.formattedDistance!,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: AppColors.textPrimary50),
-                        ),
-                    ],
-                  ),
-                  subtitle: Text(
-                    prediction.secondaryText,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textPrimary50,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Icon(
+                              Icons.location_on_outlined,
+                              size: 20,
+                              color: AppColors.logisticsActionInactive,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        prediction.mainText,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
+                                              fontWeight: AppFontWeights.semiBold,
+                                              color: AppColors.white,
+                                            ),
+                                      ),
+                                    ),
+                                    Text(
+                                      prediction.formattedDistance ?? '',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall
+                                          ?.copyWith(
+                                            color: AppColors.logisticsActionInactive,
+                                            fontWeight: AppFontWeights.medium,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  prediction.secondaryText,
+                                  style:
+                                      Theme.of(context).textTheme.bodySmall?.copyWith(
+                                            color: AppColors.logisticsActionInactive,
+                                          ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  onTap: () {
-                    _controller.text = prediction.fullText;
-                    ref
-                        .read(logisticsViewModelProvider.notifier)
-                        .selectPrediction(prediction);
-                  },
                 );
               },
             ),

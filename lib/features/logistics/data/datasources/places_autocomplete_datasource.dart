@@ -21,8 +21,6 @@ class PlacesAutocompleteDatasource {
   Future<List<PlaceAutocompletePrediction>> getPlacePredictions({
     required String input,
     LatLng? origin,
-    LatLng? locationCenter,
-    double radiusMeters = 50000.0,
     String? regionCode,
   }) async {
     if (_apiKey.isEmpty) {
@@ -43,19 +41,6 @@ class PlacesAutocompleteDatasource {
         requestBody['origin'] = {
           'latitude': origin.latitude,
           'longitude': origin.longitude,
-        };
-      }
-
-      // Add location restriction (circle) if center provided
-      if (locationCenter != null) {
-        requestBody['locationRestriction'] = {
-          'circle': {
-            'center': {
-              'latitude': locationCenter.latitude,
-              'longitude': locationCenter.longitude,
-            },
-            'radius': radiusMeters,
-          },
         };
       }
 
@@ -105,4 +90,3 @@ class PlacesAutocompleteDatasource {
     }
   }
 }
-

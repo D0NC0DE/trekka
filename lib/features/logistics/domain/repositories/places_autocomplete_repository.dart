@@ -7,8 +7,6 @@ abstract class PlacesAutocompleteRepository {
   Future<List<PlaceAutocompletePrediction>> getPlacePredictions({
     required String input,
     LatLng? origin,
-    LatLng? locationCenter,
-    double radiusMeters = 50000.0,
     String? regionCode,
   });
 }

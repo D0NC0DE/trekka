@@ -14,16 +14,24 @@ class PlacesAutocompleteRepositoryImpl implements PlacesAutocompleteRepository {
   Future<List<PlaceAutocompletePrediction>> getPlacePredictions({
     required String input,
     LatLng? origin,
-    LatLng? locationCenter,
-    double radiusMeters = 50000.0,
     String? regionCode,
   }) {
+    final requestRegionCode = regionCode?.toUpperCase();
+
     return datasource.getPlacePredictions(
       input: input,
       origin: origin,
-      locationCenter: locationCenter,
-      radiusMeters: radiusMeters,
-      regionCode: regionCode,
-    );
+      regionCode: requestRegionCode,
+    ).then((predictions) {
+      final sortedPredictions = [...predictions]
+        ..sort(
+          (a, b) {
+            final distanceA = a.distanceMeters ?? 0;
+            final distanceB = b.distanceMeters ?? 0;
+            return distanceA.compareTo(distanceB);
+          },
+        );
+      return sortedPredictions;
+    });
   }
 }

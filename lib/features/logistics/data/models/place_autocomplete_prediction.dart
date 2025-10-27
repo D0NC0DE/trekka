@@ -44,14 +44,32 @@ class PlaceAutocompletePrediction extends Equatable {
 
   /// Format distance for display
   String? get formattedDistance {
-    if (distanceMeters == null) return null;
+    final distance = distanceMeters;
 
-    if (distanceMeters! < 1000) {
-      return '$distanceMeters m';
-    } else {
-      final km = (distanceMeters! / 1000).toStringAsFixed(1);
-      return '$km km';
+    if (distance == null) {
+      return '<1 m';
     }
+
+    if (distance <= 0) {
+      return '<1 m';
+    }
+
+    if (distance >= 1000) {
+      final kmValue = distance / 1000;
+      final kmLabel =
+          kmValue >= 10 ? kmValue.toStringAsFixed(0) : kmValue.toStringAsFixed(1);
+      return '$kmLabel km';
+    }
+
+    if (distance >= 100) {
+      return '$distance m';
+    }
+
+    final feet = (distance * 3.28084).round();
+    if (feet <= 3) {
+      return '<1 m';
+    }
+    return '$feet ft';
   }
 
   @override
