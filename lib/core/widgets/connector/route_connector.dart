@@ -15,6 +15,7 @@ class RouteConnector extends StatelessWidget {
     this.lineWidth = 2,
     this.dotSize = 8,
     this.squareBottomDot = true,
+    this.position = Alignment.center,
     super.key,
   });
 
@@ -24,6 +25,7 @@ class RouteConnector extends StatelessWidget {
   final double lineWidth;
   final double dotSize;
   final bool squareBottomDot;
+  final AlignmentGeometry position;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +35,8 @@ class RouteConnector extends StatelessWidget {
 
     return SizedBox(
       height: connectorHeight,
-      child: Center(
+      child: Align(
+        alignment: position,
         child: SizedBox(
           width: lineWidth + dotSize,
           child: Column(

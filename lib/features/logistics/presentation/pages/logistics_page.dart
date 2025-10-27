@@ -14,6 +14,7 @@ import 'package:trekka/features/logistics/presentation/providers/logistics_provi
 import 'package:trekka/features/logistics/presentation/widgets/logistics_sheet_overlay.dart';
 import 'package:trekka/core/widgets/sheet/gradient_overlay_modal.dart';
 import 'package:trekka/features/logistics/utils/address_formatter.dart';
+import 'package:trekka/features/logistics/presentation/viewmodels/logistics_state.dart';
 
 class LogisticsPage extends ConsumerStatefulWidget {
   const LogisticsPage({super.key});
@@ -219,15 +220,18 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
     }
   }
 
-  Set<Marker> _buildMarkers() {
-    if (_userLocation == null) return <Marker>{};
+  Set<Marker> _buildMarkers(LogisticsState logisticsState) {
+    final LatLng? pickupLocation = logisticsState.userLocation ?? _userLocation;
+    if (pickupLocation == null) {
+      return <Marker>{};
+    }
 
     return <Marker>{
       Marker(
         markerId: const MarkerId('user-location'),
-        position: _userLocation!,
+        position: pickupLocation,
         icon: _riderIcon ?? BitmapDescriptor.defaultMarker,
-        infoWindow: const InfoWindow(title: 'Your location'),
+        infoWindow: const InfoWindow(title: 'Pickup location'),
       ),
     };
   }
@@ -276,8 +280,24 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
     setState(() {
       if (_currentStage == LogisticsStage.enterPickupLocation) {
         _currentStage = LogisticsStage.confirmPickupLocation;
+        final pickupLocation = ref
+            .read(logisticsViewModelProvider)
+            .userLocation;
+        if (_mapController != null && pickupLocation != null) {
+          _mapController!.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(target: pickupLocation, zoom: _userZoom, tilt: 20),
+            ),
+          );
+        }
         return;
       }
+
+      if (_currentStage == LogisticsStage.confirmPickupLocation) {
+        _currentStage = LogisticsStage.confirmRequest;
+        return;
+      }
+
       final int currentIndex = _stageFlow.indexOf(_currentStage);
       if (currentIndex == -1) {
         _currentStage = LogisticsStage.initial;
@@ -297,10 +317,22 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
     setState(() {
       if (_currentStage == LogisticsStage.confirmPickupLocation) {
         _currentStage = LogisticsStage.initial;
+        if (_mapController != null && _userLocation != null) {
+          _mapController!.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(target: _userLocation!, zoom: _userZoom, tilt: 20),
+            ),
+          );
+        }
         return;
       }
 
       if (_currentStage == LogisticsStage.enterPickupLocation) {
+        _currentStage = LogisticsStage.confirmPickupLocation;
+        return;
+      }
+
+      if (_currentStage == LogisticsStage.confirmRequest) {
         _currentStage = LogisticsStage.confirmPickupLocation;
         return;
       }
@@ -311,10 +343,19 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
       }
     });
   }
+
   void _handleCancelRide() {
     setState(() {
       _currentStage = LogisticsStage.initial;
     });
+    final origin = ref.read(logisticsViewModelProvider).userLocation;
+    if (_mapController != null && origin != null) {
+      _mapController!.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(target: origin, zoom: _userZoom, tilt: 20),
+        ),
+      );
+    }
     // TODO: Cancel any active ride requests
   }
 
@@ -347,7 +388,8 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
         _currentStage != LogisticsStage.confirmPickupLocation &&
         _currentStage != LogisticsStage.enterPickupLocation;
     final bool shouldShowFloatingButton =
-        _currentStage != LogisticsStage.confirmPickupLocation;
+        _currentStage != LogisticsStage.confirmPickupLocation &&
+        _currentStage != LogisticsStage.confirmRequest;
 
     return PopScope(
       canPop: _currentStage == LogisticsStage.initial,
@@ -375,7 +417,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
                         tilt: 20,
                       )
                     : _initialCameraPosition,
-                markers: _buildMarkers(),
+                markers: _buildMarkers(logisticsState),
                 // style: _mapStyle, // Temporarily disabled for performance
                 myLocationEnabled: true,
                 myLocationButtonEnabled: false,

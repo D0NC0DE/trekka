@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:trekka/features/logistics/domain/entities/logistics_stage.dart';
 import 'package:trekka/features/logistics/presentation/widgets/stages/confirm_pickup_content.dart';
 import 'package:trekka/features/logistics/presentation/widgets/stages/enter_destination_content.dart';
-import 'package:trekka/features/logistics/presentation/widgets/stages/enter_pickup_location_content.dart';
+import 'package:trekka/features/logistics/presentation/widgets/stages/enter_pickup_content.dart';
+import 'package:trekka/features/logistics/presentation/widgets/stages/confirm_request_content.dart';
 import 'package:trekka/features/logistics/presentation/widgets/stages/initial_content.dart';
 // TODO: Import other stage content widgets
 
@@ -40,9 +41,7 @@ class LogisticsContentFactory {
         );
 
       case LogisticsStage.confirmRequest:
-        return const Center(
-          child: Text('Confirm Request Stage - TODO'),
-        );
+        return const ConfirmRequestContent();
 
       case LogisticsStage.lookingForDriver:
         return const Center(

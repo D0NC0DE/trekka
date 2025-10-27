@@ -101,9 +101,6 @@ class IconTextButton extends StatelessWidget {
     //                 ),
     //               ),
     //             ),
-
-    //             //TODO: check if this is needed
-    //             // Optional trailing icon (should be 32x32... )
     //             if (trailingIcon != null) ...<Widget>[
     //               const SizedBox(width: AppSpacing.smLg),
     //               Image.asset(

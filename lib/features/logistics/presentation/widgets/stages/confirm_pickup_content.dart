@@ -51,7 +51,7 @@ class ConfirmPickupLocationContent extends ConsumerWidget {
           timeValue: _resolveDurationDisplay(logisticsState),
         ),
         const SizedBox(height: AppSpacing.lg),
-        GradientActionButton(label: 'Confirm pickup', onTap: onConfirm),
+        GradientActionButton(label: 'Confirm current location', onTap: onConfirm),
       ],
     );
   }
