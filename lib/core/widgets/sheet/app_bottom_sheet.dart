@@ -31,9 +31,7 @@ class AppBottomSheet {
           constraints: BoxConstraints(
             maxHeight: maxHeight,
           ),
-          child: IntrinsicHeight(
-            child: child,
-          ),
+          child: child,
         );
       },
     );

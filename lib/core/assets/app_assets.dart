@@ -21,7 +21,7 @@ class AppAssetIcons {
 
   // Home Action Icons
   static const String pinpoint = 'assets/icons/pinpoint.png';
-  
+
   static const String courierPin = 'assets/icons/pins/courier.png';
   static const String hailingPin = 'assets/icons/pins/hailing.png';
   static const String marketplacePin = 'assets/icons/pins/marketplace.png';
@@ -46,6 +46,8 @@ class AppAssetIcons {
 
   // Map Markers
   static const String riderMarker = 'assets/icons/markers/user.png';
+  static const String destinationMarker =
+      'assets/icons/markers/destination.png';
 
   // Action Icons
   static const String back = 'assets/icons/actions/back.png';
@@ -56,7 +58,14 @@ class AppAssetIcons {
   static const String close = 'assets/icons/actions/close.png';
   static const String selectOnMap = 'assets/icons/actions/on_map.png';
   static const String stop = 'assets/icons/actions/stop.png';
+  static const String increase = 'assets/icons/actions/increase.png';
+  static const String reduce = 'assets/icons/actions/reduce.png';
+  static const String edit = 'assets/icons/actions/edit.png';
+
+  // Other Icons
   static const String destinationInfo = 'assets/icons/destination.png';
+  static const String ride = 'assets/icons/ride.png';
+  static const String seat = 'assets/icons/seat.png';
 }
 
 @immutable

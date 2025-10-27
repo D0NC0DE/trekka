@@ -22,29 +22,26 @@ class GradientIconButton extends StatelessWidget {
   final double iconWidth;
   final double iconHeight;
   final VoidCallback? onTap;
-  
+
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: Container(
-          width: width,
-          height: height,
-          decoration: BoxDecoration(
-            gradient: AppGradients.logisticsSearchIcon,
-            borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
-          ),
-          alignment: Alignment.center,
-          child: Image.asset(
-            iconPath,
-            width: iconWidth,
-            height: iconHeight,
-            fit: BoxFit.contain,
-            color: AppColors.white,
-          ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(borderRadius),
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          gradient: AppGradients.logisticsSearchIcon,
+          borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+        ),
+        alignment: Alignment.center,
+        child: Image.asset(
+          iconPath,
+          width: iconWidth,
+          height: iconHeight,
+          fit: BoxFit.contain,
+          color: AppColors.white,
         ),
       ),
     );

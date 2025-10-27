@@ -34,6 +34,8 @@ class AppColors {
   static const Color transparentGraphite = Color(0x00666666);
   static const Color midnightGreen = Color(0xFF000A09);
   static const Color shadowRouteConnector = Color(0x66919191);
+  static const Color reduceActionBackground = Color(0xFFE4FFFF);
+  static const Color reduceActionShadow = Color(0x40000000);
   static const Color textPrimary = Color(0xE50F0400);
   static const Color textPrimary50 = Color(0x800F0400);
   static const Color error = Color(0xFFEF4444);
