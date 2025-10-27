@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:trekka/core/design/gradients.dart';
 import 'package:trekka/core/design/tokens.dart';
 
-/// Reusable overlay modal with logistics gradient styling.
-class LogisticsOverlayModal extends StatelessWidget {
-  const LogisticsOverlayModal({
+/// Reusable overlay modal with gradient styling.
+class GradientOverlayModal extends StatelessWidget {
+  const GradientOverlayModal({
     required this.child,
     super.key,
   });
