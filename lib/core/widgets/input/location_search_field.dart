@@ -48,7 +48,7 @@ class LocationSearchField extends StatelessWidget {
               height: 24,
               fit: BoxFit.contain,
             ),
-            const SizedBox(width: AppSpacing.md),
+            const SizedBox(width: 6),
             Expanded(
               child: readOnly
                   ? Text(
@@ -68,7 +68,7 @@ class LocationSearchField extends StatelessWidget {
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         height: 1.25,
                         fontWeight: AppFontWeights.semiBold,
-                        color: AppColors.textPrimary,
+                        color: AppColors.textPrimary50,
                       ),
                       decoration: InputDecoration(
                         hintText: hintText,

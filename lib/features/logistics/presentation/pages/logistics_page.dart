@@ -43,6 +43,19 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
   LogisticsStage _currentStage = LogisticsStage.initial;
   late final AnimationController _sheetAnimationController;
   late final Animation<Offset> _sheetSlideAnimation;
+  static const List<LogisticsStage> _stageFlow = <LogisticsStage>[
+    LogisticsStage.initial,
+    LogisticsStage.enterDestination,
+    LogisticsStage.confirmPickupLocation,
+    LogisticsStage.enterPickupLocation,
+    LogisticsStage.confirmRequest,
+    LogisticsStage.lookingForDriver,
+    LogisticsStage.waitingForDriver,
+    LogisticsStage.driverArrived,
+    LogisticsStage.inProgress,
+    LogisticsStage.complete,
+    LogisticsStage.review,
+  ];
 
   @override
   void initState() {
@@ -245,49 +258,24 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
 
   void _handleNextStage() {
     setState(() {
-      switch (_currentStage) {
-        case LogisticsStage.initial:
-          _currentStage = LogisticsStage.enterDestination;
-          break;
-        case LogisticsStage.enterDestination:
-          _currentStage = LogisticsStage.confirmRequest;
-          break;
-        case LogisticsStage.confirmRequest:
-          _currentStage = LogisticsStage.waitingForDriver;
-          break;
-        case LogisticsStage.waitingForDriver:
-          _currentStage = LogisticsStage.driverEnRoute;
-          break;
-        case LogisticsStage.driverEnRoute:
-          _currentStage = LogisticsStage.driverArrived;
-          break;
-        case LogisticsStage.driverArrived:
-          _currentStage = LogisticsStage.inProgress;
-          break;
-        case LogisticsStage.inProgress:
-          _currentStage = LogisticsStage.completed;
-          break;
-        case LogisticsStage.completed:
-          // Reset or close modal
-          _currentStage = LogisticsStage.initial;
-          break;
+      final int currentIndex = _stageFlow.indexOf(_currentStage);
+      if (currentIndex == -1) {
+        _currentStage = LogisticsStage.initial;
+        return;
       }
+
+      final bool isLastStage = currentIndex >= _stageFlow.length - 1;
+      _currentStage =
+          isLastStage ? LogisticsStage.initial : _stageFlow[currentIndex + 1];
     });
   }
 
   void _handleBackStage() {
     if (_currentStage.canGoBack) {
       setState(() {
-        switch (_currentStage) {
-          case LogisticsStage.enterDestination:
-            _currentStage = LogisticsStage.initial;
-            break;
-          case LogisticsStage.confirmRequest:
-            _currentStage = LogisticsStage.enterDestination;
-            break;
-          default:
-            // Other stages cannot go back
-            break;
+        final int currentIndex = _stageFlow.indexOf(_currentStage);
+        if (currentIndex > 0) {
+          _currentStage = _stageFlow[currentIndex - 1];
         }
       });
     }

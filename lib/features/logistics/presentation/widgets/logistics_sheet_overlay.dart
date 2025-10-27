@@ -22,7 +22,7 @@ class LogisticsSheetOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isCloseButton = stage == LogisticsStage.enterDestination;
+    final bool isCloseButton = stage.canGoBack;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

@@ -55,7 +55,7 @@ class IconTextButton extends StatelessWidget {
                   height: 24,
                   fit: BoxFit.contain,
                 ),
-                const SizedBox(width: AppSpacing.md),
+                const SizedBox(width: AppSpacing.sm),
                 
                 // Text
                 Expanded(

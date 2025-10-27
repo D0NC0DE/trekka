@@ -6,14 +6,20 @@ enum LogisticsStage {
   /// Entering destination in search field
   enterDestination,
 
+  /// Confirm automatically detected pickup details
+  confirmPickupLocation,
+
+  /// Manually enter pickup details if auto-detected option is unsuitable
+  enterPickupLocation,
+
   /// Confirming ride details and requesting
   confirmRequest,
 
+  /// Searching for available drivers
+  lookingForDriver,
+
   /// Waiting for driver to accept
   waitingForDriver,
-
-  /// Driver accepted, on the way to pickup
-  driverEnRoute,
 
   /// Driver arrived at pickup location
   driverArrived,
@@ -22,7 +28,10 @@ enum LogisticsStage {
   inProgress,
 
   /// Ride completed
-  completed,
+  complete,
+
+  /// Post-ride review and feedback
+  review,
 }
 
 extension LogisticsStageExtension on LogisticsStage {
@@ -30,18 +39,19 @@ extension LogisticsStageExtension on LogisticsStage {
   bool get canGoBack {
     switch (this) {
       case LogisticsStage.initial:
-        return false; // First stage, nowhere to go back
-      case LogisticsStage.enterDestination:
-        return true; // Can go back to initial stage
-      case LogisticsStage.confirmRequest:
-        return true; // Can go back to enter destination
-      case LogisticsStage.waitingForDriver:
-      case LogisticsStage.driverEnRoute:
-      case LogisticsStage.driverArrived:
+        return false;
       case LogisticsStage.inProgress:
-        return false; // Cannot go back once ride is active
-      case LogisticsStage.completed:
-        return false; // Final stage
+      case LogisticsStage.complete:
+        return false;
+      case LogisticsStage.enterDestination:
+      case LogisticsStage.confirmPickupLocation:
+      case LogisticsStage.enterPickupLocation:
+      case LogisticsStage.confirmRequest:
+      case LogisticsStage.lookingForDriver:
+      case LogisticsStage.waitingForDriver:
+      case LogisticsStage.driverArrived:
+      case LogisticsStage.review:
+        return true;
     }
   }
 
@@ -50,16 +60,16 @@ extension LogisticsStageExtension on LogisticsStage {
     switch (this) {
       case LogisticsStage.initial:
       case LogisticsStage.enterDestination:
+      case LogisticsStage.confirmPickupLocation:
+      case LogisticsStage.enterPickupLocation:
       case LogisticsStage.confirmRequest:
-        return true; // Can dismiss before ride starts
+      case LogisticsStage.lookingForDriver:
       case LogisticsStage.waitingForDriver:
-      case LogisticsStage.driverEnRoute:
       case LogisticsStage.driverArrived:
       case LogisticsStage.inProgress:
-        return false; // Cannot dismiss active ride
-      case LogisticsStage.completed:
-        return true; // Can dismiss after completion
+      case LogisticsStage.complete:
+      case LogisticsStage.review:
+        return false;
     }
   }
 }
-

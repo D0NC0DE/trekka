@@ -52,7 +52,6 @@ class InitialContent extends StatelessWidget {
           hintText: 'Where to go?',
           readOnly: true,
           onTap: () {
-            // TODO: Open location picker
             onNext(); 
           },
         ),

@@ -12,8 +12,6 @@ import 'package:trekka/features/auth/presentation/pages/auth_otp_page.dart';
 class AuthSheet extends StatefulWidget {
   const AuthSheet({super.key});
 
-  //TODO: Improve the animation of the sheet
-  /// Show auth modal from anywhere in the app.
   static Future<void> show(BuildContext context, {bool isDismissible = true}) {
     return AppModalBottomSheet.show(
       context: context,

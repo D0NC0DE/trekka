@@ -1,11 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:trekka/features/logistics/data/models/place_autocomplete_prediction.dart';
 
-/// Custom exception for Places Autocomplete errors
 class PlacesAutocompleteException implements Exception {
   PlacesAutocompleteException(this.message);
   final String message;
@@ -49,8 +47,6 @@ class PlacesAutocompleteDatasource {
         requestBody['includedRegionCodes'] = [regionCode];
       }
 
-      debugPrint('🔍 [AUTOCOMPLETE] Request: $requestBody');
-
       final Response<dynamic> response = await _dio.post(
         _baseUrl,
         data: requestBody,
@@ -66,7 +62,6 @@ class PlacesAutocompleteDatasource {
         final suggestions = response.data['suggestions'] as List<dynamic>?;
         
         if (suggestions == null || suggestions.isEmpty) {
-          debugPrint('🔍 [AUTOCOMPLETE] No suggestions returned');
           return [];
         }
 
@@ -75,17 +70,13 @@ class PlacesAutocompleteDatasource {
             .map((s) => PlaceAutocompletePrediction.fromJson(s as Map<String, dynamic>))
             .toList();
 
-        debugPrint('🔍 [AUTOCOMPLETE] Got ${predictions.length} predictions');
         return predictions;
       }
 
-      debugPrint('🔍 [AUTOCOMPLETE] Failed with status: ${response.statusCode}');
       return [];
     } on DioException catch (e) {
-      debugPrint('🔍 [AUTOCOMPLETE] DioException: ${e.message}');
       throw PlacesAutocompleteException('Failed to get predictions: ${e.message}');
     } catch (e) {
-      debugPrint('🔍 [AUTOCOMPLETE] Error: $e');
       throw PlacesAutocompleteException('An unexpected error occurred: $e');
     }
   }
