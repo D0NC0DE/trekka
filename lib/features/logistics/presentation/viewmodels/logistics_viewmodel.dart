@@ -1,17 +1,22 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'package:trekka/features/logistics/data/models/place_autocomplete_prediction.dart';
 import 'package:trekka/features/logistics/domain/repositories/geocoding_repository.dart';
+import 'package:trekka/features/logistics/domain/repositories/places_autocomplete_repository.dart';
 import 'package:trekka/features/logistics/presentation/providers/geocoding_provider.dart';
 import 'package:trekka/features/logistics/presentation/viewmodels/logistics_state.dart';
 
 /// ViewModel for logistics journey state
 class LogisticsViewModel extends Notifier<LogisticsState> {
   late final GeocodingRepository _geocodingRepository;
+  late final PlacesAutocompleteRepository _placesRepository;
 
   @override
   LogisticsState build() {
     _geocodingRepository = ref.read(geocodingRepositoryProvider);
+    _placesRepository = ref.read(placesAutocompleteRepositoryProvider);
     return const LogisticsState();
   }
 
@@ -32,7 +37,6 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
       return;
     }
 
-    // Don't fetch if already fetching for this location
     if (state.isFetchingUserAddress && 
         state.cachedAddressLocation == state.userLocation) {
       return;
@@ -68,8 +72,72 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
     );
   }
 
-  /// Clear destination
   void clearDestination() {
     state = state.copyWith(destinationLocation: null, destinationAddress: null);
+  }
+
+  String? _extractRegionCode(String? address) {
+    if (address == null) return null;
+    
+    final parts = address.split(',');
+    if (parts.length >= 2) {
+      final lastPart = parts.last.trim();
+      // Map common country names to codes
+      const countryMap = {
+        'Nigeria': 'NG',
+        'USA': 'US',
+        'United States': 'US',
+        'UK': 'GB',
+        'United Kingdom': 'GB',
+        'Canada': 'CA',
+        // Add more as needed
+      };
+      return countryMap[lastPart];
+    }
+    return null;
+  }
+
+  Future<void> searchPlaces(String input) async {
+    if (input.trim().isEmpty) {
+      state = state.copyWith(predictions: [], isFetchingPredictions: false);
+      return;
+    }
+
+    state = state.copyWith(isFetchingPredictions: true);
+
+    try {
+      final regionCode = _extractRegionCode(state.userAddress);
+      
+      final predictions = await _placesRepository.getPlacePredictions(
+        input: input,
+        origin: state.userLocation,
+        locationCenter: state.userLocation,
+        radiusMeters: 50000.0,
+        regionCode: regionCode,
+      );
+
+      state = state.copyWith(
+        predictions: predictions,
+        isFetchingPredictions: false,
+      );
+    } catch (e) {
+      debugPrint('Failed to fetch predictions: $e');
+      state = state.copyWith(
+        predictions: [],
+        isFetchingPredictions: false,
+      );
+    }
+  }
+
+  /// Clear predictions
+  void clearPredictions() {
+    state = state.copyWith(predictions: [], isFetchingPredictions: false);
+  }
+
+  /// Select a prediction
+  void selectPrediction(PlaceAutocompletePrediction prediction) {
+    // TODO: Fetch place details to get LatLng
+    debugPrint('Selected prediction: ${prediction.placeId}');
+    clearPredictions();
   }
 }

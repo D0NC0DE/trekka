@@ -39,6 +39,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
   LatLng? _userLocation;
   bool _isLocating = false;
   bool _showBottomSheet = false;
+  bool _hasResolvedCurrentPosition = false;
   LogisticsStage _currentStage = LogisticsStage.initial;
   late final AnimationController _sheetAnimationController;
   late final Animation<Offset> _sheetSlideAnimation;
@@ -59,7 +60,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
         );
     _loadMarkerIcon();
     // _loadMapStyles(); // Temporarily disabled for performance
-    // _primeWithLastKnownPosition(); // Removed - not necessary, slows down init
+    _primeWithLastKnownPosition();
     _resolveUserLocation();
   }
 
@@ -100,26 +101,35 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
   //   }
   // }
 
-  // Removed - not necessary, was slowing down initialization
-  // Future<void> _primeWithLastKnownPosition() async {
-  //   try {
-  //     final Position? lastKnown = await Geolocator.getLastKnownPosition();
-  //     if (!mounted || lastKnown == null) return;
-  //     final LatLng target = LatLng(lastKnown.latitude, lastKnown.longitude);
-  //     setState(() {
-  //       _userLocation = target;
-  //     });
-  //     if (_mapController != null) {
-  //       await _mapController!.moveCamera(
-  //         CameraUpdate.newCameraPosition(
-  //           CameraPosition(target: target, zoom: _initialZoom, tilt: 20),
-  //         ),
-  //       );
-  //     }
-  //   } catch (error) {
-  //     debugPrint('No last known position: $error');
-  //   }
-  // }
+  Future<void> _primeWithLastKnownPosition() async {
+    try {
+      final Position? lastKnown = await Geolocator.getLastKnownPosition();
+      if (!mounted || lastKnown == null || _hasResolvedCurrentPosition) return;
+
+      final LatLng target = LatLng(lastKnown.latitude, lastKnown.longitude);
+      bool didPrimeLocation = false;
+      setState(() {
+        if (!_hasResolvedCurrentPosition) {
+          _userLocation = target;
+          didPrimeLocation = true;
+        }
+      });
+
+      if (!didPrimeLocation) return;
+
+      ref.read(logisticsViewModelProvider.notifier).setUserLocation(target);
+
+      if (_mapController != null) {
+        await _mapController!.moveCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(target: target, zoom: _userZoom, tilt: 20),
+          ),
+        );
+      }
+    } catch (error) {
+      debugPrint('No last known position: $error');
+    }
+  }
 
   Future<void> _resolveUserLocation() async {
     if (!mounted) return;
@@ -170,6 +180,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
       if (!mounted) return;
       final LatLng target = LatLng(position.latitude, position.longitude);
       setState(() {
+        _hasResolvedCurrentPosition = true;
         _userLocation = target;
       });
 
