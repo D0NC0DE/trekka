@@ -6,6 +6,7 @@ import 'package:trekka/features/logistics/data/models/place_autocomplete_predict
 import 'package:trekka/features/logistics/domain/repositories/geocoding_repository.dart';
 import 'package:trekka/features/logistics/domain/repositories/place_details_repository.dart';
 import 'package:trekka/features/logistics/domain/repositories/places_autocomplete_repository.dart';
+import 'package:trekka/features/logistics/domain/repositories/routes_repository.dart';
 import 'package:trekka/features/logistics/presentation/providers/geocoding_provider.dart';
 import 'package:trekka/features/logistics/presentation/viewmodels/logistics_state.dart';
 
@@ -14,12 +15,14 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
   late final GeocodingRepository _geocodingRepository;
   late final PlacesAutocompleteRepository _placesRepository;
   late final PlaceDetailsRepository _placeDetailsRepository;
+  late final RoutesRepository _routesRepository;
 
   @override
   LogisticsState build() {
     _geocodingRepository = ref.read(geocodingRepositoryProvider);
     _placesRepository = ref.read(placesAutocompleteRepositoryProvider);
     _placeDetailsRepository = ref.read(placeDetailsRepositoryProvider);
+    _routesRepository = ref.read(routesRepositoryProvider);
     return const LogisticsState();
   }
 
@@ -72,18 +75,40 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
       destinationLocation: location,
       destinationAddress: address,
     );
+    fetchRouteInfo();
   }
 
-  void _setPickupDetails({
-    LatLng? location,
-    required String address,
-  }) {
+  /// Fetch route info (distance and duration) between origin and destination
+  Future<void> fetchRouteInfo() async {
+    if (state.userLocation == null || state.destinationLocation == null) {
+      return;
+    }
+
+    state = state.copyWith(isFetchingRoute: true);
+
+    try {
+      final routeInfo = await _routesRepository.getRouteInfo(
+        origin: state.userLocation!,
+        destination: state.destinationLocation!,
+        travelMode: 'DRIVE',
+      );
+
+      state = state.copyWith(routeInfo: routeInfo, isFetchingRoute: false);
+    } catch (e) {
+      debugPrint('Failed to fetch route info: $e');
+      state = state.copyWith(isFetchingRoute: false);
+    }
+  }
+
+  void _setPickupDetails({LatLng? location, required String address}) {
     state = state.copyWith(
       userAddress: address,
       userLocation: location ?? state.userLocation,
       cachedAddressLocation: location ?? state.cachedAddressLocation,
       isFetchingUserAddress: false,
     );
+    
+    fetchRouteInfo();
   }
 
   void clearDestination() {

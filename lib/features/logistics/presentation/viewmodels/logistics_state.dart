@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:trekka/features/logistics/data/models/place_autocomplete_prediction.dart';
+import 'package:trekka/features/logistics/data/models/route_info.dart';
 
 /// State for logistics journey flow
 class LogisticsState extends Equatable {
@@ -14,6 +15,8 @@ class LogisticsState extends Equatable {
     this.isFetchingUserAddress = false,
     this.predictions = const [],
     this.isFetchingPredictions = false,
+    this.routeInfo,
+    this.isFetchingRoute = false,
   });
 
   final LatLng? userLocation;
@@ -24,6 +27,8 @@ class LogisticsState extends Equatable {
   final bool isFetchingUserAddress;
   final List<PlaceAutocompletePrediction> predictions;
   final bool isFetchingPredictions;
+  final RouteInfo? routeInfo;
+  final bool isFetchingRoute;
 
   LogisticsState copyWith({
     LatLng? userLocation,
@@ -34,6 +39,8 @@ class LogisticsState extends Equatable {
     bool? isFetchingUserAddress,
     List<PlaceAutocompletePrediction>? predictions,
     bool? isFetchingPredictions,
+    RouteInfo? routeInfo,
+    bool? isFetchingRoute,
   }) {
     return LogisticsState(
       userLocation: userLocation ?? this.userLocation,
@@ -45,6 +52,8 @@ class LogisticsState extends Equatable {
           isFetchingUserAddress ?? this.isFetchingUserAddress,
       predictions: predictions ?? this.predictions,
       isFetchingPredictions: isFetchingPredictions ?? this.isFetchingPredictions,
+      routeInfo: routeInfo ?? this.routeInfo,
+      isFetchingRoute: isFetchingRoute ?? this.isFetchingRoute,
     );
   }
 
@@ -58,5 +67,7 @@ class LogisticsState extends Equatable {
     isFetchingUserAddress,
     predictions,
     isFetchingPredictions,
+    routeInfo,
+    isFetchingRoute,
   ];
 }

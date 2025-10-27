@@ -51,7 +51,10 @@ class ConfirmPickupLocationContent extends ConsumerWidget {
           timeValue: _resolveDurationDisplay(logisticsState),
         ),
         const SizedBox(height: AppSpacing.lg),
-        GradientActionButton(label: 'Confirm current location', onTap: onConfirm),
+        GradientActionButton(
+          label: 'Confirm current location',
+          onTap: onConfirm,
+        ),
       ],
     );
   }
@@ -69,13 +72,35 @@ class ConfirmPickupLocationContent extends ConsumerWidget {
   }
 
   String _resolveDistanceDisplay(LogisticsState state) {
-    // TODO: replace placeholder once routing service provides metrics.
-    return 'Calculating...';
+    if (state.isFetchingRoute) {
+      return 'Calculating...';
+    }
+
+    if (state.routeInfo != null) {
+      final distanceKm = state.routeInfo!.distanceKm;
+      return '${distanceKm.toStringAsFixed(1)} km';
+    }
+
+    return 'N/A';
   }
 
   String _resolveDurationDisplay(LogisticsState state) {
-    // TODO: replace placeholder once routing service provides metrics.
-    return 'Calculating...';
+    if (state.isFetchingRoute) {
+      return 'Calculating...';
+    }
+
+    if (state.routeInfo != null) {
+      final duration = state.routeInfo!.duration;
+      final hours = duration.inHours;
+      final minutes = duration.inMinutes.remainder(60);
+
+      if (hours > 0) {
+        return '${hours}h ${minutes}m';
+      }
+      return '${minutes}m';
+    }
+
+    return 'N/A';
   }
 }
 

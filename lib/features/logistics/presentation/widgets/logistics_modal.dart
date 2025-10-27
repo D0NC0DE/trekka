@@ -14,6 +14,8 @@ class _LogisticsConstants {
   static const double maxHeightFactor = 0.85;
   static const double dragHandleWidth = 135;
   static const double verticalSpacing = 20;
+  static const double topSpacing = 10;
+  static const double bottomSpacing = 5;
 }
 
 class LogisticsModal extends StatelessWidget {
@@ -44,6 +46,11 @@ class LogisticsModal extends StatelessWidget {
         stage == LogisticsStage.enterDestination ||
         stage == LogisticsStage.enterPickupLocation;
 
+    final bool shouldShowDragger =
+        stage == LogisticsStage.initial ||
+        stage == LogisticsStage.enterDestination ||
+        stage == LogisticsStage.enterPickupLocation;
+
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
@@ -62,27 +69,29 @@ class LogisticsModal extends StatelessWidget {
               physics: const BouncingScrollPhysics(),
               child: Padding(
                 padding: EdgeInsets.only(
-                  top: 10,
+                  top: _LogisticsConstants.topSpacing,
                   left: AppSpacing.lg,
                   right: AppSpacing.lg,
-                  bottom: bottomInset + _LogisticsConstants.verticalSpacing,
+                  bottom: bottomInset + _LogisticsConstants.bottomSpacing,
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    // Drag Handle
-                    Center(
-                      child: SizedBox(
-                        width: _LogisticsConstants.dragHandleWidth,
-                        child: const SheetDragHandle(),
+                    if (shouldShowDragger)
+                      Center(
+                        child: SizedBox(
+                          width: _LogisticsConstants.dragHandleWidth,
+                          child: const SheetDragHandle(),
+                        ),
                       ),
-                    ),
 
                     // Dynamic content based on stage
                     Padding(
-                      padding: const EdgeInsets.only(
-                        top: _LogisticsConstants.verticalSpacing,
+                      padding: EdgeInsets.only(
+                        top: shouldShowDragger
+                            ? _LogisticsConstants.verticalSpacing
+                            : _LogisticsConstants.topSpacing,
                       ),
                       child: LogisticsContentFactory.createContent(
                         stage: stage,
