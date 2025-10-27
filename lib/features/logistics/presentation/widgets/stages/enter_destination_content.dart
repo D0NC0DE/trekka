@@ -9,7 +9,6 @@ import 'package:trekka/core/widgets/button/icon_text_button.dart';
 import 'package:trekka/core/widgets/connector/route_connector.dart';
 import 'package:trekka/core/widgets/input/location_search_field.dart';
 import 'package:trekka/features/logistics/presentation/providers/logistics_provider.dart';
-import 'package:trekka/features/logistics/presentation/viewmodels/logistics_state.dart';
 import 'package:trekka/features/logistics/presentation/widgets/place_suggestion.dart';
 
 /// Content for the enter destination stage

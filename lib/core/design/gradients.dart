@@ -15,7 +15,7 @@ class AppGradients {
     stops: <double>[0, 0.6399],
   );
 
-  static const Gradient logisticsBottomSheet = LinearGradient(
+  static const Gradient logisticsSheet = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: <Color>[

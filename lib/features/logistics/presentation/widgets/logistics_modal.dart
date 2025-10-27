@@ -53,7 +53,7 @@ class LogisticsModal extends StatelessWidget {
           child: SheetContainer(
             key: const ValueKey<String>('logistics'),
             borderRadius: 20,
-            gradient: AppGradients.logisticsBottomSheet,
+            gradient: AppGradients.logisticsSheet,
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: Padding(
