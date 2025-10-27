@@ -4,7 +4,6 @@ import 'package:trekka/features/logistics/data/models/place_autocomplete_predict
 
 /// Abstract contract for places autocomplete operations
 abstract class PlacesAutocompleteRepository {
-  /// Get place predictions based on input text
   Future<List<PlaceAutocompletePrediction>> getPlacePredictions({
     required String input,
     LatLng? origin,
@@ -13,4 +12,3 @@ abstract class PlacesAutocompleteRepository {
     String? regionCode,
   });
 }
-

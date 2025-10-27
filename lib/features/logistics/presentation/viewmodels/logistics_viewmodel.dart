@@ -22,22 +22,21 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
 
   void setUserLocation(LatLng location) {
     state = state.copyWith(userLocation: location);
-    
-    // Silently fetch address in background 
+
+    // Silently fetch address in background
     fetchUserAddress();
   }
 
   Future<void> fetchUserAddress() async {
     if (state.userLocation == null) return;
-    
-    if (state.userAddress != null && 
+
+    if (state.userAddress != null &&
         state.cachedAddressLocation != null &&
         state.cachedAddressLocation == state.userLocation) {
-      // Cache is valid, skip fetch
       return;
     }
 
-    if (state.isFetchingUserAddress && 
+    if (state.isFetchingUserAddress &&
         state.cachedAddressLocation == state.userLocation) {
       return;
     }
@@ -47,7 +46,7 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
     try {
       final currentLocation = state.userLocation!;
       final result = await _geocodingRepository.reverseGeocode(currentLocation);
-    
+
       if (state.userLocation == currentLocation) {
         if (result != null) {
           state = state.copyWith(
@@ -78,11 +77,10 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
 
   String? _extractRegionCode(String? address) {
     if (address == null) return null;
-    
+
     final parts = address.split(',');
     if (parts.length >= 2) {
       final lastPart = parts.last.trim();
-      // Map common country names to codes
       const countryMap = {
         'Nigeria': 'NG',
         'USA': 'US',
@@ -90,7 +88,7 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
         'UK': 'GB',
         'United Kingdom': 'GB',
         'Canada': 'CA',
-        // Add more as needed
+        // TODO: Add more countries as needed
       };
       return countryMap[lastPart];
     }
@@ -107,7 +105,7 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
 
     try {
       final regionCode = _extractRegionCode(state.userAddress);
-      
+
       final predictions = await _placesRepository.getPlacePredictions(
         input: input,
         origin: state.userLocation,
@@ -122,19 +120,14 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
       );
     } catch (e) {
       debugPrint('Failed to fetch predictions: $e');
-      state = state.copyWith(
-        predictions: [],
-        isFetchingPredictions: false,
-      );
+      state = state.copyWith(predictions: [], isFetchingPredictions: false);
     }
   }
 
-  /// Clear predictions
   void clearPredictions() {
     state = state.copyWith(predictions: [], isFetchingPredictions: false);
   }
 
-  /// Select a prediction
   void selectPrediction(PlaceAutocompletePrediction prediction) {
     // TODO: Fetch place details to get LatLng
     debugPrint('Selected prediction: ${prediction.placeId}');

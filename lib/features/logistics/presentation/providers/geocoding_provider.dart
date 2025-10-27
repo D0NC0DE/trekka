@@ -16,11 +16,13 @@ final geocodingRepositoryProvider = Provider<GeocodingRepository>((ref) {
   return GeocodingRepositoryImpl(datasource);
 });
 
-final placesAutocompleteDatasourceProvider = Provider<PlacesAutocompleteDatasource>((ref) {
-  return PlacesAutocompleteDatasource();
-});
+final placesAutocompleteDatasourceProvider =
+    Provider<PlacesAutocompleteDatasource>((ref) {
+      return PlacesAutocompleteDatasource();
+    });
 
-final placesAutocompleteRepositoryProvider = Provider<PlacesAutocompleteRepository>((ref) {
-  final datasource = ref.read(placesAutocompleteDatasourceProvider);
-  return PlacesAutocompleteRepositoryImpl(datasource: datasource);
-});
+final placesAutocompleteRepositoryProvider =
+    Provider<PlacesAutocompleteRepository>((ref) {
+      final datasource = ref.read(placesAutocompleteDatasourceProvider);
+      return PlacesAutocompleteRepositoryImpl(datasource: datasource);
+    });
