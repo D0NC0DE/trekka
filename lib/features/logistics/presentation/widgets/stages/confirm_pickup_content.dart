@@ -7,6 +7,7 @@ import 'package:trekka/core/widgets/button/gradient_action_button.dart';
 import 'package:trekka/features/logistics/presentation/providers/logistics_provider.dart';
 import 'package:trekka/features/logistics/presentation/widgets/common/bottom_border_card.dart';
 import 'package:trekka/features/logistics/presentation/widgets/common/gradient_icon_button.dart';
+import 'package:trekka/features/logistics/presentation/viewmodels/logistics_state.dart';
 import 'package:trekka/features/logistics/utils/address_formatter.dart';
 
 /// Content for the confirm pickup location stage.
@@ -23,10 +24,6 @@ class ConfirmPickupLocationContent extends ConsumerWidget {
       logisticsState.userAddress,
       'Fetching pickup...',
     );
-    final destinationAddress = AddressFormatter.formatWithFallback(
-      logisticsState.destinationAddress,
-      'Fetching destination...',
-    );
     final (String pickupPrimary, String? pickupSecondary) = _splitAddressParts(
       pickupAddress,
     );
@@ -42,6 +39,12 @@ class ConfirmPickupLocationContent extends ConsumerWidget {
           trailing: const GradientIconButton(iconPath: AppAssetIcons.search),
         ),
         const SizedBox(height: AppSpacing.sm),
+        _JourneyMetricsCard(
+          distanceLabel: 'Total Distance',
+          distanceValue: _resolveDistanceDisplay(logisticsState),
+          timeLabel: 'Estimated Time',
+          timeValue: _resolveDurationDisplay(logisticsState),
+        ),
         const SizedBox(height: AppSpacing.lg),
         GradientActionButton(label: 'Confirm pickup', onTap: onConfirm),
       ],
@@ -58,6 +61,16 @@ class ConfirmPickupLocationContent extends ConsumerWidget {
     final primary = segments.first.trim();
     final remainder = segments.skip(1).join(',').trim();
     return (primary, remainder.isEmpty ? null : remainder);
+  }
+
+  String _resolveDistanceDisplay(LogisticsState state) {
+    // TODO: replace placeholder once routing service provides metrics.
+    return 'Calculating...';
+  }
+
+  String _resolveDurationDisplay(LogisticsState state) {
+    // TODO: replace placeholder once routing service provides metrics.
+    return 'Calculating...';
   }
 }
 
@@ -117,6 +130,74 @@ class _PickupAddressCard extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             trailing!,
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _JourneyMetricsCard extends StatelessWidget {
+  const _JourneyMetricsCard({
+    required this.distanceLabel,
+    required this.distanceValue,
+    required this.timeLabel,
+    required this.timeValue,
+  });
+
+  final String distanceLabel;
+  final String distanceValue;
+  final String timeLabel;
+  final String timeValue;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    Text buildLabel(String text) {
+      return Text(
+        text,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: AppColors.white,
+          height: 20 / 14,
+        ),
+      );
+    }
+
+    Text buildValue(String text) {
+      return Text(
+        text,
+        style: theme.textTheme.bodyLarge?.copyWith(
+          color: AppColors.white,
+          fontWeight: AppFontWeights.semiBold,
+        ),
+      );
+    }
+
+    return BottomBorderCard(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                buildLabel(distanceLabel),
+                const SizedBox(height: AppSpacing.xs),
+                buildValue(distanceValue),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                buildLabel(timeLabel),
+                const SizedBox(height: AppSpacing.xs),
+                buildValue(timeValue),
+              ],
+            ),
+          ),
         ],
       ),
     );
