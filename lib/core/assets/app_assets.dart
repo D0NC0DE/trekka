@@ -54,6 +54,8 @@ class AppAssetIcons {
   static const String myLocation = 'assets/icons/actions/my_location.png';
   static const String search = 'assets/icons/actions/search.png';
   static const String close = 'assets/icons/actions/close.png';
+  static const String selectOnMap = 'assets/icons/actions/on_map.png';
+  static const String stop = 'assets/icons/actions/stop.png';
 }
 
 @immutable

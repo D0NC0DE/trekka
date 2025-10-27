@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -8,18 +9,19 @@ import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/widgets/button/gradient_back_button.dart';
 import 'package:trekka/features/logistics/domain/entities/logistics_stage.dart';
+import 'package:trekka/features/logistics/presentation/providers/logistics_provider.dart';
 import 'package:trekka/features/logistics/presentation/widgets/logistics_sheet_overlay.dart';
 
-class LogisticsPage extends StatefulWidget {
+class LogisticsPage extends ConsumerStatefulWidget {
   const LogisticsPage({super.key});
 
   @override
-  State<LogisticsPage> createState() => _LogisticsPageState();
+  ConsumerState<LogisticsPage> createState() => _LogisticsPageState();
 }
 
-class _LogisticsPageState extends State<LogisticsPage>
+class _LogisticsPageState extends ConsumerState<LogisticsPage>
     with SingleTickerProviderStateMixin {
-  static const double _initialZoom = 14.0;
+  // static const double _initialZoom = 16.0; // Unused after optimization
   static const LatLng _fallbackCenter = LatLng(7.1897, 21.0937); // Africa
   static const double _fallbackZoom = 3.6;
   static const double _userZoom = 17.0;
@@ -31,9 +33,9 @@ class _LogisticsPageState extends State<LogisticsPage>
 
   GoogleMapController? _mapController;
   BitmapDescriptor? _riderIcon;
-  String? _darkMapStyle;
-  String? _lightMapStyle;
-  String? _mapStyle;
+  // String? _darkMapStyle;
+  // String? _lightMapStyle;
+  // String? _mapStyle;
   LatLng? _userLocation;
   bool _isLocating = false;
   bool _showBottomSheet = false;
@@ -56,8 +58,8 @@ class _LogisticsPageState extends State<LogisticsPage>
           ),
         );
     _loadMarkerIcon();
-    _loadMapStyles();
-    _primeWithLastKnownPosition();
+    // _loadMapStyles(); // Temporarily disabled for performance
+    // _primeWithLastKnownPosition(); // Removed - not necessary, slows down init
     _resolveUserLocation();
   }
 
@@ -81,41 +83,43 @@ class _LogisticsPageState extends State<LogisticsPage>
     }
   }
 
-  Future<void> _loadMapStyles() async {
-    try {
-      final List<String> styles = await Future.wait<String>(<Future<String>>[
-        rootBundle.loadString(AppAssetMapStyles.dark),
-        rootBundle.loadString(AppAssetMapStyles.light),
-      ]);
+  // Temporarily disabled for performance
+  // Future<void> _loadMapStyles() async {
+  //   try {
+  //     final List<String> styles = await Future.wait<String>(<Future<String>>[
+  //       rootBundle.loadString(AppAssetMapStyles.dark),
+  //       rootBundle.loadString(AppAssetMapStyles.light),
+  //     ]);
 
-      if (!mounted) return;
-      _darkMapStyle = styles[0];
-      _lightMapStyle = styles[1];
-      _updateMapStyle(forceNotify: true);
-    } catch (error) {
-      debugPrint('Failed to load map styles: $error');
-    }
-  }
+  //     if (!mounted) return;
+  //     _darkMapStyle = styles[0];
+  //     _lightMapStyle = styles[1];
+  //     _updateMapStyle(forceNotify: true);
+  //   } catch (error) {
+  //     debugPrint('Failed to load map styles: $error');
+  //   }
+  // }
 
-  Future<void> _primeWithLastKnownPosition() async {
-    try {
-      final Position? lastKnown = await Geolocator.getLastKnownPosition();
-      if (!mounted || lastKnown == null) return;
-      final LatLng target = LatLng(lastKnown.latitude, lastKnown.longitude);
-      setState(() {
-        _userLocation = target;
-      });
-      if (_mapController != null) {
-        await _mapController!.moveCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(target: target, zoom: _initialZoom, tilt: 20),
-          ),
-        );
-      }
-    } catch (error) {
-      debugPrint('No last known position: $error');
-    }
-  }
+  // Removed - not necessary, was slowing down initialization
+  // Future<void> _primeWithLastKnownPosition() async {
+  //   try {
+  //     final Position? lastKnown = await Geolocator.getLastKnownPosition();
+  //     if (!mounted || lastKnown == null) return;
+  //     final LatLng target = LatLng(lastKnown.latitude, lastKnown.longitude);
+  //     setState(() {
+  //       _userLocation = target;
+  //     });
+  //     if (_mapController != null) {
+  //       await _mapController!.moveCamera(
+  //         CameraUpdate.newCameraPosition(
+  //           CameraPosition(target: target, zoom: _initialZoom, tilt: 20),
+  //         ),
+  //       );
+  //     }
+  //   } catch (error) {
+  //     debugPrint('No last known position: $error');
+  //   }
+  // }
 
   Future<void> _resolveUserLocation() async {
     if (!mounted) return;
@@ -169,6 +173,8 @@ class _LogisticsPageState extends State<LogisticsPage>
         _userLocation = target;
       });
 
+      ref.read(logisticsViewModelProvider.notifier).setUserLocation(target);
+
       if (_mapController != null) {
         await _mapController!.animateCamera(
           CameraUpdate.newCameraPosition(
@@ -199,22 +205,22 @@ class _LogisticsPageState extends State<LogisticsPage>
     };
   }
 
-  bool _isDarkMode(BuildContext context) {
-    final MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
-    if (mediaQuery != null) {
-      return mediaQuery.platformBrightness == Brightness.dark;
-    }
-    return Theme.of(context).brightness == Brightness.dark;
-  }
+  // bool _isDarkMode(BuildContext context) {
+  //   final MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
+  //   if (mediaQuery != null) {
+  //     return mediaQuery.platformBrightness == Brightness.dark;
+  //   }
+  //   return Theme.of(context).brightness == Brightness.dark;
+  // }
 
-  void _updateMapStyle({bool forceNotify = false}) {
-    final bool isDark = _isDarkMode(context);
-    final String? resolvedStyle = isDark ? _darkMapStyle : _lightMapStyle;
-    if (!forceNotify && _mapStyle == resolvedStyle) return;
-    setState(() {
-      _mapStyle = resolvedStyle;
-    });
-  }
+  // void _updateMapStyle({bool forceNotify = false}) {
+  //   final bool isDark = _isDarkMode(context);
+  //   final String? resolvedStyle = isDark ? _darkMapStyle : _lightMapStyle;
+  //   if (!forceNotify && _mapStyle == resolvedStyle) return;
+  //   setState(() {
+  //     _mapStyle = resolvedStyle;
+  //   });
+  // }
 
   void _handleLocationButtonPressed() {
     if (_userLocation != null && _mapController != null) {
@@ -283,11 +289,11 @@ class _LogisticsPageState extends State<LogisticsPage>
     // TODO: Cancel any active ride requests
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _updateMapStyle();
-  }
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   _updateMapStyle();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -318,8 +324,8 @@ class _LogisticsPageState extends State<LogisticsPage>
                       )
                     : _initialCameraPosition,
                 markers: _buildMarkers(),
-                style: _mapStyle,
-                myLocationEnabled: _userLocation != null,
+                // style: _mapStyle, // Temporarily disabled for performance
+                myLocationEnabled: true,
                 myLocationButtonEnabled: false,
                 zoomControlsEnabled: false,
                 zoomGesturesEnabled: true,
@@ -331,18 +337,6 @@ class _LogisticsPageState extends State<LogisticsPage>
                 mapToolbarEnabled: false,
                 onMapCreated: (GoogleMapController controller) {
                   _mapController = controller;
-                  if (_userLocation != null) {
-                    controller.animateCamera(
-                      CameraUpdate.newCameraPosition(
-                        CameraPosition(
-                          target: _userLocation!,
-                          zoom: _userZoom,
-                          tilt: 20,
-                        ),
-                      ),
-                    );
-                  }
-                  // Show bottom sheet when map is created
                   if (!_showBottomSheet) {
                     setState(() => _showBottomSheet = true);
                     _sheetAnimationController.forward();
