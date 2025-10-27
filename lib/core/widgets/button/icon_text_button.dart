@@ -46,7 +46,7 @@ class IconTextButton extends StatelessWidget {
                 fontWeight: AppFontWeights.semiBold,
                 color: txtColor,
               ),
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
               softWrap: true,
             ),

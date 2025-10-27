@@ -22,6 +22,7 @@ class LogisticsModal extends StatelessWidget {
     required this.onNext,
     required this.onBack,
     required this.onCancel,
+    this.onEditPickup,
     super.key,
   });
 
@@ -29,6 +30,7 @@ class LogisticsModal extends StatelessWidget {
   final VoidCallback onNext;
   final VoidCallback onBack;
   final VoidCallback onCancel;
+  final VoidCallback? onEditPickup;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +40,9 @@ class LogisticsModal extends StatelessWidget {
         screenSize.height * _LogisticsConstants.maxHeightFactor;
     final double bottomInset = mediaQuery.viewPadding.bottom;
 
-    final bool shouldExpandToMax = stage == LogisticsStage.enterDestination;
+    final bool shouldExpandToMax =
+        stage == LogisticsStage.enterDestination ||
+        stage == LogisticsStage.enterPickupLocation;
 
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),
@@ -85,6 +89,7 @@ class LogisticsModal extends StatelessWidget {
                         onNext: onNext,
                         onBack: onBack,
                         onCancel: onCancel,
+                        onEditPickup: onEditPickup,
                       ),
                     ),
                   ],

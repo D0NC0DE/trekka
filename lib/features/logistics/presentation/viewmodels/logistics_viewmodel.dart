@@ -74,6 +74,18 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
     );
   }
 
+  void _setPickupDetails({
+    LatLng? location,
+    required String address,
+  }) {
+    state = state.copyWith(
+      userAddress: address,
+      userLocation: location ?? state.userLocation,
+      cachedAddressLocation: location ?? state.cachedAddressLocation,
+      isFetchingUserAddress: false,
+    );
+  }
+
   void clearDestination() {
     state = state.copyWith(destinationLocation: null, destinationAddress: null);
   }
@@ -160,6 +172,40 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
       }
     } catch (error) {
       debugPrint('Failed to select prediction: $error');
+    } finally {
+      clearPredictions();
+    }
+  }
+
+  Future<void> selectPickupPrediction(
+    PlaceAutocompletePrediction prediction,
+  ) async {
+    LatLng? resolvedLocation;
+    String resolvedAddress = prediction.fullText;
+
+    try {
+      final details = await _placeDetailsRepository.getPlaceDetails(
+        prediction.placeId,
+      );
+
+      if (details != null) {
+        resolvedLocation = details.location ?? resolvedLocation;
+        resolvedAddress = details.formattedAddress ?? resolvedAddress;
+      }
+
+      if (resolvedLocation == null) {
+        final geocode = await _geocodingRepository.geocodeAddress(
+          prediction.fullText,
+        );
+        if (geocode != null) {
+          resolvedLocation = geocode.location;
+          resolvedAddress = geocode.formattedAddress;
+        }
+      }
+
+      _setPickupDetails(location: resolvedLocation, address: resolvedAddress);
+    } catch (error) {
+      debugPrint('Failed to select pickup prediction: $error');
     } finally {
       clearPredictions();
     }

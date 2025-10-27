@@ -12,38 +12,46 @@ import 'package:trekka/features/logistics/presentation/providers/logistics_provi
 import 'package:trekka/features/logistics/presentation/widgets/place_suggestion.dart';
 import 'package:trekka/features/logistics/utils/address_formatter.dart';
 
-/// Content for the enter destination stage
-class EnterDestinationContent extends ConsumerStatefulWidget {
-  const EnterDestinationContent({required this.onNext, super.key});
+/// Content for editing pickup location manually.
+class EnterPickupLocationContent extends ConsumerStatefulWidget {
+  const EnterPickupLocationContent({required this.onNext, super.key});
 
   final VoidCallback onNext;
 
   @override
-  ConsumerState<EnterDestinationContent> createState() =>
-      _EnterDestinationContentState();
+  ConsumerState<EnterPickupLocationContent> createState() =>
+      _EnterPickupLocationContentState();
 }
 
-class _EnterDestinationContentState
-    extends ConsumerState<EnterDestinationContent> {
-  final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
+class _EnterPickupLocationContentState
+    extends ConsumerState<EnterPickupLocationContent> {
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
   Timer? _debounceTimer;
 
   @override
   void initState() {
     super.initState();
+    _controller = TextEditingController();
+    _focusNode = FocusNode();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final pickupAddress = ref.read(logisticsViewModelProvider).userAddress;
+      final initialText = pickupAddress != null
+          ? AddressFormatter.shortenAddress(pickupAddress)
+          : '';
+      _controller
+        ..text = initialText
+        ..selection = TextSelection.collapsed(offset: initialText.length);
       _focusNode.requestFocus();
-      // Ensure address is fetched (will use cache if valid)
-      ref.read(logisticsViewModelProvider.notifier).fetchUserAddress();
     });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
-    _focusNode.dispose();
     _debounceTimer?.cancel();
+    _focusNode.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -63,9 +71,12 @@ class _EnterDestinationContentState
   @override
   Widget build(BuildContext context) {
     final logisticsState = ref.watch(logisticsViewModelProvider);
-    final displayText = logisticsState.userAddress != null
-        ? AddressFormatter.shortenAddress(logisticsState.userAddress!)
-        : 'Your location';
+    final destinationSummary = logisticsState.destinationAddress != null
+        ? AddressFormatter.formatWithFallback(
+            logisticsState.destinationAddress!,
+            'Fetching destination...',
+          )
+        : 'Destination not set';
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -73,32 +84,29 @@ class _EnterDestinationContentState
       children: <Widget>[
         Center(
           child: Text(
-            'Enter a destination',
+            'Edit pickup location',
             style: Theme.of(
               context,
             ).textTheme.headlineLarge?.copyWith(color: AppColors.white),
           ),
         ),
         const SizedBox(height: AppSpacing.mdLg),
-
-        IconTextButton(
-          text: displayText,
-          leadingIcon: AppAssetIcons.riderMarker,
-          textColor: AppColors.textPrimary50,
-          onPressed: null, // Disabled for now
-        ),
-        const RouteConnector(),
-
         LocationSearchField(
           controller: _controller,
           focusNode: _focusNode,
-          hintText: 'Where to go?',
+          hintText: 'Pickup address',
           readOnly: false,
           autofocus: true,
           onChanged: _onSearchChanged,
         ),
+        const RouteConnector(),
+        IconTextButton(
+          text: destinationSummary,
+          leadingIcon: AppAssetIcons.destinationInfo,
+          textColor: AppColors.textPrimary50,
+          onPressed: null,
+        ),
         const SizedBox(height: AppSpacing.xs),
-
         if (logisticsState.isFetchingPredictions) ...[
           ClipRRect(
             borderRadius: BorderRadius.circular(AppRadius.sm),
@@ -112,7 +120,6 @@ class _EnterDestinationContentState
           ),
           const SizedBox(height: AppSpacing.xs),
         ],
-
         Padding(
           padding: const EdgeInsets.only(left: 4),
           child: Row(
@@ -126,12 +133,12 @@ class _EnterDestinationContentState
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
-                  'Select Destination on map',
+                  'Select pickup on map',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.logisticsActionActive,
-                        height: 1.25,
-                        fontWeight: AppFontWeights.semiBold,
-                      ),
+                    color: AppColors.logisticsActionActive,
+                    height: 1.25,
+                    fontWeight: AppFontWeights.semiBold,
+                  ),
                 ),
               ),
               Image.asset(
@@ -151,7 +158,7 @@ class _EnterDestinationContentState
             onPredictionSelected: widget.onNext,
             onSelectPrediction: ref
                 .read(logisticsViewModelProvider.notifier)
-                .selectPrediction,
+                .selectPickupPrediction,
           ),
           const SizedBox(height: AppSpacing.sm),
         ],

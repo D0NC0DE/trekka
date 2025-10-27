@@ -274,6 +274,10 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
 
   void _handleNextStage() {
     setState(() {
+      if (_currentStage == LogisticsStage.enterPickupLocation) {
+        _currentStage = LogisticsStage.confirmPickupLocation;
+        return;
+      }
       final int currentIndex = _stageFlow.indexOf(_currentStage);
       if (currentIndex == -1) {
         _currentStage = LogisticsStage.initial;
@@ -288,21 +292,37 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
   }
 
   void _handleBackStage() {
-    if (_currentStage.canGoBack) {
-      setState(() {
-        final int currentIndex = _stageFlow.indexOf(_currentStage);
-        if (currentIndex > 0) {
-          _currentStage = _stageFlow[currentIndex - 1];
-        }
-      });
-    }
-  }
+    if (!_currentStage.canGoBack) return;
 
+    setState(() {
+      if (_currentStage == LogisticsStage.confirmPickupLocation) {
+        _currentStage = LogisticsStage.initial;
+        return;
+      }
+
+      if (_currentStage == LogisticsStage.enterPickupLocation) {
+        _currentStage = LogisticsStage.confirmPickupLocation;
+        return;
+      }
+
+      final int currentIndex = _stageFlow.indexOf(_currentStage);
+      if (currentIndex > 0) {
+        _currentStage = _stageFlow[currentIndex - 1];
+      }
+    });
+  }
   void _handleCancelRide() {
     setState(() {
       _currentStage = LogisticsStage.initial;
     });
     // TODO: Cancel any active ride requests
+  }
+
+  void _handleEditPickup() {
+    setState(() {
+      _currentStage = LogisticsStage.enterPickupLocation;
+    });
+    ref.read(logisticsViewModelProvider.notifier).clearPredictions();
   }
 
   // @override
@@ -324,8 +344,8 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
     );
     final bool shouldShowBackButton =
         _currentStage != LogisticsStage.enterDestination &&
-        _currentStage != LogisticsStage.initial &&
-        _currentStage != LogisticsStage.confirmPickupLocation;
+        _currentStage != LogisticsStage.confirmPickupLocation &&
+        _currentStage != LogisticsStage.enterPickupLocation;
     final bool shouldShowFloatingButton =
         _currentStage != LogisticsStage.confirmPickupLocation;
 
@@ -443,6 +463,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
                       onBack: _handleBackStage,
                       onCancel: _handleCancelRide,
                       showFloatingButton: shouldShowFloatingButton,
+                      onEditPickup: _handleEditPickup,
                     ),
                   ),
                 ),

@@ -12,9 +12,14 @@ import 'package:trekka/features/logistics/utils/address_formatter.dart';
 
 /// Content for the confirm pickup location stage.
 class ConfirmPickupLocationContent extends ConsumerWidget {
-  const ConfirmPickupLocationContent({required this.onConfirm, super.key});
+  const ConfirmPickupLocationContent({
+    required this.onConfirm,
+    required this.onEditPickup,
+    super.key,
+  });
 
   final VoidCallback onConfirm;
+  final VoidCallback onEditPickup;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,7 +41,7 @@ class ConfirmPickupLocationContent extends ConsumerWidget {
           iconPath: AppAssetIcons.riderMarker,
           primaryText: pickupPrimary,
           secondaryText: pickupSecondary,
-          trailing: const GradientIconButton(iconPath: AppAssetIcons.search),
+          onEditPickup: onEditPickup,
         ),
         const SizedBox(height: AppSpacing.sm),
         _JourneyMetricsCard(
@@ -79,13 +84,13 @@ class _PickupAddressCard extends StatelessWidget {
     required this.iconPath,
     required this.primaryText,
     required this.secondaryText,
-    this.trailing,
+    required this.onEditPickup,
   });
 
   final String iconPath;
   final String primaryText;
   final String? secondaryText;
-  final Widget? trailing;
+  final VoidCallback onEditPickup;
 
   @override
   Widget build(BuildContext context) {
@@ -126,10 +131,11 @@ class _PickupAddressCard extends StatelessWidget {
               ],
             ),
           ),
-          if (trailing != null) ...<Widget>[
-            const SizedBox(width: AppSpacing.sm),
-            trailing!,
-          ],
+          const SizedBox(width: AppSpacing.sm),
+          GradientIconButton(
+            iconPath: AppAssetIcons.search,
+            onTap: onEditPickup,
+          ),
         ],
       ),
     );

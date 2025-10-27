@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:trekka/features/logistics/domain/entities/logistics_stage.dart';
 import 'package:trekka/features/logistics/presentation/widgets/stages/confirm_pickup_content.dart';
 import 'package:trekka/features/logistics/presentation/widgets/stages/enter_destination_content.dart';
+import 'package:trekka/features/logistics/presentation/widgets/stages/enter_pickup_location_content.dart';
 import 'package:trekka/features/logistics/presentation/widgets/stages/initial_content.dart';
 // TODO: Import other stage content widgets
 
@@ -14,6 +15,7 @@ class LogisticsContentFactory {
     required VoidCallback onNext,
     required VoidCallback onBack,
     required VoidCallback onCancel,
+    VoidCallback? onEditPickup,
   }) {
     switch (stage) {
       case LogisticsStage.initial:
@@ -29,11 +31,12 @@ class LogisticsContentFactory {
       case LogisticsStage.confirmPickupLocation:
         return ConfirmPickupLocationContent(
           onConfirm: onNext,
+          onEditPickup: onEditPickup ?? onBack,
         );
 
       case LogisticsStage.enterPickupLocation:
-        return const Center(
-          child: Text('Enter Pickup Location Stage - TODO'),
+        return EnterPickupLocationContent(
+          onNext: onNext,
         );
 
       case LogisticsStage.confirmRequest:

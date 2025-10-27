@@ -11,6 +11,7 @@ class GradientIconButton extends StatelessWidget {
     this.borderRadius = 4,
     this.iconWidth = 24,
     this.iconHeight = 24,
+    this.onTap,
     super.key,
   });
 
@@ -20,24 +21,31 @@ class GradientIconButton extends StatelessWidget {
   final double borderRadius;
   final double iconWidth;
   final double iconHeight;
+  final VoidCallback? onTap;
   
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        gradient: AppGradients.logisticsSearchIcon,
-        borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
-      ),
-      alignment: Alignment.center,
-      child: Image.asset(
-        iconPath,
-        width: iconWidth,
-        height: iconHeight,
-        fit: BoxFit.contain,
-        // TODO: Make it really White
-        color: AppColors.white,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            gradient: AppGradients.logisticsSearchIcon,
+            borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+          ),
+          alignment: Alignment.center,
+          child: Image.asset(
+            iconPath,
+            width: iconWidth,
+            height: iconHeight,
+            fit: BoxFit.contain,
+            color: AppColors.white,
+          ),
+        ),
       ),
     );
   }

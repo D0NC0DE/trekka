@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trekka/core/design/tokens.dart';
-import 'package:trekka/features/logistics/presentation/providers/logistics_provider.dart';
+import 'package:trekka/features/logistics/data/models/place_autocomplete_prediction.dart';
 import 'package:trekka/features/logistics/presentation/viewmodels/logistics_state.dart';
 
 class PlaceSuggestion extends StatelessWidget {
@@ -9,14 +8,14 @@ class PlaceSuggestion extends StatelessWidget {
     super.key,
     required this.logisticsState,
     required TextEditingController controller,
-    required this.ref,
     required this.onPredictionSelected,
+    required this.onSelectPrediction,
   }) : _controller = controller;
 
   final LogisticsState logisticsState;
   final TextEditingController _controller;
-  final WidgetRef ref;
   final VoidCallback onPredictionSelected;
+  final Future<void> Function(PlaceAutocompletePrediction) onSelectPrediction;
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +37,7 @@ class PlaceSuggestion extends StatelessWidget {
               onTap: () async {
                 _controller.text = prediction.fullText;
                 FocusScope.of(context).unfocus();
-                await ref
-                    .read(logisticsViewModelProvider.notifier)
-                    .selectPrediction(prediction);
+                await onSelectPrediction(prediction);
                 onPredictionSelected();
               },
               child: Container(
