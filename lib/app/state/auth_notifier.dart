@@ -4,9 +4,9 @@ import 'package:trekka/core/error/failures.dart';
 import 'package:trekka/core/network/api_client.dart';
 import 'package:trekka/core/storage/auth_storage_service.dart';
 import 'package:trekka/core/utils/result.dart';
-import 'package:trekka/features/users/data/models/user_dto.dart';
-import 'package:trekka/features/users/domain/entities/user.dart';
-import 'package:trekka/features/users/domain/repositories/users_repository.dart';
+import 'package:trekka/features/profile/data/models/user_dto.dart';
+import 'package:trekka/features/profile/domain/entities/user.dart';
+import 'package:trekka/features/profile/domain/repositories/users_repository.dart';
 import 'package:trekka/features/wallets/domain/entities/wallet.dart';
 import 'package:trekka/features/wallets/domain/repositories/wallets_repository.dart';
 

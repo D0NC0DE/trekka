@@ -26,6 +26,8 @@ class AppColors {
   static const Color tealDark = Color(0xFF008375);
   static const Color tealBrightGradientStart = Color(0xFF01BF97);
   static const Color tealBrightGradientEnd = Color(0xFF008D7A);
+  static const Color centerModalGradientStart = Color(0xFF03A496);
+  static const Color centerModalGradientEnd = Color(0xFF038F92);
   static const Color black = Color(0xFF000000);
   static const Color surfaceMuted = Color(0xFFF6F6F6);
   static const Color overlayFadeBlack = Color(0x59000000);

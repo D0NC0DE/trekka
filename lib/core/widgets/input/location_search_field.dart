@@ -34,7 +34,7 @@ class LocationSearchField extends StatelessWidget {
     return GestureDetector(
       onTap: readOnly ? onTap : null,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.smLg),
         decoration: BoxDecoration(
           color: AppColors.surfaceMuted,
           border: Border.all(color: AppColors.deepTeal50, width: 2),

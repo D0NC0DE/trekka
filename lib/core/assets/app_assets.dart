@@ -8,6 +8,8 @@ class AppAssetImages {
   static const String splashBackground = 'assets/images/home_bg.png';
 
   static const String authSheetBackground = 'assets/images/auth_sheet_bg.png';
+
+  static const String avatar = 'assets/images/avatar.jpg';
 }
 
 @immutable
@@ -65,6 +67,12 @@ class AppAssetIcons {
   static const String chat = 'assets/icons/actions/chat.png';
   static const String call = 'assets/icons/actions/call.png';
   static const String popDots = 'assets/icons/actions/pop_dots.png';
+
+  // Profile Icons
+  static const String user = 'assets/icons/profile/user.png';
+  static const String signout = 'assets/icons/profile/signout.png';
+  static const String settings = 'assets/icons/profile/settings.png';
+  static const String forward = 'assets/icons/profile/forward.png';
 
   // Other Icons
   static const String destinationInfo = 'assets/icons/destination.png';

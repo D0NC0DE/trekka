@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:trekka/features/users/domain/entities/user.dart';
+import 'package:trekka/features/profile/domain/entities/user.dart';
 import 'package:trekka/features/wallets/domain/entities/wallet.dart';
 
 /// Represents the authentication state of the app
