@@ -15,6 +15,7 @@ class MapMarkerBuilder {
     BitmapDescriptor? destinationIcon,
     LatLng? fallbackUserLocation,
     Set<Marker>? nearbyDriverMarkers,
+    BitmapDescriptor? animatedPickupIcon,
   }) {
     final LatLng? pickupLocation =
         logisticsState.userLocation ?? fallbackUserLocation;
@@ -23,11 +24,17 @@ class MapMarkerBuilder {
       return <Marker>{};
     }
 
+    // Use animated pickup marker during "looking for driver" stage
+    final bool shouldAnimatePickup = currentStage == LogisticsStage.lookingForDriver;
+    final pickupMarkerIcon = shouldAnimatePickup && animatedPickupIcon != null
+        ? animatedPickupIcon
+        : (riderIcon ?? BitmapDescriptor.defaultMarker);
+
     final Set<Marker> markers = <Marker>{
       Marker(
         markerId: const MarkerId('user-location'),
         position: pickupLocation,
-        icon: riderIcon ?? BitmapDescriptor.defaultMarker,
+        icon: pickupMarkerIcon,
         infoWindow: const InfoWindow(title: 'Pickup location'),
       ),
     };

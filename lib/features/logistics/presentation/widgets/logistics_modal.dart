@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:trekka/core/design/shadows.dart';
 import 'package:trekka/core/design/gradients.dart';
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/widgets/sheet/sheet_container.dart';
@@ -51,6 +52,11 @@ class LogisticsModal extends StatelessWidget {
         stage == LogisticsStage.enterDestination ||
         stage == LogisticsStage.enterPickupLocation;
 
+    final bool shouldShowStatusBanner =
+        stage == LogisticsStage.waitingForDriver ||
+        stage == LogisticsStage.driverArrived ||
+        stage == LogisticsStage.inProgress;
+
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
@@ -61,52 +67,113 @@ class LogisticsModal extends StatelessWidget {
           minHeight: shouldExpandToMax ? maxHeight : 0,
         ),
         child: IntrinsicHeight(
-          child: SheetContainer(
-            key: const ValueKey<String>('logistics'),
-            borderRadius: 20,
-            gradient: AppGradients.logisticsSheet,
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  top: _LogisticsConstants.topSpacing,
-                  left: AppSpacing.lg,
-                  right: AppSpacing.lg,
-                  bottom: bottomInset + _LogisticsConstants.bottomSpacing,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              if (shouldShowStatusBanner)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: -40,
+                  child: _DriverStatusBanner(message: _getStatusMessage(stage)),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    if (shouldShowDragger)
-                      Center(
-                        child: SizedBox(
-                          width: _LogisticsConstants.dragHandleWidth,
-                          child: const SheetDragHandle(),
-                        ),
-                      ),
-
-                    // Dynamic content based on stage
-                    Padding(
-                      padding: EdgeInsets.only(
-                        top: shouldShowDragger
-                            ? _LogisticsConstants.verticalSpacing
-                            : _LogisticsConstants.topSpacing,
-                      ),
-                      child: LogisticsContentFactory.createContent(
-                        stage: stage,
-                        onNext: onNext,
-                        onBack: onBack,
-                        onCancel: onCancel,
-                        onEditPickup: onEditPickup,
-                      ),
+              // Main modal
+              SheetContainer(
+                key: const ValueKey<String>('logistics'),
+                borderRadius: 20,
+                gradient: AppGradients.logisticsSheet,
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      top: _LogisticsConstants.topSpacing,
+                      left: AppSpacing.lg,
+                      right: AppSpacing.lg,
+                      bottom: bottomInset + _LogisticsConstants.bottomSpacing,
                     ),
-                  ],
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        if (shouldShowDragger)
+                          Center(
+                            child: SizedBox(
+                              width: _LogisticsConstants.dragHandleWidth,
+                              child: const SheetDragHandle(),
+                            ),
+                          ),
+
+                        // Dynamic content based on stage
+                        Padding(
+                          padding: EdgeInsets.only(
+                            top: shouldShowDragger
+                                ? _LogisticsConstants.verticalSpacing
+                                : _LogisticsConstants.topSpacing,
+                          ),
+                          child: LogisticsContentFactory.createContent(
+                            stage: stage,
+                            onNext: onNext,
+                            onBack: onBack,
+                            onCancel: onCancel,
+                            onEditPickup: onEditPickup,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  String _getStatusMessage(LogisticsStage stage) {
+    switch (stage) {
+      case LogisticsStage.waitingForDriver:
+        return 'Driver is on the way';
+      case LogisticsStage.driverArrived:
+        return 'Driver has arrived';
+      case LogisticsStage.inProgress:
+        return 'Trip in progress';
+      default:
+        return '';
+    }
+  }
+}
+
+/// Curved status banner that appears on top of the modal
+class _DriverStatusBanner extends StatelessWidget {
+  const _DriverStatusBanner({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      height: 52, // Total height of banner
+      decoration: const BoxDecoration(
+        color: AppColors.logisticsDriverStatusBackground,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        boxShadow: AppShadows.avatarBorderShadow,
+      ),
+      alignment: Alignment.topCenter,
+      padding: const EdgeInsets.only(top: 12),
+      child: Text(
+        message,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: AppColors.deepTeal,
+          fontWeight: AppFontWeights.medium,
+          height: 1.4,
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }

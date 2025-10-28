@@ -55,7 +55,9 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
   Timer? _sheetRestoreTimer;
   Timer? _driverAcceptanceTimer;
   AnimatedDriverMarkerController? _driverMarkerController;
+  AnimatedPickupMarkerController? _pickupMarkerController;
   Set<Marker> _nearbyDriverMarkers = {};
+  BitmapDescriptor? _animatedPickupIcon;
   static const List<LogisticsStage> _stageFlow = <LogisticsStage>[
     LogisticsStage.initial,
     LogisticsStage.enterDestination,
@@ -96,6 +98,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
     _sheetRestoreTimer?.cancel();
     _driverAcceptanceTimer?.cancel();
     _driverMarkerController?.dispose();
+    _pickupMarkerController?.dispose();
     super.dispose();
   }
 
@@ -221,6 +224,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
       destinationIcon: _destinationIcon,
       fallbackUserLocation: _userLocation,
       nearbyDriverMarkers: _nearbyDriverMarkers,
+      animatedPickupIcon: _animatedPickupIcon,
     );
   }
 
@@ -229,6 +233,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
         ref.read(logisticsViewModelProvider).userLocation ?? _userLocation;
     if (pickupLocation == null) return;
 
+    // Start nearby driver markers animation
     _driverMarkerController?.dispose();
     _driverMarkerController = AnimatedDriverMarkerController(
       pickupLocation: pickupLocation,
@@ -241,12 +246,27 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
       },
     );
     _driverMarkerController!.start();
+
+    // Start pickup marker pulsing animation
+    _pickupMarkerController?.dispose();
+    _pickupMarkerController = AnimatedPickupMarkerController(
+      onFrameUpdated: (frame) {
+        if (mounted && _currentStage == LogisticsStage.lookingForDriver) {
+          setState(() {
+            _animatedPickupIcon = frame;
+          });
+        }
+      },
+    );
+    _pickupMarkerController!.start();
   }
 
   void _stopNearbyDriverAnimation() {
     _driverMarkerController?.stop();
+    _pickupMarkerController?.stop();
     setState(() {
       _nearbyDriverMarkers = {};
+      _animatedPickupIcon = null; // Reset to normal icon
     });
   }
 
@@ -394,6 +414,13 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
 
       if (_currentStage == LogisticsStage.confirmRequest) {
         _currentStage = LogisticsStage.confirmPickupLocation;
+        if (_mapController != null && _userLocation != null) {
+          _mapController!.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(target: _userLocation!, zoom: _userZoom, tilt: 20),
+            ),
+          );
+        }
         return;
       }
 

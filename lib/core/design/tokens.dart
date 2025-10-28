@@ -11,6 +11,9 @@ class AppColors {
   static const Color divider = Color(0xFFE0E0E0);
   static const Color accentBurntOrange = Color(0xFFF4A261);
   static const Color accentAmber = Color(0xFFFFD166);
+  static const Color accentAmber10 = Color(0x1AFFD166);
+  static const Color accentAmber30 = Color(0x4DFFD166);
+  static const Color accentAmber50 = Color(0x80FFD166);
   static const Color accentPinpoint = Color(0xFFFFC460);
   static const Color primary = Color(0xFF00A896);
   static const Color primaryBright = Color(0xFF02C39A);
