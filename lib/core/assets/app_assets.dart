@@ -21,7 +21,7 @@ class AppAssetIcons {
 
   // Home Action Icons
   static const String pinpoint = 'assets/icons/pinpoint.png';
-  
+
   static const String courierPin = 'assets/icons/pins/courier.png';
   static const String hailingPin = 'assets/icons/pins/hailing.png';
   static const String marketplacePin = 'assets/icons/pins/marketplace.png';
@@ -43,6 +43,35 @@ class AppAssetIcons {
   static const String facebook = 'assets/icons/socials/facebook.png';
   static const String apple = 'assets/icons/socials/apple.png';
   static const String x = 'assets/icons/socials/x.png';
+
+  // Map Markers
+  static const String riderMarker = 'assets/icons/markers/user.png';
+  static const String destinationMarker =
+      'assets/icons/markers/destination.png';
+  static const String nearbyDriversMarker = 'assets/icons/markers/drivers.png';
+
+  // Action Icons
+  static const String back = 'assets/icons/actions/back.png';
+  static const String journey = 'assets/icons/actions/journey.png';
+  static const String courier = 'assets/icons/actions/courier.png';
+  static const String myLocation = 'assets/icons/actions/my_location.png';
+  static const String search = 'assets/icons/actions/search.png';
+  static const String close = 'assets/icons/actions/close.png';
+  static const String selectOnMap = 'assets/icons/actions/on_map.png';
+  static const String stop = 'assets/icons/actions/stop.png';
+  static const String increase = 'assets/icons/actions/increase.png';
+  static const String reduce = 'assets/icons/actions/reduce.png';
+  static const String edit = 'assets/icons/actions/edit.png';
+  static const String chat = 'assets/icons/actions/chat.png';
+  static const String call = 'assets/icons/actions/call.png';
+  static const String popDots = 'assets/icons/actions/pop_dots.png';
+
+  // Other Icons
+  static const String destinationInfo = 'assets/icons/destination.png';
+  static const String ride = 'assets/icons/ride.png';
+  static const String seat = 'assets/icons/seat.png';
+  static const String star = 'assets/icons/star.png';
+  static const String success = 'assets/icons/success.png';
 }
 
 @immutable
@@ -51,4 +80,12 @@ class AppAssetGifs {
 
   static const String loader = 'assets/gifs/loader.gif';
   static const String loading = 'assets/gifs/loading.gif';
+}
+
+@immutable
+class AppAssetMapStyles {
+  const AppAssetMapStyles._();
+
+  static const String dark = 'assets/map_styles/dark.json';
+  static const String light = 'assets/map_styles/light.json';
 }

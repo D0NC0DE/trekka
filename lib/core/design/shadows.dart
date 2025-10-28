@@ -89,4 +89,58 @@ class AppShadows {
       blurStyle: BlurStyle.inner,
     ),
   ];
+
+  static const List<BoxShadow> floatingButton = <BoxShadow>[
+    BoxShadow(
+      color: Color(0x80000000),
+      offset: Offset(0, 0),
+      blurRadius: 4,
+      spreadRadius: 0,
+    ),
+  ];
+
+  static const List<BoxShadow> routeConnectorDot = <BoxShadow>[
+    BoxShadow(
+      color: AppColors.shadowRouteConnector,
+      offset: Offset(0, 1),
+      blurRadius: 2,
+    ),
+    BoxShadow(
+      color: AppColors.shadowRouteConnector,
+      offset: Offset(0, -1),
+      blurRadius: 2,
+    ),
+  ];
+
+  static const List<BoxShadow> routeConnectorLineInner = <BoxShadow>[
+    BoxShadow(
+      color: AppColors.shadowRouteConnector,
+      offset: Offset(1, 0),
+      blurRadius: 4,
+    ),
+  ];
+
+  static const List<BoxShadow> routeConnectorLineOuter = <BoxShadow>[
+    BoxShadow(
+      color: AppColors.shadowMidBlack,
+      offset: Offset(-1, 0),
+      blurRadius: 4,
+    ),
+  ];
+
+  static const List<BoxShadow> avatarBorderShadow = <BoxShadow>[
+    BoxShadow(
+      color: AppColors.reduceActionShadow,
+      offset: Offset(0, 2),
+      blurRadius: 2,
+    ),
+  ];
+
+  static const List<BoxShadow> completeRideSuccessBadge = <BoxShadow>[
+    BoxShadow(
+      color: AppColors.shadowMidBlack,
+      blurRadius: 4,
+      offset: Offset(0, 2),
+    ),
+  ];
 }

@@ -14,4 +14,63 @@ class AppGradients {
     ],
     stops: <double>[0, 0.6399],
   );
+
+  static const Gradient logisticsSheet = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[
+      AppColors.tealGradientStart,
+      AppColors.tealGradientEnd,
+    ],
+  );
+
+  static const Gradient logisticsActionButton = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[
+      AppColors.primaryBright,
+      AppColors.tealDark,
+    ],
+  );
+
+  static const Gradient logisticsSearchIcon = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[
+      AppColors.logisticsIconStart,
+      AppColors.logisticsIconEnd,
+    ],
+  );
+
+  static const Gradient backButton = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[
+      AppColors.tealBrightGradientStart,
+      AppColors.tealBrightGradientEnd,
+    ],
+  );
+
+  static const Gradient completeRideBackground = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[
+      AppColors.tealGradientStart,
+      AppColors.tealGradientEnd,
+    ],
+  );
+
+  static const Gradient completeRideButtonActive = LinearGradient(
+    colors: <Color>[
+      AppColors.tealBrightGradientStart,
+      AppColors.tealBrightGradientEnd,
+    ],
+  );
+
+  static const Gradient completeRideButtonInactive = LinearGradient(
+    colors: <Color>[
+      AppColors.logisticsActionInactive,
+      AppColors.logisticsActionInactive,
+    ],
+  );
 }
