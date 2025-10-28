@@ -54,6 +54,7 @@ class AppColors {
   static const Color nearbyDriverMarkerOuter = Color(0x5904A497);
   static const Color nearbyDriverMarkerInner = Color(0x8004A497);
   static const Color nearbyDriverMarkerCenter = Color(0xFF04A497);
+  static const Color completeRideSuccessBadge = Color(0xE6D9FAFA);
 }
 
 class AppSpacing {
@@ -82,6 +83,17 @@ class AppRadius {
   static const double md = 16;
   static const double lg = 24;
   static const double pill = 22;
+  static const double circular = 92;
+}
+
+class AppSizes {
+  AppSizes._();
+
+  // Complete ride screen
+  static const double completeRideSuccessBadge = 92;
+  static const double completeRideSuccessIcon = 48;
+  static const double completeRideStarSize = 28;
+  static const double completeRideTextFieldLines = 2;
 }
 
 class AppFontWeights {

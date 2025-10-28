@@ -29,9 +29,6 @@ enum LogisticsStage {
 
   /// Ride completed
   complete,
-
-  /// Post-ride review and feedback
-  review,
 }
 
 extension LogisticsStageExtension on LogisticsStage {
@@ -52,8 +49,6 @@ extension LogisticsStageExtension on LogisticsStage {
       case LogisticsStage.waitingForDriver:
       case LogisticsStage.driverArrived:
         return false;
-      case LogisticsStage.review:
-        return true;
     }
   }
 
@@ -70,7 +65,6 @@ extension LogisticsStageExtension on LogisticsStage {
       case LogisticsStage.driverArrived:
       case LogisticsStage.inProgress:
       case LogisticsStage.complete:
-      case LogisticsStage.review:
         return false;
     }
   }

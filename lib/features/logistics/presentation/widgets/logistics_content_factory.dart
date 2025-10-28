@@ -8,7 +8,7 @@ import 'package:trekka/features/logistics/presentation/widgets/stages/confirm_re
 import 'package:trekka/features/logistics/presentation/widgets/stages/looking_for_driver_content.dart';
 import 'package:trekka/features/logistics/presentation/widgets/stages/waiting_for_driver_content.dart';
 import 'package:trekka/features/logistics/presentation/widgets/stages/initial_content.dart';
-// TODO: Import other stage content widgets
+import 'package:trekka/features/logistics/presentation/widgets/stages/complete_ride_content.dart';
 
 /// Factory that returns the appropriate content widget for each logistics stage.
 class LogisticsContentFactory {
@@ -61,10 +61,7 @@ class LogisticsContentFactory {
         );
 
       case LogisticsStage.complete:
-        return const Center(child: Text('Ride Complete Stage - TODO'));
-
-      case LogisticsStage.review:
-        return const Center(child: Text('Review Stage - TODO'));
+        return CompleteRideContent(onComplete: onNext);
     }
   }
 }

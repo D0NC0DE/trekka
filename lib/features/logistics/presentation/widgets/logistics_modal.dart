@@ -39,11 +39,27 @@ class LogisticsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Render complete stage as full-screen modal
+    if (stage == LogisticsStage.complete) {
+      return LogisticsContentFactory.createContent(
+        stage: stage,
+        onNext: onNext,
+        onBack: onBack,
+        onCancel: onCancel,
+        onEditPickup: onEditPickup,
+      );
+    }
+
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final Size screenSize = mediaQuery.size;
     final double maxHeight =
         screenSize.height * _LogisticsConstants.maxHeightFactor;
     final double bottomInset = mediaQuery.viewPadding.bottom;
+
+    // Only respond to keyboard on confirmRequest stage
+    final double keyboardInset = stage == LogisticsStage.confirmRequest
+        ? mediaQuery.viewInsets.bottom
+        : 0;
 
     final bool shouldExpandToMax =
         stage == LogisticsStage.enterDestination ||
@@ -91,7 +107,10 @@ class LogisticsModal extends StatelessWidget {
                       top: _LogisticsConstants.topSpacing,
                       left: AppSpacing.lg,
                       right: AppSpacing.lg,
-                      bottom: bottomInset + _LogisticsConstants.bottomSpacing,
+                      bottom:
+                          bottomInset +
+                          keyboardInset +
+                          _LogisticsConstants.bottomSpacing,
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,

@@ -48,6 +48,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
   bool _isLocating = false;
   bool _showBottomSheet = false;
   bool _hasResolvedCurrentPosition = false;
+  // StreamSubscription<Position>? _positionStreamSubscription;
   LogisticsStage _currentStage = LogisticsStage.initial;
   late final AnimationController _sheetAnimationController;
   late final Animation<Offset> _sheetSlideAnimation;
@@ -69,7 +70,6 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
     LogisticsStage.driverArrived,
     LogisticsStage.inProgress,
     LogisticsStage.complete,
-    LogisticsStage.review,
   ];
 
   @override
@@ -99,6 +99,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
     _driverAcceptanceTimer?.cancel();
     _driverMarkerController?.dispose();
     _pickupMarkerController?.dispose();
+    // _positionStreamSubscription?.cancel();
     super.dispose();
   }
 
@@ -270,6 +271,62 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
     });
   }
 
+  // void _startCompassRotation() {
+  //   _positionStreamSubscription?.cancel();
+
+  //   late LocationSettings locationSettings;
+  //   if (defaultTargetPlatform == TargetPlatform.android) {
+  //     locationSettings = AndroidSettings(
+  //       accuracy: LocationAccuracy.bestForNavigation,
+  //       distanceFilter: 5,
+  //       intervalDuration: const Duration(seconds: 1),
+  //     );
+  //   } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+  //     locationSettings = AppleSettings(
+  //       accuracy: LocationAccuracy.bestForNavigation,
+  //       distanceFilter: 5,
+  //     );
+  //   } else {
+  //     locationSettings = const LocationSettings(
+  //       accuracy: LocationAccuracy.bestForNavigation,
+  //       distanceFilter: 5,
+  //     );
+  //   }
+
+  //   _positionStreamSubscription = Geolocator.getPositionStream(
+  //     locationSettings: locationSettings,
+  //   ).listen((Position position) {
+  //     if (!mounted || _currentStage != LogisticsStage.inProgress) return;
+  //     if (_mapController == null) return;
+
+  //     final LatLng target = LatLng(position.latitude, position.longitude);
+
+  //     // Update user location
+  //     setState(() {
+  //       _userLocation = target;
+  //     });
+
+  //     ref.read(logisticsViewModelProvider.notifier).setUserLocation(target);
+
+  //     // Update camera with bearing (rotation based on heading)
+  //     _mapController!.animateCamera(
+  //       CameraUpdate.newCameraPosition(
+  //         CameraPosition(
+  //           target: target,
+  //           zoom: _userZoom,
+  //           tilt: 50,
+  //           bearing: position.heading, // Rotate map based on device heading
+  //         ),
+  //       ),
+  //     );
+  //   });
+  // }
+
+  // void _stopCompassRotation() {
+  //   _positionStreamSubscription?.cancel();
+  //   _positionStreamSubscription = null;
+  // }
+
   Set<Polyline> _buildPolylines(LogisticsState logisticsState) {
     return MapPolylineBuilder.buildPolylines(
       logisticsState: logisticsState,
@@ -401,11 +458,19 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
           );
         }
       }
+
+      //  // Start compass rotation when entering inProgress stage
+      // if (_currentStage == LogisticsStage.inProgress) {
+      //   _startCompassRotation();
+      // } else {
+      //   _stopCompassRotation();
+      // }
     });
   }
 
   void _handleBackStage() {
     _driverAcceptanceTimer?.cancel();
+    // _stopCompassRotation();
     if (!_currentStage.canGoBack) return;
 
     setState(() {
@@ -448,6 +513,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
   void _handleCancelRide() {
     _driverAcceptanceTimer?.cancel();
     _stopNearbyDriverAnimation();
+    // _stopCompassRotation();
     if (_currentStage == LogisticsStage.lookingForDriver ||
         _currentStage == LogisticsStage.waitingForDriver) {
       setState(() {
@@ -509,7 +575,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
 
   void _scheduleDriverArrival() {
     _driverAcceptanceTimer?.cancel();
-    final int randomMillis = Random().nextInt(3000) + 2000; // 2-5 seconds
+    final int randomMillis = Random().nextInt(10000) + 20000; // 20-30 seconds
     _driverAcceptanceTimer = Timer(Duration(milliseconds: randomMillis), () {
       if (!mounted) return;
       if (_currentStage != LogisticsStage.waitingForDriver) return;
@@ -563,14 +629,16 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
         _currentStage != LogisticsStage.lookingForDriver &&
         _currentStage != LogisticsStage.waitingForDriver &&
         _currentStage != LogisticsStage.driverArrived &&
-        _currentStage != LogisticsStage.inProgress;
+        _currentStage != LogisticsStage.inProgress &&
+        _currentStage != LogisticsStage.complete;
     final bool shouldShowFloatingButton =
         _currentStage != LogisticsStage.confirmPickupLocation &&
         _currentStage != LogisticsStage.confirmRequest &&
         _currentStage != LogisticsStage.lookingForDriver &&
         _currentStage != LogisticsStage.waitingForDriver &&
         _currentStage != LogisticsStage.driverArrived &&
-        _currentStage != LogisticsStage.inProgress;
+        _currentStage != LogisticsStage.inProgress &&
+        _currentStage != LogisticsStage.complete;
 
     return PopScope(
       canPop: _currentStage == LogisticsStage.initial,
@@ -587,7 +655,8 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
         ),
         child: Scaffold(
           backgroundColor: AppColors.midnightGreen,
-          resizeToAvoidBottomInset: false,
+          resizeToAvoidBottomInset:
+              _currentStage == LogisticsStage.confirmRequest,
           body: Stack(
             children: <Widget>[
               GoogleMap(
@@ -623,6 +692,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
               ),
               if (_isLocating && _currentStage == LogisticsStage.initial)
                 GradientOverlayModal(
+                  maxWidth: 240,
                   child: IconTextButton(
                     text: 'Locating you...',
                     onPressed: null,

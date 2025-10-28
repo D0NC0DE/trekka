@@ -71,6 +71,7 @@ class AppAssetIcons {
   static const String ride = 'assets/icons/ride.png';
   static const String seat = 'assets/icons/seat.png';
   static const String star = 'assets/icons/star.png';
+  static const String success = 'assets/icons/success.png';
 }
 
 @immutable

@@ -135,4 +135,12 @@ class AppShadows {
       blurRadius: 2,
     ),
   ];
+
+  static const List<BoxShadow> completeRideSuccessBadge = <BoxShadow>[
+    BoxShadow(
+      color: AppColors.shadowMidBlack,
+      blurRadius: 4,
+      offset: Offset(0, 2),
+    ),
+  ];
 }

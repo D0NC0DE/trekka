@@ -50,4 +50,27 @@ class AppGradients {
       AppColors.tealBrightGradientEnd,
     ],
   );
+
+  static const Gradient completeRideBackground = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[
+      AppColors.tealGradientStart,
+      AppColors.tealGradientEnd,
+    ],
+  );
+
+  static const Gradient completeRideButtonActive = LinearGradient(
+    colors: <Color>[
+      AppColors.tealBrightGradientStart,
+      AppColors.tealBrightGradientEnd,
+    ],
+  );
+
+  static const Gradient completeRideButtonInactive = LinearGradient(
+    colors: <Color>[
+      AppColors.logisticsActionInactive,
+      AppColors.logisticsActionInactive,
+    ],
+  );
 }
