@@ -49,9 +49,9 @@ extension LogisticsStageExtension on LogisticsStage {
       case LogisticsStage.confirmRequest:
         return true;
       case LogisticsStage.lookingForDriver:
-        return false;
       case LogisticsStage.waitingForDriver:
       case LogisticsStage.driverArrived:
+        return false;
       case LogisticsStage.review:
         return true;
     }

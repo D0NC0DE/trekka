@@ -37,7 +37,7 @@ class PlaceSuggestion extends StatelessWidget {
               onTap: () async {
                 _controller.text = prediction.fullText;
                 FocusScope.of(context).unfocus();
-                await onSelectPrediction(prediction);
+                onSelectPrediction(prediction);
                 onPredictionSelected();
               },
               child: Container(

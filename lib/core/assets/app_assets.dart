@@ -61,6 +61,9 @@ class AppAssetIcons {
   static const String increase = 'assets/icons/actions/increase.png';
   static const String reduce = 'assets/icons/actions/reduce.png';
   static const String edit = 'assets/icons/actions/edit.png';
+  static const String chat = 'assets/icons/actions/chat.png';
+  static const String call = 'assets/icons/actions/call.png';
+  static const String popDots = 'assets/icons/actions/pop_dots.png';
 
   // Other Icons
   static const String destinationInfo = 'assets/icons/destination.png';

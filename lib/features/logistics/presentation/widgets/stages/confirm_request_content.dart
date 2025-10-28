@@ -148,7 +148,7 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
+  
     return BottomBorderCard(
       child: Row(
         children: [
@@ -167,7 +167,7 @@ class _SummaryCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  AddressFormatter.shortenAddress(address),
+                  AddressFormatter.formatWithFallback(address, 'Fetching address...'),
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: AppColors.white,
                     fontWeight: AppFontWeights.semiBold,

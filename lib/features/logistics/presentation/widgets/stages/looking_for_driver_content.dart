@@ -54,6 +54,7 @@ class _LookingForDriverContentState extends State<LookingForDriverContent>
           style: theme.textTheme.bodyLarge?.copyWith(
             color: AppColors.white,
             fontWeight: AppFontWeights.semiBold,
+            height: 1.25,
           ),
         ),
         const SizedBox(height: AppSpacing.lg),

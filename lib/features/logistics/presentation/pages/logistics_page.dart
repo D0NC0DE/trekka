@@ -12,6 +12,9 @@ import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/widgets/button/gradient_back_button.dart';
 import 'package:trekka/core/widgets/button/icon_text_button.dart';
 import 'package:trekka/features/logistics/domain/entities/logistics_stage.dart';
+import 'package:trekka/features/logistics/presentation/helpers/map_camera_controller.dart';
+import 'package:trekka/features/logistics/presentation/helpers/map_marker_builder.dart';
+import 'package:trekka/features/logistics/presentation/helpers/map_polyline_builder.dart';
 import 'package:trekka/features/logistics/presentation/providers/logistics_provider.dart';
 import 'package:trekka/features/logistics/presentation/widgets/logistics_sheet_overlay.dart';
 import 'package:trekka/core/widgets/sheet/gradient_overlay_modal.dart';
@@ -27,7 +30,6 @@ class LogisticsPage extends ConsumerStatefulWidget {
 
 class _LogisticsPageState extends ConsumerState<LogisticsPage>
     with SingleTickerProviderStateMixin {
-  // static const double _initialZoom = 16.0; // Unused after optimization
   static const LatLng _fallbackCenter = LatLng(7.1897, 21.0937); // Africa
   static const double _fallbackZoom = 3.6;
   static const double _userZoom = 17.0;
@@ -39,9 +41,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
 
   GoogleMapController? _mapController;
   BitmapDescriptor? _riderIcon;
-  // String? _darkMapStyle;
-  // String? _lightMapStyle;
-  // String? _mapStyle;
+  BitmapDescriptor? _destinationIcon;
   LatLng? _userLocation;
   bool _isLocating = false;
   bool _showBottomSheet = false;
@@ -79,8 +79,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
             curve: Curves.easeIn,
           ),
         );
-    _loadMarkerIcon();
-    // _loadMapStyles(); // Temporarily disabled for performance
+    _loadMarkerIcons();
     _primeWithLastKnownPosition();
     _resolveUserLocation();
   }
@@ -93,35 +92,17 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
     super.dispose();
   }
 
-  Future<void> _loadMarkerIcon() async {
-    try {
-      final BitmapDescriptor icon = await BitmapDescriptor.asset(
-        const ImageConfiguration(size: Size(24, 24)),
-        AppAssetIcons.riderMarker,
-      );
-      if (!mounted) return;
-      setState(() => _riderIcon = icon);
-    } catch (error) {
-      debugPrint('Failed to load rider marker icon: $error');
+  Future<void> _loadMarkerIcons() async {
+    final riderIcon = await MapMarkerBuilder.loadRiderIcon();
+    final destinationIcon = await MapMarkerBuilder.loadDestinationIcon();
+
+    if (mounted) {
+      setState(() {
+        _riderIcon = riderIcon;
+        _destinationIcon = destinationIcon;
+      });
     }
   }
-
-  // Temporarily disabled for performance
-  // Future<void> _loadMapStyles() async {
-  //   try {
-  //     final List<String> styles = await Future.wait<String>(<Future<String>>[
-  //       rootBundle.loadString(AppAssetMapStyles.dark),
-  //       rootBundle.loadString(AppAssetMapStyles.light),
-  //     ]);
-
-  //     if (!mounted) return;
-  //     _darkMapStyle = styles[0];
-  //     _lightMapStyle = styles[1];
-  //     _updateMapStyle(forceNotify: true);
-  //   } catch (error) {
-  //     debugPrint('Failed to load map styles: $error');
-  //   }
-  // }
 
   Future<void> _primeWithLastKnownPosition() async {
     try {
@@ -226,121 +207,30 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
   }
 
   Set<Marker> _buildMarkers(LogisticsState logisticsState) {
-    final LatLng? pickupLocation = logisticsState.userLocation ?? _userLocation;
-    if (pickupLocation == null) {
-      return <Marker>{};
-    }
+    return MapMarkerBuilder.buildMarkers(
+      logisticsState: logisticsState,
+      currentStage: _currentStage,
+      riderIcon: _riderIcon,
+      destinationIcon: _destinationIcon,
+      fallbackUserLocation: _userLocation,
+    );
+  }
 
-    final Set<Marker> markers = <Marker>{
-      Marker(
-        markerId: const MarkerId('user-location'),
-        position: pickupLocation,
-        icon: _riderIcon ?? BitmapDescriptor.defaultMarker,
-        infoWindow: const InfoWindow(title: 'Pickup location'),
-      ),
-    };
-
-    if (logisticsState.destinationLocation != null) {
-      markers.add(
-        Marker(
-          markerId: const MarkerId('destination'),
-          position: logisticsState.destinationLocation!,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-          infoWindow: const InfoWindow(title: 'Destination'),
-        ),
-      );
-    }
-
-    return markers;
+  Set<Polyline> _buildPolylines(LogisticsState logisticsState) {
+    return MapPolylineBuilder.buildPolylines(
+      logisticsState: logisticsState,
+      currentStage: _currentStage,
+    );
   }
 
   void _fitBoundsToRoute(LatLng pickup, LatLng destination) {
     if (_mapController == null) return;
-
-    final LatLngBounds bounds = LatLngBounds(
-      southwest: LatLng(
-        pickup.latitude < destination.latitude
-            ? pickup.latitude
-            : destination.latitude,
-        pickup.longitude < destination.longitude
-            ? pickup.longitude
-            : destination.longitude,
-      ),
-      northeast: LatLng(
-        pickup.latitude > destination.latitude
-            ? pickup.latitude
-            : destination.latitude,
-        pickup.longitude > destination.longitude
-            ? pickup.longitude
-            : destination.longitude,
-      ),
-    );
-
-    _mapController!.animateCamera(
-      CameraUpdate.newLatLngBounds(bounds, 100), // 100px padding
+    MapCameraController.fitBoundsToRoute(
+      mapController: _mapController!,
+      pickup: pickup,
+      destination: destination,
     );
   }
-
-  /// Build polylines for the route
-  Set<Polyline> _buildPolylines(LogisticsState logisticsState) {
-    if (_currentStage != LogisticsStage.confirmRequest) {
-      return <Polyline>{};
-    }
-
-    if (logisticsState.routeInfo?.encodedPolyline == null) {
-      return <Polyline>{};
-    }
-
-    final List<LatLng>? polylinePoints = logisticsState.routeInfo!
-        .decodePolyline();
-
-    if (polylinePoints == null || polylinePoints.isEmpty) {
-      return <Polyline>{};
-    }
-
-    return <Polyline>{
-      Polyline(
-        polylineId: const PolylineId('route'),
-        points: polylinePoints,
-        color: AppColors.primaryBright,
-        width: 5,
-        geodesic: true,
-        startCap: Cap.roundCap,
-        endCap: Cap.roundCap,
-        jointType: JointType.round,
-      ),
-    };
-  }
-
-  // String _formatAddress(String? address, String fallback) {
-  //   if (address == null || address.trim().isEmpty) {
-  //     return fallback;
-  //   }
-
-  //   final parts = address.split(',');
-  //   if (parts.length > 2) {
-  //     return '${parts[0]}, ${parts[1].trim()}';
-  //   }
-
-  //   return address.trim();
-  // }
-
-  // bool _isDarkMode(BuildContext context) {
-  //   final MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
-  //   if (mediaQuery != null) {
-  //     return mediaQuery.platformBrightness == Brightness.dark;
-  //   }
-  //   return Theme.of(context).brightness == Brightness.dark;
-  // }
-
-  // void _updateMapStyle({bool forceNotify = false}) {
-  //   final bool isDark = _isDarkMode(context);
-  //   final String? resolvedStyle = isDark ? _darkMapStyle : _lightMapStyle;
-  //   if (!forceNotify && _mapStyle == resolvedStyle) return;
-  //   setState(() {
-  //     _mapStyle = resolvedStyle;
-  //   });
-  // }
 
   void _handleLocationButtonPressed() {
     if (_userLocation != null && _mapController != null) {
