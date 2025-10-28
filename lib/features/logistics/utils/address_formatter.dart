@@ -17,4 +17,22 @@ class AddressFormatter {
     }
     return shortenAddress(address);
   }
+
+  /// Returns only the first comma-separated portion of the address.
+  static String? primaryLine(String? address) {
+    if (address == null) return null;
+    final trimmed = address.trim();
+    if (trimmed.isEmpty) return null;
+    final parts = trimmed.split(',');
+    return parts.first.trim();
+  }
+
+  /// Returns the primary line of the address or the fallback if unavailable.
+  static String primaryLineWithFallback(String? address, String fallback) {
+    final primary = primaryLine(address);
+    if (primary == null || primary.isEmpty) {
+      return fallback;
+    }
+    return primary;
+  }
 }

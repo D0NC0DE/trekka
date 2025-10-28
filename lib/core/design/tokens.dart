@@ -15,6 +15,8 @@ class AppColors {
   static const Color accentAmber30 = Color(0x4DFFD166);
   static const Color accentAmber50 = Color(0x80FFD166);
   static const Color accentPinpoint = Color(0xFFFFC460);
+  static const Color pickupPulseOuter = Color(0x334C1D95);
+  static const Color pickupPulseInner = Color(0x664C1D95);
   static const Color primary = Color(0xFF00A896);
   static const Color primaryBright = Color(0xFF02C39A);
   static const Color deepTeal = Color(0xFF05668D);

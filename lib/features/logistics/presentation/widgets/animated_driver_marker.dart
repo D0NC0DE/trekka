@@ -382,13 +382,13 @@ class AnimatedPickupMarkerController {
     final double innerRadius =
         innerBaseRadius + (innerMaxRadius - innerBaseRadius) * animationValue;
 
-    // Outer circle (30% opacity)
-    paint.color = AppColors.accentAmber10;
+    // Outer circle using alternate blue pulse to avoid clashing with driver markers
+    paint.color = AppColors.pickupPulseOuter;
     paint.style = PaintingStyle.fill;
     canvas.drawCircle(center, outerRadius, paint);
 
-    // Inner circle (30% opacity)
-    paint.color = AppColors.accentAmber30;
+    // Inner circle with slightly stronger opacity
+    paint.color = AppColors.pickupPulseInner;
     paint.style = PaintingStyle.fill;
     canvas.drawCircle(center, innerRadius, paint);
 

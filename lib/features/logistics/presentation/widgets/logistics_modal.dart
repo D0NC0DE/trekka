@@ -25,6 +25,7 @@ class LogisticsModal extends StatelessWidget {
     required this.onNext,
     required this.onBack,
     required this.onCancel,
+    this.onCompleteTrip,
     this.onEditPickup,
     super.key,
   });
@@ -33,6 +34,7 @@ class LogisticsModal extends StatelessWidget {
   final VoidCallback onNext;
   final VoidCallback onBack;
   final VoidCallback onCancel;
+  final VoidCallback? onCompleteTrip;
   final VoidCallback? onEditPickup;
 
   @override
@@ -116,6 +118,7 @@ class LogisticsModal extends StatelessWidget {
                             onBack: onBack,
                             onCancel: onCancel,
                             onEditPickup: onEditPickup,
+                            // onCompleteTrip: onCompleteTrip,
                           ),
                         ),
                       ],

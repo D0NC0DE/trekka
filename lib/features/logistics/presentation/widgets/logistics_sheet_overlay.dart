@@ -13,6 +13,7 @@ class LogisticsSheetOverlay extends StatelessWidget {
     required this.onCancel,
     this.showFloatingButton = true,
     this.onEditPickup,
+    this.onCompleteTrip,
     super.key,
   });
 
@@ -22,6 +23,7 @@ class LogisticsSheetOverlay extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback onCancel;
   final VoidCallback? onEditPickup;
+  final VoidCallback? onCompleteTrip;
   final bool showFloatingButton;
 
   @override
@@ -46,6 +48,7 @@ class LogisticsSheetOverlay extends StatelessWidget {
           onBack: onBack,
           onCancel: onCancel,
           onEditPickup: onEditPickup,
+          onCompleteTrip: onCompleteTrip,
         ),
       ],
     );

@@ -9,7 +9,7 @@ import 'package:trekka/core/widgets/button/gradient_info_button.dart';
 class IconTextButton extends StatelessWidget {
   const IconTextButton({
     required this.text,
-    required this.leadingIcon,
+    this.leadingIcon,
     this.onPressed,
     this.backgroundColor,
     this.textColor,
@@ -18,7 +18,7 @@ class IconTextButton extends StatelessWidget {
   });
 
   final String text;
-  final String leadingIcon;
+  final String? leadingIcon;
   final VoidCallback? onPressed;
   final Color? backgroundColor;
   final Color? textColor;
@@ -28,14 +28,26 @@ class IconTextButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color txtColor = textColor ?? AppColors.textPrimary;
 
+    final bool hasLeading = leadingIcon != null;
+    final bool hasTrailing = trailingIcon != null;
+
     return GradientInfoButton(
       backgroundColor: backgroundColor,
       onPressed: onPressed,
       child: Row(
+        mainAxisAlignment: (!hasLeading && !hasTrailing)
+            ? MainAxisAlignment.center
+            : MainAxisAlignment.start,
         children: <Widget>[
-          // Leading icon
-          Image.asset(leadingIcon, width: 24, height: 24, fit: BoxFit.contain),
-          const SizedBox(width: AppSpacing.sm),
+          if (hasLeading) ...<Widget>[
+            Image.asset(
+              leadingIcon!,
+              width: 24,
+              height: 24,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+          ],
 
           // Text
           Expanded(
@@ -46,13 +58,16 @@ class IconTextButton extends StatelessWidget {
                 fontWeight: AppFontWeights.semiBold,
                 color: txtColor,
               ),
+              textAlign: (!hasLeading && !hasTrailing)
+                  ? TextAlign.center
+                  : TextAlign.start,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               softWrap: true,
             ),
           ),
 
-          if (trailingIcon != null) ...<Widget>[
+          if (hasTrailing) ...<Widget>[
             const SizedBox(width: AppSpacing.smLg),
             Image.asset(
               trailingIcon!,

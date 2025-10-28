@@ -43,13 +43,22 @@ class LogisticsContentFactory {
         return LookingForDriverContent(onCancel: onCancel);
 
       case LogisticsStage.waitingForDriver:
-        return WaitingForDriverContent(onCancel: onCancel);
+        return WaitingForDriverContent(
+          onAction: onCancel,
+          actionLabel: 'Cancel ride',
+        );
 
       case LogisticsStage.driverArrived:
-        return const Center(child: Text('Driver Arrived Stage - TODO'));
+        return WaitingForDriverContent(
+          onAction: onCancel,
+          actionLabel: 'Cancel ride',
+        );
 
       case LogisticsStage.inProgress:
-        return const Center(child: Text('Ride In Progress Stage - TODO'));
+        return WaitingForDriverContent(
+          onAction: onNext, // Complete trip action
+          actionLabel: 'Complete trip',
+        );
 
       case LogisticsStage.complete:
         return const Center(child: Text('Ride Complete Stage - TODO'));

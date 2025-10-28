@@ -8,9 +8,14 @@ import 'package:trekka/features/logistics/presentation/widgets/common/bottom_bor
 import 'package:trekka/features/logistics/presentation/widgets/common/gradient_icon_button.dart';
 
 class WaitingForDriverContent extends StatelessWidget {
-  const WaitingForDriverContent({required this.onCancel, super.key});
+  const WaitingForDriverContent({
+    required this.onAction,
+    this.actionLabel = 'Cancel ride',
+    super.key,
+  });
 
-  final VoidCallback onCancel;
+  final VoidCallback onAction;
+  final String actionLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +126,7 @@ class WaitingForDriverContent extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        GradientActionButton(label: 'Cancel ride', onTap: onCancel),
+        GradientActionButton(label: actionLabel, onTap: onAction),
       ],
     );
   }

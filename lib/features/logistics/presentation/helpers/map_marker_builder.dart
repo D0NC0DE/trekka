@@ -25,16 +25,21 @@ class MapMarkerBuilder {
     }
 
     // Use animated pickup marker during "looking for driver" stage
-    final bool shouldAnimatePickup = currentStage == LogisticsStage.lookingForDriver;
+    final bool shouldAnimatePickup =
+        currentStage == LogisticsStage.lookingForDriver;
     final pickupMarkerIcon = shouldAnimatePickup && animatedPickupIcon != null
         ? animatedPickupIcon
         : (riderIcon ?? BitmapDescriptor.defaultMarker);
+    final Offset pickupAnchor = shouldAnimatePickup
+        ? const Offset(0.5, 0.5)
+        : const Offset(0.5, 0.5);
 
     final Set<Marker> markers = <Marker>{
       Marker(
         markerId: const MarkerId('user-location'),
         position: pickupLocation,
         icon: pickupMarkerIcon,
+        anchor: pickupAnchor,
         infoWindow: const InfoWindow(title: 'Pickup location'),
       ),
     };
@@ -54,7 +59,8 @@ class MapMarkerBuilder {
     }
 
     // Add nearby driver markers if provided (for lookingForDriver stage)
-    if (nearbyDriverMarkers != null && currentStage == LogisticsStage.lookingForDriver) {
+    if (nearbyDriverMarkers != null &&
+        currentStage == LogisticsStage.lookingForDriver) {
       markers.addAll(nearbyDriverMarkers);
     }
 

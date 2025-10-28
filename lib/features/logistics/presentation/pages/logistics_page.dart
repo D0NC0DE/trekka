@@ -387,6 +387,20 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
       } else {
         _stopNearbyDriverAnimation();
       }
+
+      // Adjust camera tilt when entering inProgress stage
+      if (_currentStage == LogisticsStage.inProgress) {
+        final pickupLocation = ref
+            .read(logisticsViewModelProvider)
+            .userLocation;
+        if (_mapController != null && pickupLocation != null) {
+          _mapController!.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(target: pickupLocation, zoom: _userZoom, tilt: 50),
+            ),
+          );
+        }
+      }
     });
   }
 
@@ -486,6 +500,38 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
 
       // TODO: Replace with WebSocket driver acceptance listener.
       _handleNextStage();
+
+      // After transitioning to waitingForDriver, schedule arrival
+      _scheduleDriverArrival();
+      _driverAcceptanceTimer = null;
+    });
+  }
+
+  void _scheduleDriverArrival() {
+    _driverAcceptanceTimer?.cancel();
+    final int randomMillis = Random().nextInt(3000) + 2000; // 2-5 seconds
+    _driverAcceptanceTimer = Timer(Duration(milliseconds: randomMillis), () {
+      if (!mounted) return;
+      if (_currentStage != LogisticsStage.waitingForDriver) return;
+
+      // Auto-transition to driver arrived
+      _handleNextStage();
+      
+      // After transitioning to driverArrived, schedule trip start
+      _scheduleTripStart();
+      _driverAcceptanceTimer = null;
+    });
+  }
+
+  void _scheduleTripStart() {
+    _driverAcceptanceTimer?.cancel();
+    final int randomMillis = Random().nextInt(3000) + 2000; // 2-5 seconds
+    _driverAcceptanceTimer = Timer(Duration(milliseconds: randomMillis), () {
+      if (!mounted) return;
+      if (_currentStage != LogisticsStage.driverArrived) return;
+
+      // Auto-transition to in progress
+      _handleNextStage();
       _driverAcceptanceTimer = null;
     });
   }
@@ -501,17 +547,30 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
       logisticsState.destinationAddress,
       'Fetching destination...',
     );
+    final pickupPrimary = AddressFormatter.primaryLineWithFallback(
+      logisticsState.userAddress,
+      'Fetching pickup...',
+    );
+    final destinationPrimary = AddressFormatter.primaryLineWithFallback(
+      logisticsState.destinationAddress,
+      'Fetching destination...',
+    );
+    final String routeSummary = '$pickupPrimary -> $destinationPrimary';
     final bool shouldShowBackButton =
         _currentStage != LogisticsStage.enterDestination &&
         _currentStage != LogisticsStage.confirmPickupLocation &&
         _currentStage != LogisticsStage.enterPickupLocation &&
         _currentStage != LogisticsStage.lookingForDriver &&
-        _currentStage != LogisticsStage.waitingForDriver;
+        _currentStage != LogisticsStage.waitingForDriver &&
+        _currentStage != LogisticsStage.driverArrived &&
+        _currentStage != LogisticsStage.inProgress;
     final bool shouldShowFloatingButton =
         _currentStage != LogisticsStage.confirmPickupLocation &&
         _currentStage != LogisticsStage.confirmRequest &&
         _currentStage != LogisticsStage.lookingForDriver &&
-        _currentStage != LogisticsStage.waitingForDriver;
+        _currentStage != LogisticsStage.waitingForDriver &&
+        _currentStage != LogisticsStage.driverArrived &&
+        _currentStage != LogisticsStage.inProgress;
 
     return PopScope(
       canPop: _currentStage == LogisticsStage.initial,
@@ -562,18 +621,12 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
                   }
                 },
               ),
-              if (_isLocating)
-                SafeArea(
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        top: AppSpacing.lg,
-                        left: AppSpacing.lg,
-                        right: AppSpacing.lg,
-                      ),
-                      // child: const _LocatingBanner(),
-                    ),
+              if (_isLocating && _currentStage == LogisticsStage.initial)
+                GradientOverlayModal(
+                  child: IconTextButton(
+                    text: 'Locating you...',
+                    onPressed: null,
+                    textColor: AppColors.textPrimary,
                   ),
                 ),
               // Hide back button in enterDestination and confirmPickupLocation
@@ -614,6 +667,14 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
                         textColor: AppColors.textPrimary,
                       ),
                     ],
+                  ),
+                ),
+              if (_currentStage == LogisticsStage.waitingForDriver)
+                GradientOverlayModal(
+                  child: IconTextButton(
+                    text: routeSummary,
+                    onPressed: null,
+                    textColor: AppColors.textPrimary,
                   ),
                 ),
               // Bottom sheet overlay with floating button
