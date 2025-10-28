@@ -28,7 +28,7 @@ class RoutesDatasource {
           headers: {
             'Content-Type': 'application/json',
             'X-Goog-Api-Key': _apiKey,
-            'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters',
+            'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline',
           },
         ),
         data: {

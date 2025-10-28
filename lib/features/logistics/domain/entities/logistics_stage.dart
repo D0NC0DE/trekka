@@ -47,7 +47,9 @@ extension LogisticsStageExtension on LogisticsStage {
       case LogisticsStage.confirmPickupLocation:
       case LogisticsStage.enterPickupLocation:
       case LogisticsStage.confirmRequest:
+        return true;
       case LogisticsStage.lookingForDriver:
+        return false;
       case LogisticsStage.waitingForDriver:
       case LogisticsStage.driverArrived:
       case LogisticsStage.review:

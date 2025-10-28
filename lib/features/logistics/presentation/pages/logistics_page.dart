@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -47,6 +49,8 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
   LogisticsStage _currentStage = LogisticsStage.initial;
   late final AnimationController _sheetAnimationController;
   late final Animation<Offset> _sheetSlideAnimation;
+  bool _isMapInteracting = false;
+  Timer? _sheetRestoreTimer;
   static const List<LogisticsStage> _stageFlow = <LogisticsStage>[
     LogisticsStage.initial,
     LogisticsStage.enterDestination,
@@ -85,6 +89,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
   void dispose() {
     _mapController?.dispose();
     _sheetAnimationController.dispose();
+    _sheetRestoreTimer?.cancel();
     super.dispose();
   }
 
@@ -226,12 +231,83 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
       return <Marker>{};
     }
 
-    return <Marker>{
+    final Set<Marker> markers = <Marker>{
       Marker(
         markerId: const MarkerId('user-location'),
         position: pickupLocation,
         icon: _riderIcon ?? BitmapDescriptor.defaultMarker,
         infoWindow: const InfoWindow(title: 'Pickup location'),
+      ),
+    };
+
+    if (logisticsState.destinationLocation != null) {
+      markers.add(
+        Marker(
+          markerId: const MarkerId('destination'),
+          position: logisticsState.destinationLocation!,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          infoWindow: const InfoWindow(title: 'Destination'),
+        ),
+      );
+    }
+
+    return markers;
+  }
+
+  void _fitBoundsToRoute(LatLng pickup, LatLng destination) {
+    if (_mapController == null) return;
+
+    final LatLngBounds bounds = LatLngBounds(
+      southwest: LatLng(
+        pickup.latitude < destination.latitude
+            ? pickup.latitude
+            : destination.latitude,
+        pickup.longitude < destination.longitude
+            ? pickup.longitude
+            : destination.longitude,
+      ),
+      northeast: LatLng(
+        pickup.latitude > destination.latitude
+            ? pickup.latitude
+            : destination.latitude,
+        pickup.longitude > destination.longitude
+            ? pickup.longitude
+            : destination.longitude,
+      ),
+    );
+
+    _mapController!.animateCamera(
+      CameraUpdate.newLatLngBounds(bounds, 100), // 100px padding
+    );
+  }
+
+  /// Build polylines for the route
+  Set<Polyline> _buildPolylines(LogisticsState logisticsState) {
+    if (_currentStage != LogisticsStage.confirmRequest) {
+      return <Polyline>{};
+    }
+
+    if (logisticsState.routeInfo?.encodedPolyline == null) {
+      return <Polyline>{};
+    }
+
+    final List<LatLng>? polylinePoints = logisticsState.routeInfo!
+        .decodePolyline();
+
+    if (polylinePoints == null || polylinePoints.isEmpty) {
+      return <Polyline>{};
+    }
+
+    return <Polyline>{
+      Polyline(
+        polylineId: const PolylineId('route'),
+        points: polylinePoints,
+        color: AppColors.primaryBright,
+        width: 5,
+        geodesic: true,
+        startCap: Cap.roundCap,
+        endCap: Cap.roundCap,
+        jointType: JointType.round,
       ),
     };
   }
@@ -276,6 +352,31 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
     }
   }
 
+  void _handleMapInteractionStart() {
+    _sheetRestoreTimer?.cancel();
+    if (!_isMapInteracting) {
+      setState(() => _isMapInteracting = true);
+    }
+    if (_sheetAnimationController.status == AnimationStatus.completed ||
+        _sheetAnimationController.status == AnimationStatus.forward) {
+      _sheetAnimationController.reverse();
+    }
+  }
+
+  void _handleMapInteractionEnd() {
+    if (_isMapInteracting) {
+      setState(() => _isMapInteracting = false);
+    }
+    _sheetRestoreTimer?.cancel();
+    _sheetRestoreTimer = Timer(const Duration(milliseconds: 200), () {
+      if (!mounted || _isMapInteracting) return;
+      if (_sheetAnimationController.status == AnimationStatus.dismissed ||
+          _sheetAnimationController.status == AnimationStatus.reverse) {
+        _sheetAnimationController.forward();
+      }
+    });
+  }
+
   void _handleNextStage() {
     setState(() {
       if (_currentStage == LogisticsStage.enterPickupLocation) {
@@ -295,6 +396,22 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
 
       if (_currentStage == LogisticsStage.confirmPickupLocation) {
         _currentStage = LogisticsStage.confirmRequest;
+        final logisticsState = ref.read(logisticsViewModelProvider);
+        final pickupLocation = logisticsState.userLocation;
+        final destinationLocation = logisticsState.destinationLocation;
+
+        if (_mapController != null &&
+            pickupLocation != null &&
+            destinationLocation != null) {
+          // Fit both markers in view
+          _fitBoundsToRoute(pickupLocation, destinationLocation);
+        } else if (_mapController != null && pickupLocation != null) {
+          _mapController!.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(target: pickupLocation, zoom: _userZoom, tilt: 20),
+            ),
+          );
+        }
         return;
       }
 
@@ -308,6 +425,19 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
       _currentStage = isLastStage
           ? LogisticsStage.initial
           : _stageFlow[currentIndex + 1];
+
+      if (_currentStage == LogisticsStage.lookingForDriver) {
+        final pickupLocation = ref
+            .read(logisticsViewModelProvider)
+            .userLocation;
+        if (_mapController != null && pickupLocation != null) {
+          _mapController!.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(target: pickupLocation, zoom: _userZoom, tilt: 20),
+            ),
+          );
+        }
+      }
     });
   }
 
@@ -345,6 +475,21 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
   }
 
   void _handleCancelRide() {
+    if (_currentStage == LogisticsStage.lookingForDriver) {
+      setState(() {
+        _currentStage = LogisticsStage.confirmRequest;
+      });
+      final pickupLocation = ref.read(logisticsViewModelProvider).userLocation;
+      if (_mapController != null && pickupLocation != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(target: pickupLocation, zoom: _userZoom, tilt: 20),
+          ),
+        );
+      }
+      return;
+    }
+
     setState(() {
       _currentStage = LogisticsStage.initial;
     });
@@ -356,7 +501,6 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
         ),
       );
     }
-    // TODO: Cancel any active ride requests
   }
 
   void _handleEditPickup() {
@@ -386,10 +530,12 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
     final bool shouldShowBackButton =
         _currentStage != LogisticsStage.enterDestination &&
         _currentStage != LogisticsStage.confirmPickupLocation &&
-        _currentStage != LogisticsStage.enterPickupLocation;
+        _currentStage != LogisticsStage.enterPickupLocation &&
+        _currentStage != LogisticsStage.lookingForDriver;
     final bool shouldShowFloatingButton =
         _currentStage != LogisticsStage.confirmPickupLocation &&
-        _currentStage != LogisticsStage.confirmRequest;
+        _currentStage != LogisticsStage.confirmRequest &&
+        _currentStage != LogisticsStage.lookingForDriver;
 
     return PopScope(
       canPop: _currentStage == LogisticsStage.initial,
@@ -418,6 +564,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
                       )
                     : _initialCameraPosition,
                 markers: _buildMarkers(logisticsState),
+                polylines: _buildPolylines(logisticsState),
                 // style: _mapStyle, // Temporarily disabled for performance
                 myLocationEnabled: true,
                 myLocationButtonEnabled: false,
@@ -427,9 +574,10 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
                 tiltGesturesEnabled: true,
                 rotateGesturesEnabled: true,
                 mapType: MapType.normal,
-                // polylines: ,
                 compassEnabled: false,
                 mapToolbarEnabled: false,
+                onCameraMoveStarted: _handleMapInteractionStart,
+                onCameraIdle: _handleMapInteractionEnd,
                 onMapCreated: (GoogleMapController controller) {
                   _mapController = controller;
                   if (!_showBottomSheet) {
@@ -468,7 +616,8 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
                     ),
                   ),
                 ),
-              if (_currentStage == LogisticsStage.confirmPickupLocation)
+              if (_currentStage == LogisticsStage.confirmPickupLocation &&
+                  !_isMapInteracting)
                 GradientOverlayModal(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,

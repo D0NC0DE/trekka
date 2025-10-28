@@ -12,7 +12,9 @@ import 'package:trekka/features/logistics/utils/address_formatter.dart';
 
 /// Review card showing pickup and drop-off summary before confirming request.
 class ConfirmRequestContent extends ConsumerStatefulWidget {
-  const ConfirmRequestContent({super.key});
+  const ConfirmRequestContent({required this.onConfirm, super.key});
+
+  final VoidCallback onConfirm;
 
   @override
   ConsumerState<ConfirmRequestContent> createState() =>
@@ -127,7 +129,7 @@ class _ConfirmRequestContentState extends ConsumerState<ConfirmRequestContent> {
           ],
         ),
         const SizedBox(height: AppSpacing.smLg),
-        GradientActionButton(label: 'Confirm ride', onTap: () {}),
+        GradientActionButton(label: 'Confirm ride', onTap: widget.onConfirm),
       ],
     );
   }

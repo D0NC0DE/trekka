@@ -5,6 +5,7 @@ import 'package:trekka/features/logistics/presentation/widgets/stages/confirm_pi
 import 'package:trekka/features/logistics/presentation/widgets/stages/enter_destination_content.dart';
 import 'package:trekka/features/logistics/presentation/widgets/stages/enter_pickup_content.dart';
 import 'package:trekka/features/logistics/presentation/widgets/stages/confirm_request_content.dart';
+import 'package:trekka/features/logistics/presentation/widgets/stages/looking_for_driver_content.dart';
 import 'package:trekka/features/logistics/presentation/widgets/stages/initial_content.dart';
 // TODO: Import other stage content widgets
 
@@ -41,11 +42,13 @@ class LogisticsContentFactory {
         );
 
       case LogisticsStage.confirmRequest:
-        return const ConfirmRequestContent();
+        return ConfirmRequestContent(
+          onConfirm: onNext,
+        );
 
       case LogisticsStage.lookingForDriver:
-        return const Center(
-          child: Text('Looking for Driver Stage - TODO'),
+        return LookingForDriverContent(
+          onCancel: onCancel,
         );
 
       case LogisticsStage.waitingForDriver:
