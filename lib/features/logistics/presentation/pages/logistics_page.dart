@@ -516,7 +516,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
 
       // Auto-transition to driver arrived
       _handleNextStage();
-      
+
       // After transitioning to driverArrived, schedule trip start
       _scheduleTripStart();
       _driverAcceptanceTimer = null;
@@ -669,7 +669,9 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
                     ],
                   ),
                 ),
-              if (_currentStage == LogisticsStage.waitingForDriver)
+              if (_currentStage == LogisticsStage.waitingForDriver ||
+                  _currentStage == LogisticsStage.driverArrived ||
+                  _currentStage == LogisticsStage.inProgress)
                 GradientOverlayModal(
                   child: IconTextButton(
                     text: routeSummary,
