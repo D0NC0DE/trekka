@@ -127,4 +127,12 @@ class AppShadows {
       blurRadius: 4,
     ),
   ];
+
+  static const List<BoxShadow> avatarBorderShadow = <BoxShadow>[
+    BoxShadow(
+      color: AppColors.reduceActionShadow,
+      offset: Offset(0, 2),
+      blurRadius: 2,
+    ),
+  ];
 }

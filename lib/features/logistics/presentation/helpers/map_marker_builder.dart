@@ -14,6 +14,7 @@ class MapMarkerBuilder {
     required BitmapDescriptor? riderIcon,
     BitmapDescriptor? destinationIcon,
     LatLng? fallbackUserLocation,
+    Set<Marker>? nearbyDriverMarkers,
   }) {
     final LatLng? pickupLocation =
         logisticsState.userLocation ?? fallbackUserLocation;
@@ -43,6 +44,11 @@ class MapMarkerBuilder {
           infoWindow: const InfoWindow(title: 'Destination'),
         ),
       );
+    }
+
+    // Add nearby driver markers if provided (for lookingForDriver stage)
+    if (nearbyDriverMarkers != null && currentStage == LogisticsStage.lookingForDriver) {
+      markers.addAll(nearbyDriverMarkers);
     }
 
     return markers;

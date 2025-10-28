@@ -48,6 +48,7 @@ class AppAssetIcons {
   static const String riderMarker = 'assets/icons/markers/user.png';
   static const String destinationMarker =
       'assets/icons/markers/destination.png';
+  static const String nearbyDriversMarker = 'assets/icons/markers/drivers.png';
 
   // Action Icons
   static const String back = 'assets/icons/actions/back.png';
@@ -69,6 +70,7 @@ class AppAssetIcons {
   static const String destinationInfo = 'assets/icons/destination.png';
   static const String ride = 'assets/icons/ride.png';
   static const String seat = 'assets/icons/seat.png';
+  static const String star = 'assets/icons/star.png';
 }
 
 @immutable

@@ -6,6 +6,7 @@ import 'package:trekka/features/logistics/presentation/widgets/stages/enter_dest
 import 'package:trekka/features/logistics/presentation/widgets/stages/enter_pickup_content.dart';
 import 'package:trekka/features/logistics/presentation/widgets/stages/confirm_request_content.dart';
 import 'package:trekka/features/logistics/presentation/widgets/stages/looking_for_driver_content.dart';
+import 'package:trekka/features/logistics/presentation/widgets/stages/waiting_for_driver_content.dart';
 import 'package:trekka/features/logistics/presentation/widgets/stages/initial_content.dart';
 // TODO: Import other stage content widgets
 
@@ -21,14 +22,10 @@ class LogisticsContentFactory {
   }) {
     switch (stage) {
       case LogisticsStage.initial:
-        return InitialContent(
-          onNext: onNext,
-        );
+        return InitialContent(onNext: onNext);
 
       case LogisticsStage.enterDestination:
-        return EnterDestinationContent(
-          onNext: onNext,
-        );
+        return EnterDestinationContent(onNext: onNext);
 
       case LogisticsStage.confirmPickupLocation:
         return ConfirmPickupLocationContent(
@@ -37,44 +34,28 @@ class LogisticsContentFactory {
         );
 
       case LogisticsStage.enterPickupLocation:
-        return EnterPickupLocationContent(
-          onNext: onNext,
-        );
+        return EnterPickupLocationContent(onNext: onNext);
 
       case LogisticsStage.confirmRequest:
-        return ConfirmRequestContent(
-          onConfirm: onNext,
-        );
+        return ConfirmRequestContent(onConfirm: onNext);
 
       case LogisticsStage.lookingForDriver:
-        return LookingForDriverContent(
-          onCancel: onCancel,
-        );
+        return LookingForDriverContent(onCancel: onCancel);
 
       case LogisticsStage.waitingForDriver:
-        return const Center(
-          child: Text('Waiting for Driver Stage - TODO'),
-        );
+        return WaitingForDriverContent(onCancel: onCancel);
 
       case LogisticsStage.driverArrived:
-        return const Center(
-          child: Text('Driver Arrived Stage - TODO'),
-        );
+        return const Center(child: Text('Driver Arrived Stage - TODO'));
 
       case LogisticsStage.inProgress:
-        return const Center(
-          child: Text('Ride In Progress Stage - TODO'),
-        );
+        return const Center(child: Text('Ride In Progress Stage - TODO'));
 
       case LogisticsStage.complete:
-        return const Center(
-          child: Text('Ride Complete Stage - TODO'),
-        );
+        return const Center(child: Text('Ride Complete Stage - TODO'));
 
       case LogisticsStage.review:
-        return const Center(
-          child: Text('Review Stage - TODO'),
-        );
+        return const Center(child: Text('Review Stage - TODO'));
     }
   }
 }

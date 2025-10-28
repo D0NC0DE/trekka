@@ -44,6 +44,11 @@ class AppColors {
   static const Color logisticsActionInactive = Color(0xFFD9D9D9);
   static const Color logisticsIconStart = Color(0xFF02BF98);
   static const Color logisticsIconEnd = Color(0xFF018979);
+  static const Color logisticsDriverAvatarBorder = Color(0xFF036B64);
+  static const Color logisticsDriverStatusBackground = Color(0xFFD9FAFA);
+  static const Color nearbyDriverMarkerOuter = Color(0x5904A497);
+  static const Color nearbyDriverMarkerInner = Color(0x8004A497);
+  static const Color nearbyDriverMarkerCenter = Color(0xFF04A497);
 }
 
 class AppSpacing {
@@ -73,6 +78,7 @@ class AppRadius {
   static const double lg = 24;
   static const double pill = 22;
 }
+
 class AppFontWeights {
   AppFontWeights._();
 

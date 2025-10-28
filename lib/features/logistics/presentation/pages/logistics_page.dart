@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ import 'package:trekka/features/logistics/presentation/helpers/map_camera_contro
 import 'package:trekka/features/logistics/presentation/helpers/map_marker_builder.dart';
 import 'package:trekka/features/logistics/presentation/helpers/map_polyline_builder.dart';
 import 'package:trekka/features/logistics/presentation/providers/logistics_provider.dart';
+import 'package:trekka/features/logistics/presentation/widgets/animated_driver_marker.dart';
 import 'package:trekka/features/logistics/presentation/widgets/logistics_sheet_overlay.dart';
 import 'package:trekka/core/widgets/sheet/gradient_overlay_modal.dart';
 import 'package:trekka/features/logistics/utils/address_formatter.dart';
@@ -51,6 +53,9 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
   late final Animation<Offset> _sheetSlideAnimation;
   bool _isMapInteracting = false;
   Timer? _sheetRestoreTimer;
+  Timer? _driverAcceptanceTimer;
+  AnimatedDriverMarkerController? _driverMarkerController;
+  Set<Marker> _nearbyDriverMarkers = {};
   static const List<LogisticsStage> _stageFlow = <LogisticsStage>[
     LogisticsStage.initial,
     LogisticsStage.enterDestination,
@@ -89,6 +94,8 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
     _mapController?.dispose();
     _sheetAnimationController.dispose();
     _sheetRestoreTimer?.cancel();
+    _driverAcceptanceTimer?.cancel();
+    _driverMarkerController?.dispose();
     super.dispose();
   }
 
@@ -213,7 +220,34 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
       riderIcon: _riderIcon,
       destinationIcon: _destinationIcon,
       fallbackUserLocation: _userLocation,
+      nearbyDriverMarkers: _nearbyDriverMarkers,
     );
+  }
+
+  void _startNearbyDriverAnimation() {
+    final pickupLocation =
+        ref.read(logisticsViewModelProvider).userLocation ?? _userLocation;
+    if (pickupLocation == null) return;
+
+    _driverMarkerController?.dispose();
+    _driverMarkerController = AnimatedDriverMarkerController(
+      pickupLocation: pickupLocation,
+      onMarkersUpdated: (markers) {
+        if (mounted && _currentStage == LogisticsStage.lookingForDriver) {
+          setState(() {
+            _nearbyDriverMarkers = markers;
+          });
+        }
+      },
+    );
+    _driverMarkerController!.start();
+  }
+
+  void _stopNearbyDriverAnimation() {
+    _driverMarkerController?.stop();
+    setState(() {
+      _nearbyDriverMarkers = {};
+    });
   }
 
   Set<Polyline> _buildPolylines(LogisticsState logisticsState) {
@@ -302,6 +336,7 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
             ),
           );
         }
+        _driverAcceptanceTimer?.cancel();
         return;
       }
 
@@ -327,11 +362,16 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
             ),
           );
         }
+        _startNearbyDriverAnimation();
+        _scheduleDriverAcceptance();
+      } else {
+        _stopNearbyDriverAnimation();
       }
     });
   }
 
   void _handleBackStage() {
+    _driverAcceptanceTimer?.cancel();
     if (!_currentStage.canGoBack) return;
 
     setState(() {
@@ -365,12 +405,21 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
   }
 
   void _handleCancelRide() {
-    if (_currentStage == LogisticsStage.lookingForDriver) {
+    _driverAcceptanceTimer?.cancel();
+    _stopNearbyDriverAnimation();
+    if (_currentStage == LogisticsStage.lookingForDriver ||
+        _currentStage == LogisticsStage.waitingForDriver) {
       setState(() {
         _currentStage = LogisticsStage.confirmRequest;
       });
-      final pickupLocation = ref.read(logisticsViewModelProvider).userLocation;
-      if (_mapController != null && pickupLocation != null) {
+      final logisticsState = ref.read(logisticsViewModelProvider);
+      final pickupLocation = logisticsState.userLocation;
+      final destinationLocation = logisticsState.destinationLocation;
+      if (_mapController != null &&
+          pickupLocation != null &&
+          destinationLocation != null) {
+        _fitBoundsToRoute(pickupLocation, destinationLocation);
+      } else if (_mapController != null && pickupLocation != null) {
         _mapController!.animateCamera(
           CameraUpdate.newCameraPosition(
             CameraPosition(target: pickupLocation, zoom: _userZoom, tilt: 20),
@@ -394,17 +443,25 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
   }
 
   void _handleEditPickup() {
+    _driverAcceptanceTimer?.cancel();
     setState(() {
       _currentStage = LogisticsStage.enterPickupLocation;
     });
     ref.read(logisticsViewModelProvider.notifier).clearPredictions();
   }
 
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  //   _updateMapStyle();
-  // }
+  void _scheduleDriverAcceptance() {
+    _driverAcceptanceTimer?.cancel();
+    final int randomMillis = Random().nextInt(10000) + 20000; // 20-30 seconds
+    _driverAcceptanceTimer = Timer(Duration(milliseconds: randomMillis), () {
+      if (!mounted) return;
+      if (_currentStage != LogisticsStage.lookingForDriver) return;
+
+      // TODO: Replace with WebSocket driver acceptance listener.
+      _handleNextStage();
+      _driverAcceptanceTimer = null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -421,11 +478,13 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
         _currentStage != LogisticsStage.enterDestination &&
         _currentStage != LogisticsStage.confirmPickupLocation &&
         _currentStage != LogisticsStage.enterPickupLocation &&
-        _currentStage != LogisticsStage.lookingForDriver;
+        _currentStage != LogisticsStage.lookingForDriver &&
+        _currentStage != LogisticsStage.waitingForDriver;
     final bool shouldShowFloatingButton =
         _currentStage != LogisticsStage.confirmPickupLocation &&
         _currentStage != LogisticsStage.confirmRequest &&
-        _currentStage != LogisticsStage.lookingForDriver;
+        _currentStage != LogisticsStage.lookingForDriver &&
+        _currentStage != LogisticsStage.waitingForDriver;
 
     return PopScope(
       canPop: _currentStage == LogisticsStage.initial,
