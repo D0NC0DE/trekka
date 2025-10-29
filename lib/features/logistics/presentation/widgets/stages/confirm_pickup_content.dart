@@ -158,8 +158,10 @@ class _PickupAddressCard extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           GradientIconButton(
-            iconPath: AppAssetIcons.search,
+            iconPath: AppAssetIcons.searchWhite,
             onTap: onEditPickup,
+            iconWidth: 16,
+            iconHeight: 16,
           ),
         ],
       ),
