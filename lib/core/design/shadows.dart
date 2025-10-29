@@ -143,4 +143,69 @@ class AppShadows {
       offset: Offset(0, 2),
     ),
   ];
+
+  static const List<BoxShadow> modalCircularButtonInner = <BoxShadow>[
+    BoxShadow(
+      color: AppColors.modalButtonInnerShadow,
+      blurRadius: 4,
+      offset: Offset(0, 4),
+    ),
+    BoxShadow(
+      color: AppColors.modalButtonInnerShadow,
+      blurRadius: 4,
+      offset: Offset(4, 0),
+    ),
+    BoxShadow(
+      color: AppColors.modalButtonInnerShadow,
+      blurRadius: 4,
+      offset: Offset(-4, 0),
+    ),
+  ];
+
+  static const List<BoxShadow> volumeButton = <BoxShadow>[
+    BoxShadow(
+      color: AppColors.shadowSoftBlack,
+      blurRadius: 2,
+      offset: Offset(0, 2),
+    ),
+  ];
+
+  static const List<BoxShadow> volumeButtonInner = <BoxShadow>[
+    BoxShadow(
+      color: AppColors.accentAmberInnerShadow,
+      blurRadius: 4,
+      offset: Offset(0, 4),
+    ),
+    BoxShadow(
+      color: AppColors.accentAmberInnerShadow,
+      blurRadius: 4,
+      offset: Offset(0, -2),
+    ),
+  ];
+
+  static const List<BoxShadow> volumeSliderTrack = <BoxShadow>[
+    BoxShadow(
+      color: AppColors.shadowLightBlack,
+      blurRadius: 4,
+      offset: Offset(0, 2),
+    ),
+  ];
+
+  static const List<BoxShadow> volumeSliderThumbInner = <BoxShadow>[
+    BoxShadow(
+      color: AppColors.shadowMidBlack,
+      blurRadius: 4,
+      offset: Offset(0, 2),
+    ),
+    BoxShadow(
+      color: AppColors.shadowMidBlack,
+      blurRadius: 4,
+      offset: Offset(0, -4),
+    ),
+    BoxShadow(
+      color: AppColors.shadowMidBlack,
+      blurRadius: 12,
+      offset: Offset(4, 0),
+    ),
+  ];
 }

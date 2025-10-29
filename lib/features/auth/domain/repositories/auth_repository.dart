@@ -13,5 +13,8 @@ abstract interface class AuthRepository {
     required String email,
     required String otp,
   });
+
+  /// Logout the current user
+  Future<Result<void>> logout(String refreshToken);
 }
 

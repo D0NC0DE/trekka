@@ -6,6 +6,7 @@ import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/widgets/button/gradient_action_button.dart';
 import 'package:trekka/core/widgets/input/app_multiline_text_field.dart';
+import 'package:trekka/core/widgets/snackbar/app_snackbar.dart';
 
 class CompleteRideContent extends StatefulWidget {
   const CompleteRideContent({required this.onComplete, super.key});
@@ -85,23 +86,7 @@ class _CompleteRideContentState extends State<CompleteRideContent> {
       message = 'Please share your experience with a quick review or comment. Both get rewards! 💬';
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.white,
-              ),
-        ),
-        backgroundColor: AppColors.deepTeal,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.all(AppSpacing.md),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-        ),
-      ),
-    );
+    AppSnackbar.showInfo(context, message);
   }
 
   @override
@@ -262,7 +247,7 @@ class _CompleteRideContentState extends State<CompleteRideContent> {
                 child: GradientActionButton(
                   label: 'Submit rating',
                   onTap: _handleSubmitTap,
-                  isActive: _canSubmit,
+                  isActive: true,
                   gradient: _canSubmit
                       ? AppGradients.completeRideButtonActive
                       : AppGradients.completeRideButtonInactive,

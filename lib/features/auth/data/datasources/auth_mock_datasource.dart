@@ -41,8 +41,19 @@ class AuthMockDataSource implements AuthRemoteDataSource {
         'id': 'mock_user_id',
         'email': email,
         'username': 'mockuser',
+        'avatar': 1,
+        'isEmailVerified': true,
+        'createdAt': DateTime.now().toIso8601String(),
+        'updatedAt': DateTime.now().toIso8601String(),
       },
     };
+  }
+
+  @override
+  Future<void> logout(String refreshToken) async {
+    // Simulate network delay
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    // Mock successful logout
   }
 }
 

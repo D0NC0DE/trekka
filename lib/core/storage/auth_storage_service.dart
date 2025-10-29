@@ -9,6 +9,7 @@ class AuthStorageKeys {
   static const String accessToken = 'access_token';
   static const String refreshToken = 'refresh_token';
   static const String userJson = 'user_json';
+  static const String walletJson = 'wallet_json';
 }
 
 /// Service for storing and retrieving authentication data
@@ -49,6 +50,21 @@ class AuthStorageService {
     return jsonDecode(jsonString) as Map<String, dynamic>;
   }
 
+  Future<void> saveWalletJson(Map<String, dynamic> walletJson) async {
+    await _secureStorage.write(
+      key: AuthStorageKeys.walletJson,
+      value: jsonEncode(walletJson),
+    );
+  }
+
+  Future<Map<String, dynamic>?> getWalletJson() async {
+    final String? jsonString = await _secureStorage.read(
+      key: AuthStorageKeys.walletJson,
+    );
+    if (jsonString == null) return null;
+    return jsonDecode(jsonString) as Map<String, dynamic>;
+  }
+
   Future<void> saveAuthData({
     required String accessToken,
     required String refreshToken,
@@ -66,6 +82,7 @@ class AuthStorageService {
       _secureStorage.delete(key: AuthStorageKeys.accessToken),
       _secureStorage.delete(key: AuthStorageKeys.refreshToken),
       _secureStorage.delete(key: AuthStorageKeys.userJson),
+      _secureStorage.delete(key: AuthStorageKeys.walletJson),
     ]);
   }
 

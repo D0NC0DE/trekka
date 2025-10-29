@@ -8,6 +8,47 @@ class AppAssetImages {
   static const String splashBackground = 'assets/images/home_bg.png';
 
   static const String authSheetBackground = 'assets/images/auth_sheet_bg.png';
+
+  // Avatar Images
+  // static const String avatar = 'assets/images/avatars/avatar.jpg';
+  static const String avatar1 = 'assets/images/avatars/avatar1.jpg';
+  static const String avatar2 = 'assets/images/avatars/avatar2.png';
+  static const String avatar3 = 'assets/images/avatars/avatar3.png';
+  static const String avatar4 = 'assets/images/avatars/avatar4.png';
+  static const String avatar5 = 'assets/images/avatars/avatar5.png';
+  static const String avatar6 = 'assets/images/avatars/avatar6.png';
+  static const String avatar7 = 'assets/images/avatars/avatar7.png';
+  static const String avatar8 = 'assets/images/avatars/avatar8.png';
+  static const String avatar9 = 'assets/images/avatars/avatar9.png';
+  static const String avatar10 = 'assets/images/avatars/avatar10.png';
+
+  /// Get avatar path by ID (1-10)
+  static String getAvatarById(int id) {
+    switch (id) {
+      case 1:
+        return avatar1;
+      case 2:
+        return avatar2;
+      case 3:
+        return avatar3;
+      case 4:
+        return avatar4;
+      case 5:
+        return avatar5;
+      case 6:
+        return avatar6;
+      case 7:
+        return avatar7;
+      case 8:
+        return avatar8;
+      case 9:
+        return avatar9;
+      case 10:
+        return avatar10;
+      default:
+        return avatar1; // Default to avatar 1
+    }
+  }
 }
 
 @immutable
@@ -65,6 +106,16 @@ class AppAssetIcons {
   static const String chat = 'assets/icons/actions/chat.png';
   static const String call = 'assets/icons/actions/call.png';
   static const String popDots = 'assets/icons/actions/pop_dots.png';
+
+  // Profile Icons
+  static const String user = 'assets/icons/profile/user.png';
+  static const String signout = 'assets/icons/profile/signout.png';
+  static const String settings = 'assets/icons/profile/settings.png';
+  static const String forward = 'assets/icons/profile/forward.png';
+  static const String editProfile = 'assets/icons/profile/edit.png';
+  static const String volume = 'assets/icons/profile/volume.png';
+  static const String music = 'assets/icons/profile/music.png';
+  static const String delete = 'assets/icons/profile/delete.png';
 
   // Other Icons
   static const String destinationInfo = 'assets/icons/destination.png';

@@ -16,6 +16,9 @@ abstract interface class AuthRemoteDataSource {
     required String email,
     required String otp,
   });
+
+  /// Logout the current user
+  Future<void> logout(String refreshToken);
 }
 
 /// Implementation of [AuthRemoteDataSource] using [ApiClient]
@@ -59,6 +62,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       },
     );
     return response;
+  }
+
+  @override
+  Future<void> logout(String refreshToken) async {
+    await _apiClient.post(
+      ApiConstants.logout,
+      data: <String, dynamic>{
+        'refreshToken': refreshToken,
+      },
+    );
   }
 }
 

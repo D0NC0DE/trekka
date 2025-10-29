@@ -4,9 +4,11 @@ import 'package:trekka/core/error/failures.dart';
 import 'package:trekka/core/network/api_client.dart';
 import 'package:trekka/core/storage/auth_storage_service.dart';
 import 'package:trekka/core/utils/result.dart';
-import 'package:trekka/features/users/data/models/user_dto.dart';
-import 'package:trekka/features/users/domain/entities/user.dart';
-import 'package:trekka/features/users/domain/repositories/users_repository.dart';
+import 'package:trekka/features/auth/domain/repositories/auth_repository.dart';
+import 'package:trekka/features/profile/data/models/user_dto.dart';
+import 'package:trekka/features/profile/domain/entities/user.dart';
+import 'package:trekka/features/profile/domain/repositories/users_repository.dart';
+import 'package:trekka/features/wallets/data/models/wallet_dto.dart';
 import 'package:trekka/features/wallets/domain/entities/wallet.dart';
 import 'package:trekka/features/wallets/domain/repositories/wallets_repository.dart';
 
@@ -14,10 +16,12 @@ import 'package:trekka/features/wallets/domain/repositories/wallets_repository.d
 class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier({
     required AuthStorageService authStorage,
+    required AuthRepository authRepository,
     required UsersRepository usersRepository,
     required WalletsRepository walletsRepository,
     required ApiClient apiClient,
   }) : _authStorage = authStorage,
+       _authRepository = authRepository,
        _usersRepository = usersRepository,
        _walletsRepository = walletsRepository,
        _apiClient = apiClient,
@@ -38,6 +42,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   final AuthStorageService _authStorage;
+  final AuthRepository _authRepository;
   final UsersRepository _usersRepository;
   final WalletsRepository _walletsRepository;
   final ApiClient _apiClient;
@@ -58,7 +63,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final Map<String, dynamic>? userJson = await _authStorage.getUserJson();
       if (userJson != null) {
         final User cachedUser = UserDto.fromJson(userJson).toEntity();
-        state = Authenticated(user: cachedUser);
+        
+        // Try to load cached wallet
+        final Map<String, dynamic>? walletJson = await _authStorage.getWalletJson();
+        final Wallet? cachedWallet = walletJson != null 
+            ? WalletDto.fromJson(walletJson).toEntity()
+            : null;
+        
+        state = Authenticated(
+          user: cachedUser,
+          wallet: cachedWallet,
+        );
 
         _refreshUserData();
 
@@ -103,13 +118,39 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Sign out - clear all auth data
   Future<void> signOut() async {
+    if (state is Authenticated) {
+      state = (state as Authenticated).copyWith(isLoggingOut: true);
+    }
+
     try {
+      // Get refresh token before clearing
+      final String? refreshToken = await _authStorage.getRefreshToken();
+      
+      // Call logout API if we have a refresh token
+      if (refreshToken != null) {
+        await _authRepository.logout(refreshToken);
+      }
+      
       await _authStorage.clearAuthData();
       _apiClient.clearAuthToken();
       state = const Unauthenticated();
     } catch (e) {
-      state = AuthError(e.toString());
+      // Even if API call fails, still clear local data
+      await _authStorage.clearAuthData();
+      _apiClient.clearAuthToken();
+      state = const Unauthenticated();
     }
+  }
+
+  /// Refresh profile data (user and wallet)
+  Future<void> refreshProfile() async {
+    if (state is! Authenticated) return;
+    
+    // Refresh both user and wallet data in parallel
+    await Future.wait(<Future<void>>[
+      _refreshUserData(),
+      _loadWalletData(),
+    ]);
   }
 
   /// Fetch and set fresh user data from API
@@ -186,6 +227,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
           wallet: wallet,
           isLoadingWallet: false,
         );
+        
+        // Cache wallet data
+        _authStorage.saveWalletJson(
+          WalletDto(
+            id: wallet.id,
+            userId: wallet.userId,
+            address: wallet.address,
+            balance: wallet.balance,
+            createdAt: wallet.createdAt,
+            updatedAt: wallet.updatedAt,
+          ).toJson(),
+        );
       }
       return;
     }
@@ -222,6 +275,75 @@ class AuthNotifier extends StateNotifier<AuthState> {
         ).toJson(),
       );
     }
+  }
+
+  /// Update user avatar
+  Future<Result<void>> updateAvatar(int avatarId) async {
+    if (state is! Authenticated) {
+      return Error<void>(const UnexpectedFailure(message: 'Not authenticated'));
+    }
+
+    state = (state as Authenticated).copyWith(isUpdatingAvatar: true);
+
+    final Result<User> result = await _usersRepository.updateProfile(avatar: avatarId);
+
+    if (result is Success<User>) {
+      updateUser(result.data);
+      if (state is Authenticated) {
+        state = (state as Authenticated).copyWith(isUpdatingAvatar: false);
+      }
+      return const Success<void>(null);
+    }
+
+    if (state is Authenticated) {
+      state = (state as Authenticated).copyWith(isUpdatingAvatar: false);
+    }
+    return Error<void>((result as Error<User>).error);
+  }
+
+  /// Update username
+  Future<Result<void>> updateUsername(String username) async {
+    if (state is! Authenticated) {
+      return Error<void>(const UnexpectedFailure(message: 'Not authenticated'));
+    }
+
+    state = (state as Authenticated).copyWith(isUpdatingUsername: true);
+
+    final Result<User> result = await _usersRepository.updateProfile(username: username);
+
+    if (result is Success<User>) {
+      updateUser(result.data);
+      if (state is Authenticated) {
+        state = (state as Authenticated).copyWith(isUpdatingUsername: false);
+      }
+      return const Success<void>(null);
+    }
+
+    if (state is Authenticated) {
+      state = (state as Authenticated).copyWith(isUpdatingUsername: false);
+    }
+    return Error<void>((result as Error<User>).error);
+  }
+
+  /// Delete account
+  Future<Result<void>> deleteAccount() async {
+    if (state is! Authenticated) {
+      return Error<void>(const UnexpectedFailure(message: 'Not authenticated'));
+    }
+
+    state = (state as Authenticated).copyWith(isDeletingAccount: true);
+
+    final Result<void> result = await _usersRepository.deleteAccount();
+
+    if (result is Success<void>) {
+      await signOut();
+      return const Success<void>(null);
+    }
+
+    if (state is Authenticated) {
+      state = (state as Authenticated).copyWith(isDeletingAccount: false);
+    }
+    return Error<void>((result as Error<void>).error);
   }
 
   Future<bool> _handleAuthRelatedFailure(Failure failure) async {

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:trekka/app/di/auth_providers.dart';
 import 'package:trekka/app/di/network_providers.dart';
 import 'package:trekka/app/di/storage_providers.dart';
 import 'package:trekka/app/di/users_providers.dart';
@@ -10,6 +11,7 @@ import 'package:trekka/app/state/auth_state.dart';
 final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>(
   (ref) => AuthNotifier(
     authStorage: ref.read(authStorageServiceProvider),
+    authRepository: ref.read(authRepositoryProvider),
     usersRepository: ref.read(usersRepositoryProvider),
     walletsRepository: ref.read(walletsRepositoryProvider),
     apiClient: ref.read(apiClientProvider),

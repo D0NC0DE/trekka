@@ -9,6 +9,7 @@ class AppColors {
   static const Color white50 = Color(0x80FFFFFF);
   static const Color white25 = Color(0x40FFFFFF);
   static const Color divider = Color(0xFFE0E0E0);
+  static const Color lightGrey = Color(0xFFE0E0E0);
   static const Color accentBurntOrange = Color(0xFFF4A261);
   static const Color accentAmber = Color(0xFFFFD166);
   static const Color accentAmber10 = Color(0x1AFFD166);
@@ -26,6 +27,8 @@ class AppColors {
   static const Color tealDark = Color(0xFF008375);
   static const Color tealBrightGradientStart = Color(0xFF01BF97);
   static const Color tealBrightGradientEnd = Color(0xFF008D7A);
+  static const Color centerModalGradientStart = Color(0xFF03A496);
+  static const Color centerModalGradientEnd = Color(0xFF038F92);
   static const Color black = Color(0xFF000000);
   static const Color surfaceMuted = Color(0xFFF6F6F6);
   static const Color overlayFadeBlack = Color(0x59000000);
@@ -55,6 +58,13 @@ class AppColors {
   static const Color nearbyDriverMarkerInner = Color(0x8004A497);
   static const Color nearbyDriverMarkerCenter = Color(0xFF04A497);
   static const Color completeRideSuccessBadge = Color(0xE6D9FAFA);
+  static const Color modalButtonInnerShadow = Color(0x401A2A22);
+  static const Color accentAmberInnerShadow = Color(0x59FFD166);
+  static const Color sliderTrackBackground = Color(0xFFF8F8F8);
+  static const Color shadowLightBlack = Color(0x1A000000);
+  static const Color destructive = Color(0xFFFF0000);
+  static const Color destructiveTextOn = Color(0xFFF8F8F8);
+  static const Color deleteButtonBorder = Color(0x26000000);
 }
 
 class AppSpacing {
@@ -68,6 +78,7 @@ class AppSpacing {
   static const double md = 16;
   static const double mdLg = 20;
   static const double lg = 24;
+  static const double lgXl = 28;
   static const double xl = 32;
   static const double xxl = 40;
   static const double xxxl = 50;

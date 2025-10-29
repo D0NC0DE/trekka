@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:trekka/features/users/domain/entities/user.dart';
+import 'package:trekka/features/profile/domain/entities/user.dart';
 import 'package:trekka/features/wallets/domain/entities/wallet.dart';
 
 /// Represents the authentication state of the app
@@ -21,22 +21,50 @@ class Authenticated extends AuthState {
     required this.user,
     this.wallet,
     this.isLoadingWallet = false,
+    this.isUpdatingAvatar = false,
+    this.isUpdatingUsername = false,
+    this.isDeletingAccount = false,
+    this.isLoggingOut = false,
   });
 
   final User user;
   final Wallet? wallet;
   final bool isLoadingWallet;
+  final bool isUpdatingAvatar;
+  final bool isUpdatingUsername;
+  final bool isDeletingAccount;
+  final bool isLoggingOut;
 
-  Authenticated copyWith({User? user, Wallet? wallet, bool? isLoadingWallet}) {
+  Authenticated copyWith({
+    User? user,
+    Wallet? wallet,
+    bool? isLoadingWallet,
+    bool? isUpdatingAvatar,
+    bool? isUpdatingUsername,
+    bool? isDeletingAccount,
+    bool? isLoggingOut,
+  }) {
     return Authenticated(
       user: user ?? this.user,
       wallet: wallet ?? this.wallet,
       isLoadingWallet: isLoadingWallet ?? this.isLoadingWallet,
+      isUpdatingAvatar: isUpdatingAvatar ?? this.isUpdatingAvatar,
+      isUpdatingUsername: isUpdatingUsername ?? this.isUpdatingUsername,
+      isDeletingAccount: isDeletingAccount ?? this.isDeletingAccount,
+      isLoggingOut: isLoggingOut ?? this.isLoggingOut,
     );
   }
 
   @override
-  List<Object?> get props => <Object?>[user, wallet, isLoadingWallet];
+  List<Object?> get props => <Object?>[
+        user,
+        wallet,
+        isLoadingWallet,
+        isUpdatingAvatar,
+        isUpdatingUsername,
+        isDeletingAccount,
+        isLoggingOut,
+      ];
 }
 
 /// User is not authenticated

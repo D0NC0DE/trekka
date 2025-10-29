@@ -9,10 +9,13 @@ import 'package:trekka/app/utils/auth_guard.dart';
 import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/router/route_paths.dart';
+import 'package:trekka/core/widgets/snackbar/app_snackbar.dart';
 import 'package:trekka/features/home/presentation/viewmodels/home_pin_view_model.dart';
 import 'package:trekka/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:trekka/features/home/presentation/widgets/home_bottom_nav.dart';
 import 'package:trekka/features/home/presentation/widgets/home_pins_layer.dart';
+import 'package:trekka/features/history/presentation/pages/history_coming_soon_modal.dart';
+import 'package:trekka/features/profile/presentation/pages/profile_overview_modal.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -88,15 +91,12 @@ class _HomePageState extends ConsumerState<HomePage> {
       case 0:
         return HomePinsLayer(onPinTap: _handlePinTap);
       case 1:
-        return const _TabPlaceholder(
+        return const HistoryComingSoonModal(
           title: 'History',
           message: 'Track quests and rewards -- coming soon.',
         );
       case 2:
-        return const _TabPlaceholder(
-          title: 'Profile',
-          message: 'Customize your Trekka identity -- coming soon.',
-        );
+        return const ProfileOverviewModal();
       default:
         return const SizedBox.shrink();
     }
@@ -129,12 +129,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   void _showComingSoon(String label) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$label is coming soon.'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    AppSnackbar.showInfo(context, '$label is coming soon.');
   }
 
   double _resolveBottomNavInset(double width) {
@@ -170,42 +165,6 @@ class _ResponsiveNavInset extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: _maxNavWidth),
         child: child,
-      ),
-    );
-  }
-}
-
-class _TabPlaceholder extends StatelessWidget {
-  const _TabPlaceholder({required this.title, required this.message});
-
-  final String title;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final TextTheme textTheme = Theme.of(context).textTheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              title.toUpperCase(),
-              textAlign: TextAlign.center,
-              style: textTheme.headlineSmall?.copyWith(
-                letterSpacing: 1.6,
-                color: AppColors.accentAmber,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: textTheme.bodyLarge?.copyWith(color: AppColors.white75),
-            ),
-          ],
-        ),
       ),
     );
   }

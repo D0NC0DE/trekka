@@ -100,5 +100,28 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     }
   }
+
+  @override
+  Future<Result<void>> logout(String refreshToken) async {
+    try {
+      await _remoteDataSource.logout(refreshToken);
+      return const Success<void>(null);
+    } on ServerException catch (e) {
+      return Error<void>(
+        ServerFailure(
+          message: e.message,
+          statusCode: e.statusCode,
+        ),
+      );
+    } on NetworkException catch (e) {
+      return Error<void>(NetworkFailure(message: e.message));
+    } on TimeoutException catch (e) {
+      return Error<void>(TimeoutFailure(message: e.message));
+    } catch (e) {
+      return Error<void>(
+        UnexpectedFailure(message: e.toString()),
+      );
+    }
+  }
 }
 
