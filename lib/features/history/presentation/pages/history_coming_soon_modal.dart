@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/widgets/sheet/center_modal_sheet.dart';
+import 'package:trekka/core/assets/app_assets.dart';
 
 /// Displays a placeholder modal until the history feature is ready.
 class HistoryComingSoonModal extends StatelessWidget {
@@ -20,6 +21,8 @@ class HistoryComingSoonModal extends StatelessWidget {
 
     return CenterModalSheet(
       dismissible: false,
+      padding: const EdgeInsets.all(AppSpacing.xxl),
+      topButton: Image.asset(AppAssetIcons.historyTab, width: 24, height: 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
