@@ -4,6 +4,7 @@ import 'package:trekka/core/error/failures.dart';
 import 'package:trekka/core/network/api_client.dart';
 import 'package:trekka/core/storage/auth_storage_service.dart';
 import 'package:trekka/core/utils/result.dart';
+import 'package:trekka/features/auth/domain/repositories/auth_repository.dart';
 import 'package:trekka/features/profile/data/models/user_dto.dart';
 import 'package:trekka/features/profile/domain/entities/user.dart';
 import 'package:trekka/features/profile/domain/repositories/users_repository.dart';
@@ -14,10 +15,12 @@ import 'package:trekka/features/wallets/domain/repositories/wallets_repository.d
 class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier({
     required AuthStorageService authStorage,
+    required AuthRepository authRepository,
     required UsersRepository usersRepository,
     required WalletsRepository walletsRepository,
     required ApiClient apiClient,
   }) : _authStorage = authStorage,
+       _authRepository = authRepository,
        _usersRepository = usersRepository,
        _walletsRepository = walletsRepository,
        _apiClient = apiClient,
@@ -38,6 +41,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   final AuthStorageService _authStorage;
+  final AuthRepository _authRepository;
   final UsersRepository _usersRepository;
   final WalletsRepository _walletsRepository;
   final ApiClient _apiClient;
@@ -104,11 +108,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Sign out - clear all auth data
   Future<void> signOut() async {
     try {
+      // Get refresh token before clearing
+      final String? refreshToken = await _authStorage.getRefreshToken();
+      
+      // Call logout API if we have a refresh token
+      if (refreshToken != null) {
+        await _authRepository.logout(refreshToken);
+      }
+      
       await _authStorage.clearAuthData();
       _apiClient.clearAuthToken();
       state = const Unauthenticated();
     } catch (e) {
-      state = AuthError(e.toString());
+      // Even if API call fails, still clear local data
+      await _authStorage.clearAuthData();
+      _apiClient.clearAuthToken();
+      state = const Unauthenticated();
     }
   }
 
@@ -222,6 +237,54 @@ class AuthNotifier extends StateNotifier<AuthState> {
         ).toJson(),
       );
     }
+  }
+
+  /// Update user avatar
+  Future<Result<void>> updateAvatar(int avatarId) async {
+    if (state is! Authenticated) {
+      return Error<void>(const UnexpectedFailure(message: 'Not authenticated'));
+    }
+
+    final Result<User> result = await _usersRepository.updateProfile(avatar: avatarId);
+
+    if (result is Success<User>) {
+      updateUser(result.data);
+      return const Success<void>(null);
+    }
+
+    return Error<void>((result as Error<User>).error);
+  }
+
+  /// Update username
+  Future<Result<void>> updateUsername(String username) async {
+    if (state is! Authenticated) {
+      return Error<void>(const UnexpectedFailure(message: 'Not authenticated'));
+    }
+
+    final Result<User> result = await _usersRepository.updateProfile(username: username);
+
+    if (result is Success<User>) {
+      updateUser(result.data);
+      return const Success<void>(null);
+    }
+
+    return Error<void>((result as Error<User>).error);
+  }
+
+  /// Delete account
+  Future<Result<void>> deleteAccount() async {
+    if (state is! Authenticated) {
+      return Error<void>(const UnexpectedFailure(message: 'Not authenticated'));
+    }
+
+    final Result<void> result = await _usersRepository.deleteAccount();
+
+    if (result is Success<void>) {
+      await signOut();
+      return const Success<void>(null);
+    }
+
+    return Error<void>((result as Error<void>).error);
   }
 
   Future<bool> _handleAuthRelatedFailure(Failure failure) async {

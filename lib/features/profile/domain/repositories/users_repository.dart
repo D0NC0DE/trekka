@@ -8,4 +8,6 @@ abstract interface class UsersRepository {
   Future<Result<User>> getUserById(String userId);
 
   Future<Result<User>> updateProfile({String? username, int? avatar});
+
+  Future<Result<void>> deleteAccount();
 }

@@ -29,6 +29,9 @@ class ProfileOverviewModal extends ConsumerWidget {
           wallet: wallet,
           isWalletLoading: isLoadingWallet,
           onLogout: () => authNotifier.signOut(),
+          onAvatarChanged: (int avatarId) => authNotifier.updateAvatar(avatarId),
+          onUsernameChanged: (String username) => authNotifier.updateUsername(username),
+          onDeleteAccount: () => authNotifier.deleteAccount(),
         ),
       AuthError(:final String message) => ProfileUnauthenticatedContent(
         errorMessage: message,

@@ -49,4 +49,10 @@ class UsersMockDataSource implements UsersRemoteDataSource {
       updatedAt: DateTime.now(),
     );
   }
+
+  @override
+  Future<void> deleteAccount() async {
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    // Mock successful account deletion
+  }
 }

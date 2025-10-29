@@ -69,4 +69,22 @@ class UsersRepositoryImpl implements UsersRepository {
       return Error<User>(UnexpectedFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Result<void>> deleteAccount() async {
+    try {
+      await _remoteDataSource.deleteAccount();
+      return const Success<void>(null);
+    } on ServerException catch (e) {
+      return Error<void>(
+        ServerFailure(message: e.message, statusCode: e.statusCode),
+      );
+    } on NetworkException catch (e) {
+      return Error<void>(NetworkFailure(message: e.message));
+    } on TimeoutException catch (e) {
+      return Error<void>(TimeoutFailure(message: e.message));
+    } catch (e) {
+      return Error<void>(UnexpectedFailure(message: e.toString()));
+    }
+  }
 }

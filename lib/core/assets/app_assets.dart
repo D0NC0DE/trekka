@@ -10,8 +10,8 @@ class AppAssetImages {
   static const String authSheetBackground = 'assets/images/auth_sheet_bg.png';
 
   // Avatar Images
-  static const String avatar = 'assets/images/avatars/avatar.jpg';
-  static const String avatar1 = 'assets/images/avatars/avatar1.png';
+  // static const String avatar = 'assets/images/avatars/avatar.jpg';
+  static const String avatar1 = 'assets/images/avatars/avatar1.jpg';
   static const String avatar2 = 'assets/images/avatars/avatar2.png';
   static const String avatar3 = 'assets/images/avatars/avatar3.png';
   static const String avatar4 = 'assets/images/avatars/avatar4.png';
@@ -20,6 +20,35 @@ class AppAssetImages {
   static const String avatar7 = 'assets/images/avatars/avatar7.png';
   static const String avatar8 = 'assets/images/avatars/avatar8.png';
   static const String avatar9 = 'assets/images/avatars/avatar9.png';
+  static const String avatar10 = 'assets/images/avatars/avatar10.png';
+
+  /// Get avatar path by ID (1-10)
+  static String getAvatarById(int id) {
+    switch (id) {
+      case 1:
+        return avatar1;
+      case 2:
+        return avatar2;
+      case 3:
+        return avatar3;
+      case 4:
+        return avatar4;
+      case 5:
+        return avatar5;
+      case 6:
+        return avatar6;
+      case 7:
+        return avatar7;
+      case 8:
+        return avatar8;
+      case 9:
+        return avatar9;
+      case 10:
+        return avatar10;
+      default:
+        return avatar1; // Default to avatar 1
+    }
+  }
 }
 
 @immutable

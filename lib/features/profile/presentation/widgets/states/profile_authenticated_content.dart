@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:trekka/core/assets/app_assets.dart';
+import 'package:trekka/core/design/gradients.dart';
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/widgets/button/full_width_gradient_button.dart';
 import 'package:trekka/core/widgets/sheet/center_modal_sheet.dart';
@@ -20,6 +21,8 @@ class ProfileAuthenticatedContent extends StatelessWidget {
     required this.wallet,
     required this.isWalletLoading,
     required this.onLogout,
+    required this.onAvatarChanged,
+    required this.onUsernameChanged,
     this.onDeleteAccount,
     super.key,
   });
@@ -28,6 +31,8 @@ class ProfileAuthenticatedContent extends StatelessWidget {
   final Wallet? wallet;
   final bool isWalletLoading;
   final VoidCallback onLogout;
+  final ValueChanged<int> onAvatarChanged;
+  final ValueChanged<String> onUsernameChanged;
   final VoidCallback? onDeleteAccount;
 
   void _showEditProfileModal(BuildContext context) {
@@ -35,9 +40,29 @@ class ProfileAuthenticatedContent extends StatelessWidget {
       context: context,
       barrierColor: Colors.transparent,
       builder: (BuildContext context) {
-        return EditProfileModal(user: user);
+        return EditProfileModal(
+          user: user,
+          onUsernameEdit: () {
+            Navigator.of(context).pop();
+            _showUsernameEditModal(context);
+          },
+        );
       },
     );
+  }
+
+  void _showUsernameEditModal(BuildContext context) {
+    showDialog<String>(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return _UsernameEditModal(currentUsername: user.username);
+      },
+    ).then((String? newUsername) {
+      if (newUsername != null && newUsername.isNotEmpty && newUsername != user.username) {
+        onUsernameChanged(newUsername);
+      }
+    });
   }
 
   void _showSettingsModal(BuildContext context) {
@@ -81,7 +106,10 @@ class ProfileAuthenticatedContent extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          const ProfileAvatar(),
+          ProfileAvatar(
+            user: user,
+            onAvatarChanged: onAvatarChanged,
+          ),
           const SizedBox(height: AppSpacing.xs),
           Text(
             displayName,
@@ -119,6 +147,136 @@ class ProfileAuthenticatedContent extends StatelessWidget {
             onPressed: () => _showDeleteAccountModal(context),
           ),
           const SizedBox(height: AppSpacing.sm),
+        ],
+      ),
+    );
+  }
+}
+
+/// Username edit modal
+class _UsernameEditModal extends StatefulWidget {
+  const _UsernameEditModal({required this.currentUsername});
+
+  final String currentUsername;
+
+  @override
+  State<_UsernameEditModal> createState() => _UsernameEditModalState();
+}
+
+class _UsernameEditModalState extends State<_UsernameEditModal> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.currentUsername);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
+    return CenterModalSheet(
+      dismissible: true,
+      padding: const EdgeInsets.all(AppSpacing.xxl),
+      topButton: Image.asset(AppAssetIcons.editProfile, width: 24, height: 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(
+            'Edit Username',
+            style: textTheme.bodyLarge?.copyWith(
+              fontWeight: AppFontWeights.semiBold,
+              color: AppColors.white,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            style: textTheme.bodyMedium?.copyWith(
+              color: AppColors.white,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Enter username',
+              hintStyle: textTheme.bodyMedium?.copyWith(
+                color: AppColors.white50,
+              ),
+              filled: true,
+              fillColor: AppColors.deepTeal,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+                borderSide: BorderSide(color: AppColors.primaryBright, width: 1),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+                borderSide: BorderSide(color: AppColors.primaryBright, width: 1),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+                borderSide: BorderSide(color: AppColors.accentAmber, width: 2),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      border: Border.all(color: AppColors.primaryBright, width: 1),
+                    ),
+                    child: Text(
+                      'Cancel',
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: AppColors.white,
+                        fontWeight: AppFontWeights.semiBold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    final String newUsername = _controller.text.trim();
+                    Navigator.of(context).pop(newUsername);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      gradient: AppGradients.logisticsActionButton,
+                    ),
+                    child: Text(
+                      'Save',
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: AppColors.white,
+                        fontWeight: AppFontWeights.semiBold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

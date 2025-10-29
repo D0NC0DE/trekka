@@ -9,9 +9,11 @@ class EditProfileModal extends StatelessWidget {
   const EditProfileModal({
     super.key,
     required this.user,
+    required this.onUsernameEdit,
   });
 
   final User user;
+  final VoidCallback onUsernameEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -22,18 +24,19 @@ class EditProfileModal extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          GradientInfoCard(
-            label: 'Username',
-            value: user.username.isNotEmpty ? user.username : 'Not set',
-            trailing: Image.asset(AppAssetIcons.editProfile, width: 16, height: 16),
-            iconSize: 16,
+          GestureDetector(
+            onTap: onUsernameEdit,
+            child: GradientInfoCard(
+              label: 'Username',
+              value: user.username.isNotEmpty ? user.username : 'Not set',
+              trailing: Image.asset(AppAssetIcons.editProfile, width: 16, height: 16),
+              iconSize: 16,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           GradientInfoCard(
             label: 'Email',
             value: user.email,
-            trailing: Image.asset(AppAssetIcons.editProfile, width: 16, height: 16),
-            iconSize: 16,
           ),
         ],
       ),

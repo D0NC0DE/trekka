@@ -9,6 +9,8 @@ abstract interface class UsersRemoteDataSource {
   Future<UserDto> getUserById(String userId);
 
   Future<UserDto> updateProfile({String? username, int? avatar});
+
+  Future<void> deleteAccount();
 }
 
 /// Implementation of [UsersRemoteDataSource] using [ApiClient]
@@ -36,14 +38,19 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
 
   @override
   Future<UserDto> updateProfile({String? username, int? avatar}) async {
-    final Map<String, String?> data = <String, String?>{};
+    final Map<String, dynamic> data = <String, dynamic>{};
     if (username != null) data['username'] = username;
-    if (avatar != null) data['avatar'] = avatar.toString();
+    if (avatar != null) data['avatar'] = avatar;
 
     final Map<String, dynamic> response = await _apiClient.patch(
       ApiConstants.usersMe,
       data: data,
     );
     return UserDto.fromJson(response);
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    await _apiClient.delete(ApiConstants.usersMe);
   }
 }
