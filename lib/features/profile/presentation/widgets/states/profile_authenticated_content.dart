@@ -4,6 +4,7 @@ import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/gradients.dart';
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/widgets/button/full_width_gradient_button.dart';
+import 'package:trekka/core/widgets/loading/linear_loader.dart';
 import 'package:trekka/core/widgets/sheet/center_modal_sheet.dart';
 import 'package:trekka/features/profile/domain/entities/user.dart';
 import 'package:trekka/features/profile/presentation/widgets/edit_profile_modal.dart';
@@ -20,6 +21,10 @@ class ProfileAuthenticatedContent extends StatelessWidget {
     required this.user,
     required this.wallet,
     required this.isWalletLoading,
+    required this.isUpdatingAvatar,
+    required this.isUpdatingUsername,
+    required this.isDeletingAccount,
+    required this.isLoggingOut,
     required this.onLogout,
     required this.onAvatarChanged,
     required this.onUsernameChanged,
@@ -30,12 +35,18 @@ class ProfileAuthenticatedContent extends StatelessWidget {
   final User user;
   final Wallet? wallet;
   final bool isWalletLoading;
+  final bool isUpdatingAvatar;
+  final bool isUpdatingUsername;
+  final bool isDeletingAccount;
+  final bool isLoggingOut;
   final VoidCallback onLogout;
   final ValueChanged<int> onAvatarChanged;
   final ValueChanged<String> onUsernameChanged;
   final VoidCallback? onDeleteAccount;
 
   void _showEditProfileModal(BuildContext context) {
+    if (isUpdatingUsername) return; // Prevent opening while updating
+    
     showDialog<void>(
       context: context,
       barrierColor: Colors.transparent,
@@ -93,6 +104,12 @@ class ProfileAuthenticatedContent extends StatelessWidget {
     final String displayName = user.username.isNotEmpty
         ? user.username
         : user.email;
+    
+    // Disable all actions when any operation is in progress
+    final bool isAnyOperationInProgress = isUpdatingAvatar || 
+        isUpdatingUsername || 
+        isDeletingAccount || 
+        isLoggingOut;
 
     return CenterModalSheet(
       dismissible: false,
@@ -108,8 +125,12 @@ class ProfileAuthenticatedContent extends StatelessWidget {
         children: <Widget>[
           ProfileAvatar(
             user: user,
-            onAvatarChanged: onAvatarChanged,
+            onAvatarChanged: isUpdatingAvatar ? (_) {} : onAvatarChanged,
           ),
+          if (isUpdatingAvatar) ...[
+            const SizedBox(height: AppSpacing.xs),
+            const CenteredLinearLoader(),
+          ],
           const SizedBox(height: AppSpacing.xs),
           Text(
             displayName,
@@ -125,27 +146,42 @@ class ProfileAuthenticatedContent extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           FullWidthGradientButton(
             label: 'Edit Profile',
-            onTap: () => _showEditProfileModal(context),
+            onTap: isAnyOperationInProgress ? () {} : () => _showEditProfileModal(context),
             leading: Image.asset(AppAssetIcons.user, width: 24, height: 24),
             trailing: Image.asset(AppAssetIcons.forward, width: 24, height: 24),
+            isActive: !isAnyOperationInProgress,
           ),
+          if (isUpdatingUsername) ...[
+            const SizedBox(height: AppSpacing.xs),
+            const CenteredLinearLoader(),
+          ],
           const SizedBox(height: AppSpacing.sm),
           FullWidthGradientButton(
             label: 'Settings',
-            onTap: () => _showSettingsModal(context),
+            onTap: isAnyOperationInProgress ? () {} : () => _showSettingsModal(context),
             leading: Image.asset(AppAssetIcons.settings, width: 24, height: 24),
             trailing: Image.asset(AppAssetIcons.forward, width: 24, height: 24),
+            isActive: !isAnyOperationInProgress,
           ),
           const SizedBox(height: AppSpacing.sm),
           FullWidthGradientButton(
             label: 'Sign Out',
-            onTap: onLogout,
+            onTap: isAnyOperationInProgress ? () {} : onLogout,
             trailing: Image.asset(AppAssetIcons.signout, width: 24, height: 24),
+            isActive: !isAnyOperationInProgress,
           ),
+          if (isLoggingOut) ...[
+            const SizedBox(height: AppSpacing.xs),
+            const CenteredLinearLoader(),
+          ],
           const SizedBox(height: AppSpacing.md),
           ProfileDeleteAccountButton(
-            onPressed: () => _showDeleteAccountModal(context),
+            onPressed: isAnyOperationInProgress ? () {} : () => _showDeleteAccountModal(context),
           ),
+          if (isDeletingAccount) ...[
+            const SizedBox(height: AppSpacing.xs),
+            const CenteredLinearLoader(),
+          ],
           const SizedBox(height: AppSpacing.sm),
         ],
       ),

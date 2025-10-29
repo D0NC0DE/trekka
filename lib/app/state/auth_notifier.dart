@@ -107,6 +107,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Sign out - clear all auth data
   Future<void> signOut() async {
+    if (state is Authenticated) {
+      state = (state as Authenticated).copyWith(isLoggingOut: true);
+    }
+
     try {
       // Get refresh token before clearing
       final String? refreshToken = await _authStorage.getRefreshToken();
@@ -125,6 +129,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
       _apiClient.clearAuthToken();
       state = const Unauthenticated();
     }
+  }
+
+  /// Refresh profile data (user and wallet)
+  Future<void> refreshProfile() async {
+    if (state is! Authenticated) return;
+    
+    // Refresh both user and wallet data in parallel
+    await Future.wait(<Future<void>>[
+      _refreshUserData(),
+      _loadWalletData(),
+    ]);
   }
 
   /// Fetch and set fresh user data from API
@@ -245,13 +260,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return Error<void>(const UnexpectedFailure(message: 'Not authenticated'));
     }
 
+    state = (state as Authenticated).copyWith(isUpdatingAvatar: true);
+
     final Result<User> result = await _usersRepository.updateProfile(avatar: avatarId);
 
     if (result is Success<User>) {
       updateUser(result.data);
+      if (state is Authenticated) {
+        state = (state as Authenticated).copyWith(isUpdatingAvatar: false);
+      }
       return const Success<void>(null);
     }
 
+    if (state is Authenticated) {
+      state = (state as Authenticated).copyWith(isUpdatingAvatar: false);
+    }
     return Error<void>((result as Error<User>).error);
   }
 
@@ -261,13 +284,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return Error<void>(const UnexpectedFailure(message: 'Not authenticated'));
     }
 
+    state = (state as Authenticated).copyWith(isUpdatingUsername: true);
+
     final Result<User> result = await _usersRepository.updateProfile(username: username);
 
     if (result is Success<User>) {
       updateUser(result.data);
+      if (state is Authenticated) {
+        state = (state as Authenticated).copyWith(isUpdatingUsername: false);
+      }
       return const Success<void>(null);
     }
 
+    if (state is Authenticated) {
+      state = (state as Authenticated).copyWith(isUpdatingUsername: false);
+    }
     return Error<void>((result as Error<User>).error);
   }
 
@@ -277,6 +308,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return Error<void>(const UnexpectedFailure(message: 'Not authenticated'));
     }
 
+    state = (state as Authenticated).copyWith(isDeletingAccount: true);
+
     final Result<void> result = await _usersRepository.deleteAccount();
 
     if (result is Success<void>) {
@@ -284,6 +317,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return const Success<void>(null);
     }
 
+    if (state is Authenticated) {
+      state = (state as Authenticated).copyWith(isDeletingAccount: false);
+    }
     return Error<void>((result as Error<void>).error);
   }
 
