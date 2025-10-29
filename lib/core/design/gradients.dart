@@ -67,4 +67,19 @@ class AppGradients {
       AppColors.logisticsActionInactive,
     ],
   );
+
+  static const Gradient marketplaceHighlight = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[
+      AppColors.marketplaceHighlightStart,
+      AppColors.marketplaceHighlightEnd,
+    ],
+  );
+
+  static const Gradient marketplaceInput = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[AppColors.white, AppColors.marketplaceInputBase],
+  );
 }

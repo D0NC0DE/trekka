@@ -11,6 +11,8 @@ class GradientIconButton extends StatelessWidget {
     this.iconSize = 16,
     this.borderRadius = 4,
     this.padding,
+    this.gradient = AppGradients.backButton,
+    this.boxShadow = true,
     super.key,
   });
 
@@ -20,6 +22,8 @@ class GradientIconButton extends StatelessWidget {
   final double iconSize;
   final double borderRadius;
   final double? padding;
+  final Gradient gradient;
+  final bool boxShadow;
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +36,9 @@ class GradientIconButton extends StatelessWidget {
         height: size,
         padding: EdgeInsets.all(resolvedPadding),
         decoration: BoxDecoration(
-          gradient: AppGradients.backButton,
+          gradient: gradient,
           borderRadius: BorderRadius.circular(borderRadius),
-          boxShadow: AppShadows.floatingButton,
+          boxShadow: boxShadow ? AppShadows.floatingButton : [],
         ),
         child: Center(
           child: Image.asset(
