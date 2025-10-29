@@ -22,7 +22,7 @@ class GradientBackButton extends StatelessWidget {
         padding: const EdgeInsets.all(9),
         decoration: BoxDecoration(
           gradient: AppGradients.backButton,
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(4),
           boxShadow: AppShadows.floatingButton,
         ),
         child: Center(

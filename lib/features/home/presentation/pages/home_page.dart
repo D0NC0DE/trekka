@@ -110,6 +110,9 @@ class _HomePageState extends ConsumerState<HomePage> {
         case HomePinType.logisticsHailing:
           context.push(RoutePaths.logisticsHailing);
           break;
+        case HomePinType.marketplace:
+          context.push(RoutePaths.marketplace);
+          break;
         default:
           _showComingSoon(
             HomePinViewModel.resolveDisplayFor(pinType, null).label,

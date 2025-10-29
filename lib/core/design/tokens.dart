@@ -4,6 +4,7 @@ class AppColors {
   AppColors._();
 
   static const Color backgroundAlt = Color(0xFFF5F9FA);
+  static const Color marketplaceBackground = Color(0xFFF9F5ED);
   static const Color white = Color(0xFFFFFFFF);
   static const Color white75 = Color(0xBFFFFFFF);
   static const Color white50 = Color(0x80FFFFFF);
