@@ -145,6 +145,7 @@ flutter:
     - assets/gifs/
     - assets/icons/
     - assets/images/
+    - assets/images/avatars/
     - assets/icons/pins/
     - assets/icons/tabs/
     - assets/icons/socials/

@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trekka/app/di/auth_state_providers.dart';
 import 'package:trekka/app/state/auth_state.dart';
 import 'package:trekka/features/profile/domain/entities/user.dart';
-import 'package:trekka/features/profile/presentation/widgets/profile_authenticated_content.dart';
-import 'package:trekka/features/profile/presentation/widgets/profile_loading_content.dart';
-import 'package:trekka/features/profile/presentation/widgets/profile_unauthenticated_content.dart';
+import 'package:trekka/features/profile/presentation/widgets/states/profile_authenticated_content.dart';
+import 'package:trekka/features/profile/presentation/widgets/states/profile_loading_content.dart';
+import 'package:trekka/features/profile/presentation/widgets/states/profile_unauthenticated_content.dart';
 import 'package:trekka/features/wallets/domain/entities/wallet.dart';
 
 /// Displays profile details inside the center modal.

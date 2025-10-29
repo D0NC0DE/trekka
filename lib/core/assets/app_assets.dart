@@ -9,7 +9,17 @@ class AppAssetImages {
 
   static const String authSheetBackground = 'assets/images/auth_sheet_bg.png';
 
-  static const String avatar = 'assets/images/avatar.jpg';
+  // Avatar Images
+  static const String avatar = 'assets/images/avatars/avatar.jpg';
+  static const String avatar1 = 'assets/images/avatars/avatar1.png';
+  static const String avatar2 = 'assets/images/avatars/avatar2.png';
+  static const String avatar3 = 'assets/images/avatars/avatar3.png';
+  static const String avatar4 = 'assets/images/avatars/avatar4.png';
+  static const String avatar5 = 'assets/images/avatars/avatar5.png';
+  static const String avatar6 = 'assets/images/avatars/avatar6.png';
+  static const String avatar7 = 'assets/images/avatars/avatar7.png';
+  static const String avatar8 = 'assets/images/avatars/avatar8.png';
+  static const String avatar9 = 'assets/images/avatars/avatar9.png';
 }
 
 @immutable
@@ -76,6 +86,7 @@ class AppAssetIcons {
   static const String editProfile = 'assets/icons/profile/edit.png';
   static const String volume = 'assets/icons/profile/volume.png';
   static const String music = 'assets/icons/profile/music.png';
+  static const String delete = 'assets/icons/profile/delete.png';
 
   // Other Icons
   static const String destinationInfo = 'assets/icons/destination.png';
