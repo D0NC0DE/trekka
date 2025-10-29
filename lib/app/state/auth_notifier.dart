@@ -8,6 +8,7 @@ import 'package:trekka/features/auth/domain/repositories/auth_repository.dart';
 import 'package:trekka/features/profile/data/models/user_dto.dart';
 import 'package:trekka/features/profile/domain/entities/user.dart';
 import 'package:trekka/features/profile/domain/repositories/users_repository.dart';
+import 'package:trekka/features/wallets/data/models/wallet_dto.dart';
 import 'package:trekka/features/wallets/domain/entities/wallet.dart';
 import 'package:trekka/features/wallets/domain/repositories/wallets_repository.dart';
 
@@ -62,7 +63,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final Map<String, dynamic>? userJson = await _authStorage.getUserJson();
       if (userJson != null) {
         final User cachedUser = UserDto.fromJson(userJson).toEntity();
-        state = Authenticated(user: cachedUser);
+        
+        // Try to load cached wallet
+        final Map<String, dynamic>? walletJson = await _authStorage.getWalletJson();
+        final Wallet? cachedWallet = walletJson != null 
+            ? WalletDto.fromJson(walletJson).toEntity()
+            : null;
+        
+        state = Authenticated(
+          user: cachedUser,
+          wallet: cachedWallet,
+        );
 
         _refreshUserData();
 
@@ -215,6 +226,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = (state as Authenticated).copyWith(
           wallet: wallet,
           isLoadingWallet: false,
+        );
+        
+        // Cache wallet data
+        _authStorage.saveWalletJson(
+          WalletDto(
+            id: wallet.id,
+            userId: wallet.userId,
+            address: wallet.address,
+            balance: wallet.balance,
+            createdAt: wallet.createdAt,
+            updatedAt: wallet.updatedAt,
+          ).toJson(),
         );
       }
       return;
