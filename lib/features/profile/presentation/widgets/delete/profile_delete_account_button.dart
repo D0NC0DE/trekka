@@ -39,7 +39,7 @@ class ProfileDeleteAccountButton extends StatelessWidget {
               textAlign: TextAlign.center,
               style: textTheme.bodyLarge?.copyWith(
                 height: 1.25,
-                fontWeight: AppFontWeights.semiBold,
+                fontWeight: AppFontWeights.regular,
                 color: AppColors.destructive,
               ),
             ),

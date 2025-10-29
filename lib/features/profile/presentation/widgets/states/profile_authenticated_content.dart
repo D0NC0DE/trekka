@@ -8,7 +8,7 @@ import 'package:trekka/core/widgets/loading/linear_loader.dart';
 import 'package:trekka/core/widgets/sheet/center_modal_sheet.dart';
 import 'package:trekka/features/profile/domain/entities/user.dart';
 import 'package:trekka/features/profile/presentation/widgets/edit_profile_modal.dart';
-import 'package:trekka/features/profile/presentation/widgets/profile_avatar.dart';
+import 'package:trekka/features/profile/presentation/widgets/profile_avatar/profile_avatar.dart';
 import 'package:trekka/features/profile/presentation/widgets/delete/profile_delete_account_button.dart';
 import 'package:trekka/features/profile/presentation/widgets/delete/profile_delete_account_modal.dart';
 import 'package:trekka/features/profile/presentation/widgets/profile_settings_modal.dart';
