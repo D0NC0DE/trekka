@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:trekka/core/design/gradients.dart';
+import 'package:trekka/core/design/shadows.dart';
 import 'package:trekka/core/design/tokens.dart';
+import 'package:trekka/core/widgets/inner_shadow.dart';
 
 /// A centered modal sheet with gradient background and optional dismiss functionality.
 class CenterModalSheet extends StatelessWidget {
@@ -11,6 +13,7 @@ class CenterModalSheet extends StatelessWidget {
     this.onDismiss,
     this.maxWidth,
     this.padding = const EdgeInsets.all(12),
+    this.topButton,
     super.key,
   });
 
@@ -19,10 +22,12 @@ class CenterModalSheet extends StatelessWidget {
   final VoidCallback? onDismiss;
   final double? maxWidth;
   final EdgeInsetsGeometry padding;
+  final Widget? topButton;
 
   static const double _borderWidth = 4;
   static const double _borderRadius = 8;
   static const double _closeButtonSize = 36;
+  static const double _topButtonSize = 50;
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +86,18 @@ class CenterModalSheet extends StatelessWidget {
                               () => Navigator.of(context).maybePop(),
                         ),
                       ),
+                    if (topButton != null)
+                      Positioned(
+                        top: -_topButtonSize / 2,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: _TopCircularButton(
+                            size: _topButtonSize,
+                            child: topButton!,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -122,6 +139,39 @@ class _CloseButton extends StatelessWidget {
           Icons.close_rounded,
           size: 20,
           color: AppColors.deepTeal,
+        ),
+      ),
+    );
+  }
+}
+
+class _TopCircularButton extends StatelessWidget {
+  const _TopCircularButton({
+    required this.size,
+    required this.child,
+  });
+
+  final double size;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return InnerShadow(
+      shadows: AppShadows.modalCircularButtonInner,
+      borderRadius: BorderRadius.circular(size / 2),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: const BoxDecoration(
+          color: AppColors.primary,
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: child,
+          ),
         ),
       ),
     );

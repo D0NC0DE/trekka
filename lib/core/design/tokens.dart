@@ -9,6 +9,7 @@ class AppColors {
   static const Color white50 = Color(0x80FFFFFF);
   static const Color white25 = Color(0x40FFFFFF);
   static const Color divider = Color(0xFFE0E0E0);
+  static const Color lightGrey = Color(0xFFE0E0E0);
   static const Color accentBurntOrange = Color(0xFFF4A261);
   static const Color accentAmber = Color(0xFFFFD166);
   static const Color accentAmber10 = Color(0x1AFFD166);
@@ -57,6 +58,10 @@ class AppColors {
   static const Color nearbyDriverMarkerInner = Color(0x8004A497);
   static const Color nearbyDriverMarkerCenter = Color(0xFF04A497);
   static const Color completeRideSuccessBadge = Color(0xE6D9FAFA);
+  static const Color modalButtonInnerShadow = Color(0x401A2A22);
+  static const Color accentAmberInnerShadow = Color(0x59FFD166);
+  static const Color sliderTrackBackground = Color(0xFFF8F8F8);
+  static const Color shadowLightBlack = Color(0x1A000000);
 }
 
 class AppSpacing {

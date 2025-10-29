@@ -73,6 +73,9 @@ class AppAssetIcons {
   static const String signout = 'assets/icons/profile/signout.png';
   static const String settings = 'assets/icons/profile/settings.png';
   static const String forward = 'assets/icons/profile/forward.png';
+  static const String editProfile = 'assets/icons/profile/edit.png';
+  static const String volume = 'assets/icons/profile/volume.png';
+  static const String music = 'assets/icons/profile/music.png';
 
   // Other Icons
   static const String destinationInfo = 'assets/icons/destination.png';
