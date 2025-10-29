@@ -104,7 +104,7 @@ class HomePinViewModel {
     HomePinType.logisticsCourier: HomePinDisplay(
       assetPath: AppAssetIcons.courierPin,
       label: 'Logistics Courier',
-      isDisabled: true,
+      // isDisabled: true,
     ),
     HomePinType.logisticsHailing: HomePinDisplay(
       assetPath: AppAssetIcons.hailingPin,
@@ -117,12 +117,12 @@ class HomePinViewModel {
     HomePinType.questOnline: HomePinDisplay(
       assetPath: AppAssetIcons.questOnlinePin,
       label: 'Quest Online',
-      isDisabled: true,
+      // isDisabled: true,
     ),
     HomePinType.questPhysical: HomePinDisplay(
       assetPath: AppAssetIcons.questPhysicalPin,
       label: 'Quest Physical',
-      isDisabled: true,
+      // isDisabled: true,
     ),
     HomePinType.recycling: HomePinDisplay(
       assetPath: AppAssetIcons.recyclePin,
