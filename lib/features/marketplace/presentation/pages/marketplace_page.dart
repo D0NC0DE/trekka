@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/tokens.dart';
+import 'package:trekka/core/router/route_paths.dart';
+import 'package:trekka/features/marketplace/domain/entities/marketplace_product.dart';
 import 'package:trekka/features/marketplace/presentation/widgets/category_pills.dart';
 import 'package:trekka/features/marketplace/presentation/widgets/marketplace_app_bar.dart';
 import 'package:trekka/features/marketplace/presentation/widgets/post_product.dart';
@@ -25,43 +28,67 @@ class MarketplacePage extends StatelessWidget {
     'Other',
   ];
 
-  static final List<_MarketplaceProduct> _products = <_MarketplaceProduct>[
-    _MarketplaceProduct(
-      title: 'Ergonomic Desk Chair',
+  static const MarketplaceProduct _placeholderProduct = MarketplaceProduct(
+    title: 'Loading Product',
+    price: '₦0',
+    coverImage: '',
+  );
+
+  static final List<MarketplaceProduct> _products = <MarketplaceProduct>[
+    MarketplaceProduct(
+      title: 'Ergonomic Desk Chair - extremely long title that should be truncated',
       price: '₦45,000',
-      image: AppAssetImages.avatar4,
+      coverImage: AppAssetImages.avatar4,
       location: 'Lekki, Lagos',
+      images: <String>[
+        AppAssetImages.avatar4,
+        AppAssetImages.avatar5,
+        AppAssetImages.avatar6,
+        AppAssetImages.avatar7,
+      ],
+      description:
+          'Comfort meets style with this ergonomic desk chair. Adjustable height, breathable mesh, and lumbar support make it perfect for long work sessions.',
     ),
-    _MarketplaceProduct(
+    MarketplaceProduct(
       title: 'Used SUV in great condition',
       price: '₦6,500,000',
-      image: AppAssetImages.avatar5,
+      coverImage: AppAssetImages.avatar5,
       location: 'Ikeja, Lagos',
+      images: <String>[
+        AppAssetImages.avatar5,
+        AppAssetImages.avatar6,
+        AppAssetImages.avatar7,
+      ],
     ),
-    _MarketplaceProduct(
+    MarketplaceProduct(
       title: 'Smart TV 55" 4K UHD',
       price: '₦320,000',
-      image: AppAssetImages.avatar6,
+      coverImage: AppAssetImages.avatar6,
       location: 'Abuja',
+      images: <String>[AppAssetImages.avatar6, AppAssetImages.avatar9],
     ),
-    _MarketplaceProduct(
+    MarketplaceProduct(
       title: 'Handmade Ankara Dress',
       price: '₦18,500',
-      image: AppAssetImages.avatar7,
+      coverImage: AppAssetImages.avatar7,
       location: 'Ibadan',
+      images: <String>[AppAssetImages.avatar7, AppAssetImages.avatar4],
     ),
-    _MarketplaceProduct(
-      title:
-          'PS5 with extra controller with extra controller really long title that should be truncated',
+    MarketplaceProduct(
+      title: 'PS5 with extra controller',
       price: '₦470,000',
-      image: AppAssetImages.avatar8,
+      coverImage: AppAssetImages.avatar8,
       location: 'Festac, Lagos',
+      images: <String>[AppAssetImages.avatar8, AppAssetImages.avatar5],
+      description:
+          'Play the latest titles in 4K with this lightly used PlayStation 5 bundle. Includes one extra DualSense controller and original packaging.',
     ),
-    _MarketplaceProduct(
+    MarketplaceProduct(
       title: 'Premium Sound Bar',
       price: '₦210,000',
-      image: AppAssetImages.avatar9,
+      coverImage: AppAssetImages.avatar9,
       location: 'Enugu',
+      images: <String>[AppAssetImages.avatar9, AppAssetImages.avatar6],
     ),
   ];
 
@@ -84,7 +111,7 @@ class MarketplacePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                MarketplaceAppBar(),
+                const MarketplaceAppBar(),
                 const SizedBox(height: AppSpacing.smLg),
                 const PostProduct(),
                 const SizedBox(height: AppSpacing.smLg),
@@ -122,16 +149,20 @@ class MarketplacePage extends StatelessWidget {
                             itemCount: itemCount,
                             itemBuilder: (BuildContext context, int index) {
                               if (showSkeleton) {
-                                return const ProductCard.skeleton();
+                                return const ProductCard(
+                                  product: _placeholderProduct,
+                                  isLoading: true,
+                                );
                               }
 
-                              final _MarketplaceProduct product =
+                              final MarketplaceProduct product =
                                   _products[index];
                               return ProductCard(
-                                imageAsset: product.image,
-                                title: product.title,
-                                price: product.price,
-                                location: product.location,
+                                product: product,
+                                onTap: () => context.push(
+                                  RoutePaths.marketplaceProductDetail,
+                                  extra: product,
+                                ),
                               );
                             },
                           );
@@ -145,18 +176,4 @@ class MarketplacePage extends StatelessWidget {
       ),
     );
   }
-}
-
-class _MarketplaceProduct {
-  const _MarketplaceProduct({
-    required this.title,
-    required this.price,
-    required this.image,
-    this.location,
-  });
-
-  final String title;
-  final String price;
-  final String image;
-  final String? location;
 }
