@@ -1,0 +1,95 @@
+import 'package:flutter/material.dart';
+
+import 'package:trekka/core/assets/app_assets.dart';
+import 'package:trekka/core/design/gradients.dart';
+import 'package:trekka/core/design/tokens.dart';
+import 'package:trekka/core/widgets/sheet/app_modal_bottom_sheet.dart';
+import 'package:trekka/core/widgets/sheet/sheet_container.dart';
+import 'package:trekka/core/widgets/sheet/sheet_drag_handle.dart';
+import 'package:trekka/features/auth/presentation/pages/auth_email_page.dart';
+import 'package:trekka/features/auth/presentation/pages/auth_otp_page.dart';
+
+class AuthSheet extends StatefulWidget {
+  const AuthSheet({super.key});
+
+  static Future<void> show(BuildContext context, {bool isDismissible = true}) {
+    return AppModalBottomSheet.show(
+      context: context,
+      child: const AuthSheet(),
+      heightFactor: 0.8,
+      isDismissible: isDismissible,
+    );
+  }
+
+  @override
+  State<AuthSheet> createState() => _AuthSheetState();
+}
+
+class _AuthSheetState extends State<AuthSheet> {
+  bool _showOtp = false;
+  String _email = '';
+
+  void _handleEmailContinue(String email) {
+    setState(() {
+      _email = email;
+      _showOtp = true;
+    });
+    debugPrint('Email submitted: $email');
+  }
+
+  void _handleVerify() {
+    debugPrint('OTP verified for: $_email');
+    if (!mounted) return;
+    Navigator.of(context).pop(true);
+  }
+
+  void _handleResend() {
+    debugPrint('Resending OTP to: $_email');
+    // Handle resend OTP
+  }
+
+  Widget _buildEmailScreen() {
+    return SheetContainer(
+      key: const ValueKey<String>('email'),
+      backgroundImage: AppAssetImages.authSheetBackground,
+      gradient: AppGradients.homeAuthSheet,
+      child: Column(
+        children: <Widget>[
+          const SizedBox(height: AppSpacing.md),
+          const SheetDragHandle(),
+          Expanded(
+            child: AuthEmailPage(
+              onContinue: _handleEmailContinue,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOtpScreen() {
+    return SheetContainer(
+      key: const ValueKey<String>('otp'),
+      backgroundImage: AppAssetImages.authSheetBackground,
+      gradient: AppGradients.homeAuthSheet,
+      child: Column(
+        children: <Widget>[
+           const SizedBox(height: AppSpacing.md),
+          const SheetDragHandle(),
+          Expanded(
+            child: AuthOtpPage(
+              email: _email,
+              onVerify: _handleVerify,
+              onResend: _handleResend,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _showOtp ? _buildOtpScreen() : _buildEmailScreen();
+  }
+}

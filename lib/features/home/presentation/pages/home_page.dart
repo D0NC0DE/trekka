@@ -1,38 +1,172 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-const _homeBackgroundAssetPath = 'assets/images/home_bg.png';
+import 'package:trekka/app/utils/auth_guard.dart';
+import 'package:trekka/core/assets/app_assets.dart';
+import 'package:trekka/core/design/tokens.dart';
+import 'package:trekka/core/router/route_paths.dart';
+import 'package:trekka/core/utils/coming_soon.dart';
+import 'package:trekka/features/home/presentation/viewmodels/home_pin_view_model.dart';
+import 'package:trekka/features/home/presentation/widgets/home_app_bar.dart';
+import 'package:trekka/features/home/presentation/widgets/home_bottom_nav.dart';
+import 'package:trekka/features/home/presentation/widgets/home_pins_layer.dart';
+import 'package:trekka/features/history/presentation/pages/history_coming_soon_modal.dart';
+import 'package:trekka/features/profile/presentation/pages/profile_overview_modal.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  static const double _navInsetWide = 47;
+  static const double _navCompactContentWidth = 264;
+
+  int _currentIndex = 0;
+
+  void _onNavChanged(int index) {
+    if (_currentIndex == index) return;
+    setState(() => _currentIndex = index);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          Image.asset(
-            _homeBackgroundAssetPath,
-            fit: BoxFit.cover,
-          ),
-          const SafeArea(
-            child: Align(
+    final bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+    final Size screenSize = MediaQuery.of(context).size;
+    final double navHorizontalInset = _resolveBottomNavInset(screenSize.width);
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: HomeAppBar(onNotificationPressed: _handleNotificationTap),
+        backgroundColor: Colors.black,
+        body: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            Image.asset(AppAssetImages.homeBackground, fit: BoxFit.cover),
+            _buildTabBody(context),
+            Align(
               alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Text(
-                  'Welcome to Trekka',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+              child: isIOS
+                  ? Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: _ResponsiveNavInset(
+                        horizontalInset: navHorizontalInset,
+                        child: HomeBottomNav(
+                          initialIndex: _currentIndex,
+                          onChanged: _onNavChanged,
+                        ),
+                      ),
+                    )
+                  : SafeArea(
+                      minimum: const EdgeInsets.only(bottom: 20),
+                      child: _ResponsiveNavInset(
+                        horizontalInset: navHorizontalInset,
+                        child: HomeBottomNav(
+                          initialIndex: _currentIndex,
+                          onChanged: _onNavChanged,
+                        ),
+                      ),
+                    ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabBody(BuildContext context) {
+    switch (_currentIndex) {
+      case 0:
+        return HomePinsLayer(onPinTap: _handlePinTap);
+      case 1:
+        return const HistoryComingSoonModal(
+          title: 'History',
+          message: 'Track quests and rewards -- coming soon.',
+        );
+      case 2:
+        return const ProfileOverviewModal();
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  Future<void> _handlePinTap(HomePinType pinType) async {
+    await _runAuthenticated(() async {
+      if (!mounted) return;
+
+      switch (pinType) {
+        case HomePinType.logisticsHailing:
+          context.push(RoutePaths.logisticsHailing);
+          break;
+        case HomePinType.marketplace:
+          context.push(RoutePaths.marketplace);
+          break;
+        default:
+          showComingSoon(
+            context,
+            featureLabel:
+                HomePinViewModel.resolveDisplayFor(pinType, null).label,
+          );
+      }
+    });
+  }
+
+  Future<void> _handleNotificationTap() async {
+    await _runAuthenticated(
+      () => showComingSoon(context, featureLabel: 'Notifications'),
+    );
+  }
+
+  Future<void> _runAuthenticated(FutureOr<void> Function() action) async {
+    final AuthGuard authGuard = ref.read(authGuardProvider);
+    await authGuard.runAuthenticated(context, action);
+  }
+
+  double _resolveBottomNavInset(double width) {
+    final double maxInsetToFit = ((width - _navCompactContentWidth) / 2)
+        .clamp(0, _navInsetWide)
+        .toDouble();
+
+    if (width <= 360) return maxInsetToFit.clamp(0, AppSpacing.md).toDouble();
+    if (width <= 400) {
+      return maxInsetToFit.clamp(AppSpacing.md, AppSpacing.lg).toDouble();
+    }
+    if (width <= 440) {
+      return maxInsetToFit.clamp(AppSpacing.lg, AppSpacing.xl).toDouble();
+    }
+    return maxInsetToFit;
+  }
+}
+
+class _ResponsiveNavInset extends StatelessWidget {
+  const _ResponsiveNavInset({
+    required this.horizontalInset,
+    required this.child,
+  });
+
+  static const double _maxNavWidth = 300;
+  final double horizontalInset;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: horizontalInset),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _maxNavWidth),
+        child: child,
       ),
     );
   }
