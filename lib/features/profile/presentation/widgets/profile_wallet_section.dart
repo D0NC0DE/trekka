@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import 'package:trekka/core/design/tokens.dart';
-import 'package:trekka/core/widgets/loading/linear_loader.dart';
 import 'package:trekka/core/widgets/snackbar/app_snackbar.dart';
 import 'package:trekka/features/wallets/domain/entities/wallet.dart';
 
@@ -20,10 +20,22 @@ class ProfileWalletSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
-    if (isLoading) {
-      return const SizedBox(
-        height: 48,
-        child: CenteredLinearLoader(width: 150, message: 'Loading wallet...'),
+    if (isLoading && wallet == null) {
+      return Skeletonizer(
+        enabled: true,
+        effect: ShimmerEffect(
+          baseColor: AppColors.skeletonProfileBase,
+          highlightColor: AppColors.skeletonProfileHighlight,
+          duration: const Duration(milliseconds: 1000),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Bone.text(words: 3, fontSize: 10),
+            const SizedBox(height: AppSpacing.sm),
+            Bone.text(words: 1, fontSize: 32),
+          ],
+        ),
       );
     }
 

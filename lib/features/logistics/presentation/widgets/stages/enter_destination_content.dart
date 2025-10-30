@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/tokens.dart';
+import 'package:trekka/core/utils/coming_soon.dart';
 import 'package:trekka/core/widgets/button/icon_text_button.dart';
 import 'package:trekka/core/widgets/connector/route_connector.dart';
 import 'package:trekka/core/widgets/input/location_search_field.dart';
@@ -115,32 +116,39 @@ class _EnterDestinationContentState
 
         Padding(
           padding: const EdgeInsets.only(left: 4),
-          child: Row(
-            children: <Widget>[
-              Image.asset(
-                AppAssetIcons.selectOnMap,
-                width: 24,
-                height: 24,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Text(
-                  'Select Destination on map',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.logisticsActionActive,
-                        height: 1.25,
-                        fontWeight: AppFontWeights.semiBold,
-                      ),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => showComingSoon(
+              context,
+              featureLabel: 'Select destination on map',
+            ),
+            child: Row(
+              children: <Widget>[
+                Image.asset(
+                  AppAssetIcons.selectOnMap,
+                  width: 24,
+                  height: 24,
+                  fit: BoxFit.contain,
                 ),
-              ),
-              Image.asset(
-                AppAssetIcons.stop,
-                width: 32,
-                height: 32,
-                fit: BoxFit.contain,
-              ),
-            ],
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    'Select destination on map',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AppColors.logisticsActionActive,
+                      height: 1.25,
+                      fontWeight: AppFontWeights.semiBold,
+                    ),
+                  ),
+                ),
+                Image.asset(
+                  AppAssetIcons.stop,
+                  width: 32,
+                  height: 32,
+                  fit: BoxFit.contain,
+                ),
+              ],
+            ),
           ),
         ),
 

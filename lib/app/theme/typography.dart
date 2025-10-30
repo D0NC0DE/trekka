@@ -21,7 +21,11 @@ TextTheme buildTextTheme(TextTheme base) {
     ),
     titleLarge: base.titleLarge?.copyWith(fontWeight: AppFontWeights.semiBold),
     titleMedium: base.titleMedium?.copyWith(fontWeight: AppFontWeights.medium),
-    titleSmall: base.titleSmall?.copyWith(fontWeight: AppFontWeights.medium),
+    titleSmall: base.titleSmall?.copyWith(
+      fontWeight: AppFontWeights.bold,
+      height: 1.0,
+      letterSpacing: 0,
+    ),
     bodyLarge: base.bodyLarge?.copyWith(
       fontWeight: AppFontWeights.regular,
       letterSpacing: 0,
@@ -31,7 +35,12 @@ TextTheme buildTextTheme(TextTheme base) {
       letterSpacing: 0,
       height: 1.0,
     ),
-    bodySmall: base.bodySmall?.copyWith(fontWeight: AppFontWeights.regular),
+    bodySmall: base.bodySmall?.copyWith(
+      fontWeight: AppFontWeights.regular,
+      fontSize: AppSpacing.smXl,
+      height: 20 / 14,
+      letterSpacing: 0,
+    ),
     labelLarge: base.labelLarge?.copyWith(
       fontWeight: AppFontWeights.semiBold,
       fontSize: AppSpacing.md,

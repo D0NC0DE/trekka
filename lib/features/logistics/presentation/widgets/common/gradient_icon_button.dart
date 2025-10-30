@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:trekka/core/design/gradients.dart';
-import 'package:trekka/core/design/tokens.dart';
+// import 'package:trekka/core/design/tokens.dart';
 
 class GradientIconButton extends StatelessWidget {
   const GradientIconButton({
@@ -41,7 +41,7 @@ class GradientIconButton extends StatelessWidget {
           width: iconWidth,
           height: iconHeight,
           fit: BoxFit.contain,
-          color: AppColors.white,
+          // color: AppColors.white,
         ),
       ),
     );

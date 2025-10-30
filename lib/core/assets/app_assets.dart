@@ -97,6 +97,7 @@ class AppAssetIcons {
   static const String courier = 'assets/icons/actions/courier.png';
   static const String myLocation = 'assets/icons/actions/my_location.png';
   static const String search = 'assets/icons/actions/search.png';
+  static const String searchWhite = 'assets/icons/actions/search_white.png';
   static const String close = 'assets/icons/actions/close.png';
   static const String selectOnMap = 'assets/icons/actions/on_map.png';
   static const String stop = 'assets/icons/actions/stop.png';
@@ -106,6 +107,7 @@ class AppAssetIcons {
   static const String chat = 'assets/icons/actions/chat.png';
   static const String call = 'assets/icons/actions/call.png';
   static const String popDots = 'assets/icons/actions/pop_dots.png';
+  static const String profile = 'assets/icons/actions/profile.png';
 
   // Profile Icons
   static const String user = 'assets/icons/profile/user.png';

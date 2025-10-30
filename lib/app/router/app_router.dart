@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:trekka/core/router/route_paths.dart';
 import 'package:trekka/features/home/presentation/pages/home_page.dart';
 import 'package:trekka/features/logistics/presentation/pages/logistics_page.dart';
+import 'package:trekka/features/marketplace/domain/entities/marketplace_product.dart';
+import 'package:trekka/features/marketplace/presentation/pages/marketplace_page.dart';
+import 'package:trekka/features/marketplace/presentation/pages/product_detail_page.dart';
 import 'package:trekka/features/splash/presentation/pages/splash_page.dart';
 
 GoRouter createAppRouter() {
@@ -62,6 +65,36 @@ GoRouter createAppRouter() {
             return FadeTransition(opacity: fadeIn, child: child);
           },
         ),
+      ),
+      GoRoute(
+        path: RoutePaths.marketplace,
+        name: 'marketplace',
+        pageBuilder: (context, state) => CustomTransitionPage<void>(
+          key: state.pageKey,
+          transitionDuration: const Duration(milliseconds: 400),
+          reverseTransitionDuration: const Duration(milliseconds: 250),
+          child: const MarketplacePage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final Animation<double> fade = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+              reverseCurve: Curves.easeInOut,
+            );
+            return FadeTransition(opacity: fade, child: child);
+          },
+        ),
+      ),
+      GoRoute(
+        path: RoutePaths.marketplaceProductDetail,
+        name: 'marketplaceProductDetail',
+        builder: (context, state) {
+          final MarketplaceProduct? product =
+              state.extra as MarketplaceProduct?;
+          if (product == null) {
+            return const MarketplacePage();
+          }
+          return MarketplaceProductDetailPage(product: product);
+        },
       ),
     ],
   );

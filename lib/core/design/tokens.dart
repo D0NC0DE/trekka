@@ -4,6 +4,7 @@ class AppColors {
   AppColors._();
 
   static const Color backgroundAlt = Color(0xFFF5F9FA);
+  static const Color marketplaceBackground = Color(0xFFF9F5ED);
   static const Color white = Color(0xFFFFFFFF);
   static const Color white75 = Color(0xBFFFFFFF);
   static const Color white50 = Color(0x80FFFFFF);
@@ -16,6 +17,16 @@ class AppColors {
   static const Color accentAmber30 = Color(0x4DFFD166);
   static const Color accentAmber50 = Color(0x80FFD166);
   static const Color accentPinpoint = Color(0xFFFFC460);
+  static const Color marketplaceHighlight = Color(0xFFFED63D);
+  static const Color marketplaceHighlightStart = Color(0xFFFCD43A);
+  static const Color marketplaceHighlightEnd = Color(0xFFDBAF04);
+  static const Color marketplaceInputBase = Color(0xFFEDFFFD);
+  static const Color marketplaceInputHighlight = Color(0x40EDFFFD);
+  static const Color marketplaceCardBorder = Color(0xFFC2C2C2);
+  static const Color marketplaceLoadingStart = Color(0xFFFFFFFF);
+  static const Color marketplaceLoadingEnd = Color(0xFFD7FFFA);
+  static const Color skeletonProfileBase = Color(0x4D05668D);
+  static const Color skeletonProfileHighlight = Color(0x2602C39A);
   static const Color pickupPulseOuter = Color(0x334C1D95);
   static const Color pickupPulseInner = Color(0x664C1D95);
   static const Color primary = Color(0xFF00A896);
@@ -89,6 +100,7 @@ class AppSpacing {
 class AppRadius {
   AppRadius._();
 
+  static const double xs = 4;
   static const double sm = 8;
   static const double smMd = 12;
   static const double md = 16;

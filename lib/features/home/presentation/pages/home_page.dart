@@ -9,7 +9,7 @@ import 'package:trekka/app/utils/auth_guard.dart';
 import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/router/route_paths.dart';
-import 'package:trekka/core/widgets/snackbar/app_snackbar.dart';
+import 'package:trekka/core/utils/coming_soon.dart';
 import 'package:trekka/features/home/presentation/viewmodels/home_pin_view_model.dart';
 import 'package:trekka/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:trekka/features/home/presentation/widgets/home_bottom_nav.dart';
@@ -110,26 +110,28 @@ class _HomePageState extends ConsumerState<HomePage> {
         case HomePinType.logisticsHailing:
           context.push(RoutePaths.logisticsHailing);
           break;
+        case HomePinType.marketplace:
+          context.push(RoutePaths.marketplace);
+          break;
         default:
-          _showComingSoon(
-            HomePinViewModel.resolveDisplayFor(pinType, null).label,
+          showComingSoon(
+            context,
+            featureLabel:
+                HomePinViewModel.resolveDisplayFor(pinType, null).label,
           );
       }
     });
   }
 
   Future<void> _handleNotificationTap() async {
-    await _runAuthenticated(() => _showComingSoon('Notifications'));
+    await _runAuthenticated(
+      () => showComingSoon(context, featureLabel: 'Notifications'),
+    );
   }
 
   Future<void> _runAuthenticated(FutureOr<void> Function() action) async {
     final AuthGuard authGuard = ref.read(authGuardProvider);
     await authGuard.runAuthenticated(context, action);
-  }
-
-  void _showComingSoon(String label) {
-    if (!mounted) return;
-    AppSnackbar.showInfo(context, '$label is coming soon.');
   }
 
   double _resolveBottomNavInset(double width) {
