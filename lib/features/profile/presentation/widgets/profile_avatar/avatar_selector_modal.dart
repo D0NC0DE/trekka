@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:trekka/core/assets/app_assets.dart';
+import 'package:trekka/core/design/gradients.dart';
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/widgets/button/gradient_action_button.dart';
 import 'package:trekka/core/widgets/sheet/center_modal_sheet.dart';
@@ -46,18 +47,13 @@ class AvatarSelectorModal extends StatelessWidget {
                     child: GradientActionButton(
                       label: 'Cancel',
                       color: AppColors.primaryBright,
-                      gradient: const LinearGradient(
-                        colors: <Color>[
-                          Colors.transparent,
-                          Colors.transparent,
-                        ],
-                      ),
+                      gradient: AppGradients.transparent,
                       borderColor: AppColors.primaryBright,
                       onTap: () => Navigator.of(context).pop(false),
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
+                  Expanded( 
                     child: GradientActionButton(
                       label: 'Confirm',
                       onTap: () => Navigator.of(context).pop(true),

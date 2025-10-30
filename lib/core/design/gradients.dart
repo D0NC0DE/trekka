@@ -100,4 +100,11 @@ class AppGradients {
       AppColors.marketplaceInputHighlight,
     ],
   );
+
+  static const Gradient transparent = LinearGradient(
+    colors: <Color>[
+      Colors.transparent,
+      Colors.transparent,
+    ],
+  );
 }

@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:trekka/core/assets/app_assets.dart';
-import 'package:trekka/core/design/gradients.dart';
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/router/route_paths.dart';
 import 'package:trekka/features/marketplace/domain/entities/marketplace_product.dart';
 import 'package:trekka/features/marketplace/presentation/widgets/details/image_carousel.dart';
+import 'package:trekka/features/marketplace/presentation/widgets/details/product_detail_card.dart';
 import 'package:trekka/features/marketplace/presentation/widgets/marketplace_app_bar.dart';
 import 'package:trekka/features/marketplace/presentation/widgets/product_card.dart';
 
@@ -104,85 +104,7 @@ class _MarketplaceProductDetailPageState
                         onSelect: _handleSelect,
                       ),
                       const SizedBox(height: AppSpacing.lg),
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: AppGradients.marketplaceCard,
-                          borderRadius: BorderRadius.circular(AppRadius.sm),
-                          border: const Border(
-                            bottom: BorderSide(
-                              color: AppColors.marketplaceCardBorder,
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                        padding: const EdgeInsets.all(AppSpacing.lg),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.product.title,
-                              style: Theme.of(context).textTheme.headlineSmall
-                                  ?.copyWith(
-                                    color: AppColors.textPrimary,
-                                    fontWeight: AppFontWeights.semiBold,
-                                  ),
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                            Text(
-                              widget.product.price,
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(
-                                    color: AppColors.primary,
-                                    fontWeight: AppFontWeights.bold,
-                                  ),
-                            ),
-                            if (widget.product.location != null) ...[
-                              const SizedBox(height: AppSpacing.sm),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.place_outlined,
-                                    size: 18,
-                                    color: AppColors.textPrimary50,
-                                  ),
-                                  const SizedBox(width: AppSpacing.xs),
-                                  Expanded(
-                                    child: Text(
-                                      widget.product.location!,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                            color: AppColors.textPrimary50,
-                                          ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                            if (widget.product.description != null) ...[
-                              const SizedBox(height: AppSpacing.md),
-                              Text(
-                                'Description',
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(
-                                      color: AppColors.textPrimary,
-                                      fontWeight: AppFontWeights.semiBold,
-                                    ),
-                              ),
-                              const SizedBox(height: AppSpacing.xs),
-                              Text(
-                                widget.product.description!,
-                                style: Theme.of(context).textTheme.bodyLarge
-                                    ?.copyWith(
-                                      color: AppColors.textPrimary,
-                                      height: 1.4,
-                                    ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
+                      ProductDetailCard(widget: widget),
                       const SizedBox(height: AppSpacing.xl),
                       Text(
                         'Check similar items',
