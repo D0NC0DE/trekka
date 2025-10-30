@@ -82,4 +82,22 @@ class AppGradients {
     end: Alignment.bottomCenter,
     colors: <Color>[AppColors.white, AppColors.marketplaceInputBase],
   );
+
+  static const Gradient marketplaceLoading = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[
+      AppColors.marketplaceLoadingStart,
+      AppColors.marketplaceLoadingEnd,
+    ],
+  );
+
+  static const Gradient marketplaceCard = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[
+      AppColors.white25,
+      AppColors.marketplaceInputHighlight,
+    ],
+  );
 }

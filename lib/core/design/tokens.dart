@@ -21,7 +21,12 @@ class AppColors {
   static const Color marketplaceHighlightStart = Color(0xFFFCD43A);
   static const Color marketplaceHighlightEnd = Color(0xFFDBAF04);
   static const Color marketplaceInputBase = Color(0xFFEDFFFD);
+  static const Color marketplaceInputHighlight = Color(0x40EDFFFD);
   static const Color marketplaceCardBorder = Color(0xFFC2C2C2);
+  static const Color marketplaceLoadingStart = Color(0xFFFFFFFF);
+  static const Color marketplaceLoadingEnd = Color(0xFFD7FFFA);
+  static const Color skeletonProfileBase = Color(0x4D05668D);
+  static const Color skeletonProfileHighlight = Color(0x2602C39A);
   static const Color pickupPulseOuter = Color(0x334C1D95);
   static const Color pickupPulseInner = Color(0x664C1D95);
   static const Color primary = Color(0xFF00A896);

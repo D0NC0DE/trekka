@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/tokens.dart';
-import 'package:trekka/core/widgets/button/gradient_back_button.dart';
-import 'package:trekka/core/widgets/button/gradient_icon_button.dart';
 import 'package:trekka/features/marketplace/presentation/widgets/category_pills.dart';
+import 'package:trekka/features/marketplace/presentation/widgets/marketplace_app_bar.dart';
 import 'package:trekka/features/marketplace/presentation/widgets/post_product.dart';
 import 'package:trekka/features/marketplace/presentation/widgets/product_card.dart';
 import 'package:trekka/features/marketplace/presentation/widgets/search_bar.dart';
@@ -53,7 +51,8 @@ class MarketplacePage extends StatelessWidget {
       location: 'Ibadan',
     ),
     _MarketplaceProduct(
-      title: 'PS5 with extra controller',
+      title:
+          'PS5 with extra controller with extra controller really long title that should be truncated',
       price: '₦470,000',
       image: AppAssetImages.avatar8,
       location: 'Festac, Lagos',
@@ -65,6 +64,8 @@ class MarketplacePage extends StatelessWidget {
       location: 'Enugu',
     ),
   ];
+
+  static const bool _isLoadingProducts = false;
 
   @override
   Widget build(BuildContext context) {
@@ -83,29 +84,7 @@ class MarketplacePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    GradientBackButton(onPressed: () => context.pop()),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          'Marketplace',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                color: AppColors.black,
-                                fontWeight: AppFontWeights.semiBold,
-                                height: 1.25,
-                              ),
-                        ),
-                      ),
-                    ),
-                    GradientIconButton(
-                      iconAsset: AppAssetIcons.profile,
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
+                MarketplaceAppBar(),
                 const SizedBox(height: AppSpacing.smLg),
                 const PostProduct(),
                 const SizedBox(height: AppSpacing.smLg),
@@ -125,6 +104,12 @@ class MarketplacePage extends StatelessWidget {
                           final double childAspectRatio =
                               itemWidth / cardHeight;
 
+                          final bool showSkeleton =
+                              _isLoadingProducts || _products.isEmpty;
+                          final int itemCount = showSkeleton
+                              ? 6
+                              : _products.length;
+
                           return GridView.builder(
                             padding: EdgeInsets.zero,
                             gridDelegate:
@@ -134,8 +119,12 @@ class MarketplacePage extends StatelessWidget {
                                   mainAxisSpacing: AppSpacing.smLg,
                                   childAspectRatio: childAspectRatio,
                                 ),
-                            itemCount: _products.length,
+                            itemCount: itemCount,
                             itemBuilder: (BuildContext context, int index) {
+                              if (showSkeleton) {
+                                return const ProductCard.skeleton();
+                              }
+
                               final _MarketplaceProduct product =
                                   _products[index];
                               return ProductCard(
