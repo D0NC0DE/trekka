@@ -76,6 +76,10 @@ class _MarketplaceProductDetailPageState
   @override
   Widget build(BuildContext context) {
     final String selectedImage = _gallery[_selectedIndex];
+    final List<MarketplaceProduct> similarProducts = _similarProducts
+        .where((MarketplaceProduct product) =>
+            product.heroTag != widget.product.heroTag)
+        .toList();
 
     return Scaffold(
       backgroundColor: AppColors.marketplaceBackground,
@@ -106,38 +110,40 @@ class _MarketplaceProductDetailPageState
                       const SizedBox(height: AppSpacing.lg),
                       ProductDetailCard(widget: widget),
                       const SizedBox(height: AppSpacing.xl),
-                      Text(
-                        'Check similar items',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: AppColors.textPrimary,
-                              fontWeight: AppFontWeights.semiBold,
-                            ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      SizedBox(
-                        height: 240,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: _similarProducts.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(width: AppSpacing.smLg),
-                          itemBuilder: (BuildContext context, int index) {
-                            final MarketplaceProduct product =
-                                _similarProducts[index];
-                            return SizedBox(
-                              width: 180,
-                              child: ProductCard(
-                                product: product,
-                                onTap: () => context.push(
-                                  RoutePaths.marketplaceProductDetail,
-                                  extra: product,
-                                ),
+                      if (similarProducts.isNotEmpty) ...[
+                        Text(
+                          'Check similar items',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: AppColors.textPrimary,
+                                fontWeight: AppFontWeights.semiBold,
                               ),
-                            );
-                          },
                         ),
-                      ),
+                        const SizedBox(height: AppSpacing.md),
+                        SizedBox(
+                          height: 240,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: similarProducts.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(width: AppSpacing.smLg),
+                            itemBuilder: (BuildContext context, int index) {
+                              final MarketplaceProduct product =
+                                  similarProducts[index];
+                              return SizedBox(
+                                width: 180,
+                                child: ProductCard(
+                                  product: product,
+                                  onTap: () => context.push(
+                                    RoutePaths.marketplaceProductDetail,
+                                    extra: product,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
