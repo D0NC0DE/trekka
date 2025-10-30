@@ -107,7 +107,7 @@ class MarketplacePage extends StatelessWidget {
         body: SafeArea(
           bottom: false,
           child: Padding(
-            padding: const EdgeInsets.only(left: 24, right: 24, top: 20),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

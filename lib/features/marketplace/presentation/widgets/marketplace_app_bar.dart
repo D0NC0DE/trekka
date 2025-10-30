@@ -10,24 +10,33 @@ class MarketplaceAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        GradientBackButton(onPressed: () => context.pop()),
-        Expanded(
-          child: Center(
-            child: Text(
-              'Marketplace',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppColors.black,
-                fontWeight: AppFontWeights.semiBold,
-                height: 1.25,
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: AppSpacing.mdLg,
+        bottom: AppSpacing.smLg,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          GradientBackButton(onPressed: () => context.pop()),
+          Expanded(
+            child: Center(
+              child: Text(
+                'Marketplace',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.black,
+                  fontWeight: AppFontWeights.semiBold,
+                  height: 1.25,
+                ),
               ),
             ),
           ),
-        ),
-        GradientIconButton(iconAsset: AppAssetIcons.profile, onPressed: () {}),
-      ],
+          GradientIconButton(
+            iconAsset: AppAssetIcons.profile,
+            onPressed: () {},
+          ),
+        ],
+      ),
     );
   }
 }
