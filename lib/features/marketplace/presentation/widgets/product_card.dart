@@ -51,20 +51,7 @@ class ProductCard extends StatelessWidget {
                 SizedBox(
                   height: 170,
                   width: double.infinity,
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(_cardRadius),
-                      topRight: Radius.circular(_cardRadius),
-                    ),
-                    child: isLoading
-                        ? Bone.square(size: double.infinity)
-                        : Image.asset(
-                            product.coverImage,
-                            width: double.infinity,
-                            height: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
-                  ),
+                  child: _buildCoverImage(),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(AppSpacing.sm),
@@ -98,5 +85,28 @@ class ProductCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildCoverImage() {
+    final Widget imageContent = ClipRRect(
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(_cardRadius),
+        topRight: Radius.circular(_cardRadius),
+      ),
+      child: isLoading
+          ? Bone.square(size: double.infinity)
+          : Image.asset(
+              product.coverImage,
+              width: double.infinity,
+              height: double.infinity,
+              fit: BoxFit.cover,
+            ),
+    );
+
+    if (isLoading || product.coverImage.isEmpty) {
+      return imageContent;
+    }
+
+    return Hero(tag: product.heroTag, child: imageContent);
   }
 }

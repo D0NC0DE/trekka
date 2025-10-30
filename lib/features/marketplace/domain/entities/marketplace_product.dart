@@ -16,4 +16,6 @@ class MarketplaceProduct {
   final String? description;
 
   List<String> get gallery => images.isNotEmpty ? images : <String>[coverImage];
+
+  String get heroTag => 'marketplace_product_$hashCode';
 }

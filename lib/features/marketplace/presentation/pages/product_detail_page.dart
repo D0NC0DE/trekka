@@ -89,13 +89,14 @@ class _MarketplaceProductDetailPageState
               const MarketplaceAppBar(),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.only(
-                    bottom: AppSpacing.xxl,
-                  ),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _ProductHeroImage(imagePath: selectedImage),
+                      _ProductHeroImage(
+                        imagePath: selectedImage,
+                        heroTag: widget.product.heroTag,
+                      ),
                       const SizedBox(height: AppSpacing.md),
                       ImageCarousel(
                         images: _gallery,
@@ -228,13 +229,14 @@ class _MarketplaceProductDetailPageState
 }
 
 class _ProductHeroImage extends StatelessWidget {
-  const _ProductHeroImage({required this.imagePath});
+  const _ProductHeroImage({required this.imagePath, required this.heroTag});
 
   final String imagePath;
+  final String heroTag;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
+    final Widget image = ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.smMd),
       child: Container(
         height: 400,
@@ -250,5 +252,11 @@ class _ProductHeroImage extends StatelessWidget {
               ),
       ),
     );
+
+    if (heroTag.isEmpty || imagePath.isEmpty) {
+      return image;
+    }
+
+    return Hero(tag: heroTag, child: image);
   }
 }
