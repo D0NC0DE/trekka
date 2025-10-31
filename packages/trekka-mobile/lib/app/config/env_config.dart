@@ -4,7 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class EnvConfig {
   EnvConfig._();
 
-  static const String _defaultApiBaseUrl = 'http://localhost:3001';
+  static const String _defaultApiBaseUrl = 'http://localhost:3000';
   static const String _dartDefineApiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: _defaultApiBaseUrl,
