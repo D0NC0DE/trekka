@@ -11,16 +11,19 @@ import 'package:trekka/core/assets/app_assets.dart';
 import 'package:trekka/core/design/tokens.dart';
 import 'package:trekka/core/widgets/button/gradient_back_button.dart';
 import 'package:trekka/core/widgets/button/icon_text_button.dart';
+import 'package:trekka/app/di/auth_state_providers.dart';
+import 'package:trekka/app/state/auth_state.dart';
+import 'package:trekka/core/widgets/sheet/center_modal_sheet.dart';
 import 'package:trekka/features/logistics/domain/entities/logistics_stage.dart';
 import 'package:trekka/features/logistics/presentation/helpers/map_camera_controller.dart';
 import 'package:trekka/features/logistics/presentation/helpers/map_marker_builder.dart';
 import 'package:trekka/features/logistics/presentation/helpers/map_polyline_builder.dart';
 import 'package:trekka/features/logistics/presentation/providers/logistics_provider.dart';
+import 'package:trekka/features/logistics/presentation/viewmodels/logistics_state.dart';
 import 'package:trekka/features/logistics/presentation/widgets/animated_driver_marker.dart';
 import 'package:trekka/features/logistics/presentation/widgets/logistics_sheet_overlay.dart';
 import 'package:trekka/core/widgets/sheet/gradient_overlay_modal.dart';
 import 'package:trekka/features/logistics/utils/address_formatter.dart';
-import 'package:trekka/features/logistics/presentation/viewmodels/logistics_state.dart';
 
 class LogisticsPage extends ConsumerStatefulWidget {
   const LogisticsPage({super.key});
@@ -423,10 +426,19 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
       }
       ref.read(logisticsViewModelProvider.notifier).requestRide().then((
         bool success,
-      ) {
-        if (!success || !mounted) return;
-        final LogisticsStage stage = ref.read(logisticsViewModelProvider).stage;
-        _setCurrentStage(stage, notifyViewModel: false);
+      ) async {
+        if (!mounted) return;
+        final LogisticsState latest = ref.read(logisticsViewModelProvider);
+
+        if (success) {
+          final LogisticsStage stage = latest.stage;
+          _setCurrentStage(stage, notifyViewModel: false);
+          return;
+        }
+
+        if (latest.shouldPromptTopUp) {
+          await _showInsufficientBalanceSheet(latest);
+        }
       });
       return;
     }
@@ -535,6 +547,61 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
     if (currentIndex > 0) {
       _setCurrentStage(_stageFlow[currentIndex - 1]);
     }
+  }
+
+  Future<void> _showInsufficientBalanceSheet(
+    LogisticsState logisticsState,
+  ) async {
+    final AuthState authState = ref.read(authStateProvider);
+    final String walletAddress =
+        authState is Authenticated ? authState.wallet?.address ?? '' : '';
+
+    final double amountValue = logisticsState.topUpAmount ??
+        logisticsState.requiredBalance ??
+        logisticsState.selectedPrice ??
+        0;
+    final String amountLabel = _formatHbarAmount(amountValue);
+
+    Future<void> refreshWallet() async {
+      await ref.read(authStateProvider.notifier).refreshWallet();
+      if (!mounted) return;
+      await Navigator.of(context).maybePop();
+      _showInfoSnackBar('Wallet refreshed');
+    }
+
+    await showCenterModalWalletTopUpSheet<void>(
+      context: context,
+      amount: amountLabel,
+      walletAddress:
+          walletAddress.isNotEmpty ? walletAddress : 'Wallet address unavailable',
+      onRefresh: logisticsState.isRequestingRide ? null : refreshWallet,
+      onAddFunds: () => _showInfoSnackBar('Add funds option coming soon'),
+      onRequestFromFriend:
+          () => _showInfoSnackBar('Request from friend coming soon'),
+    );
+
+    if (!mounted) return;
+    ref.read(logisticsViewModelProvider.notifier).acknowledgeTopUpPrompt();
+  }
+
+  String _formatHbarAmount(double amount) {
+    if (amount <= 0) {
+      return 'a little extra balance';
+    }
+    final double sanitized = amount < 0 ? 0 : amount;
+    final int precision = sanitized >= 1 ? 2 : 4;
+    return '${sanitized.toStringAsFixed(precision)} ℏ';
+  }
+
+  void _showInfoSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   void _handleCancelRide() {

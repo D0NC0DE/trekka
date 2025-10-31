@@ -28,7 +28,7 @@ class _MarketplaceProductDetailPageState
   static const List<MarketplaceProduct> _similarProducts = <MarketplaceProduct>[
     MarketplaceProduct(
       title: 'Ergonomic Desk Chair',
-      price: '₦45,000',
+      price: '45,000 ℏ',
       coverImage: AppAssetImages.avatar4,
       location: 'Lekki, Lagos',
       images: <String>[
@@ -39,21 +39,21 @@ class _MarketplaceProductDetailPageState
     ),
     MarketplaceProduct(
       title: 'Smart TV 55" 4K UHD',
-      price: '₦320,000',
+      price: '320,000 ℏ',
       coverImage: AppAssetImages.avatar6,
       location: 'Abuja',
       images: <String>[AppAssetImages.avatar6, AppAssetImages.avatar9],
     ),
     MarketplaceProduct(
       title: 'Handmade Ankara Dress',
-      price: '₦18,500',
+      price: '18,500 ℏ',
       coverImage: AppAssetImages.avatar7,
       location: 'Ibadan',
       images: <String>[AppAssetImages.avatar7, AppAssetImages.avatar4],
     ),
     MarketplaceProduct(
       title: 'PS5 with extra controller',
-      price: '₦470,000',
+      price: '470,000 ℏ',
       coverImage: AppAssetImages.avatar8,
       location: 'Festac, Lagos',
       images: <String>[AppAssetImages.avatar8, AppAssetImages.avatar5],

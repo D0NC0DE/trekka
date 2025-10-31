@@ -30,7 +30,8 @@
     "prisma:format": "prisma format",
     "db:setup": "npm run docker:up && sleep 3 && npm run prisma:migrate && npm run prisma:seed",
     "prisma:seed": "prisma db seed",
-    "generate:key": "node scripts/generate-encryption-key.js"
+    "generate:key": "node ../scripts/generate-encryption-key.js",
+    "hedera:create-topic": "tsx scripts/create-consensus-topic.ts"
   },
   "dependencies": {
     "@hashgraph/sdk": "^2.75.0",

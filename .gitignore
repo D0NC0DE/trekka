@@ -1,0 +1,96 @@
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editors / IDEs
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.atom/
+.history
+.sublime-workspace
+.project
+.classpath
+.settings/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Environment files
+.env
+.env.*
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.fvm/
+.metadata
+.packages
+.pub-cache/
+.pub/
+build/
+**/Flutter/ephemeral/
+**/doc/api/
+*.keystore
+*.jks
+
+# Android
+packages/trekka-mobile/android/.gradle/
+packages/trekka-mobile/android/local.properties
+packages/trekka-mobile/android/key.properties
+packages/trekka-mobile/android/app/debug/
+packages/trekka-mobile/android/app/profile/
+packages/trekka-mobile/android/app/release/
+
+# iOS / macOS (Flutter)
+packages/trekka-mobile/ios/Flutter/App.framework
+packages/trekka-mobile/ios/Flutter/Flutter.framework
+packages/trekka-mobile/ios/Flutter/Generated.xcconfig
+packages/trekka-mobile/ios/Flutter/flutter_export_environment.sh
+packages/trekka-mobile/ios/.generated/
+packages/trekka-mobile/ios/Pods/
+packages/trekka-mobile/ios/.symlinks/
+packages/trekka-mobile/ios/build/
+packages/trekka-mobile/ios/Runner.xcworkspace/xcuserdata/
+packages/trekka-mobile/ios/Runner.xcodeproj/project.xcworkspace/xcuserdata/
+packages/trekka-mobile/macos/Flutter/ephemeral/
+packages/trekka-mobile/macos/Pods/
+packages/trekka-mobile/macos/Runner.xcworkspace/xcuserdata/
+packages/trekka-mobile/macos/Runner.xcodeproj/project.xcworkspace/xcuserdata/
+packages/trekka-mobile/windows/flutter/ephemeral/
+packages/trekka-mobile/linux/flutter/ephemeral/
+
+# Flutter symbol/obfuscation artifacts
+app.*.symbols
+app.*.map.json
+
+# Node / NestJS
+packages/trekka-api/node_modules/
+packages/trekka-api/dist/
+packages/trekka-api/build/
+packages/trekka-api/.nyc_output/
+packages/trekka-api/coverage/
+packages/trekka-api/pids/
+packages/trekka-api/*.pid
+packages/trekka-api/*.seed
+packages/trekka-api/*.pid.lock
+packages/trekka-api/report.*.json
+packages/trekka-api/.temp/
+packages/trekka-api/.tmp/
+packages/trekka-api/generated/prisma/
+packages/trekka-api/src/generated/prisma/
+packages/trekka-api/bin/
+
+# Misc tooling
+migrate_working_dir/
+.swiftpm/
+

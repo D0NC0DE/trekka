@@ -30,14 +30,14 @@ class MarketplacePage extends StatelessWidget {
 
   static const MarketplaceProduct _placeholderProduct = MarketplaceProduct(
     title: 'Loading Product',
-    price: '₦0',
+    price: '0 ℏ',
     coverImage: '',
   );
 
   static final List<MarketplaceProduct> _products = <MarketplaceProduct>[
     MarketplaceProduct(
       title: 'Ergonomic Desk Chair - extremely long title that should be truncated',
-      price: '₦45,000',
+      price: '45,000 ℏ',
       coverImage: AppAssetImages.avatar4,
       location: 'Lekki, Lagos',
       images: <String>[
@@ -51,7 +51,7 @@ class MarketplacePage extends StatelessWidget {
     ),
     MarketplaceProduct(
       title: 'Used SUV in great condition',
-      price: '₦6,500,000',
+      price: '6,500,000 ℏ',
       coverImage: AppAssetImages.avatar5,
       location: 'Ikeja, Lagos',
       images: <String>[
@@ -62,21 +62,21 @@ class MarketplacePage extends StatelessWidget {
     ),
     MarketplaceProduct(
       title: 'Smart TV 55" 4K UHD',
-      price: '₦320,000',
+      price: '320,000 ℏ',
       coverImage: AppAssetImages.avatar6,
       location: 'Abuja',
       images: <String>[AppAssetImages.avatar6, AppAssetImages.avatar9],
     ),
     MarketplaceProduct(
       title: 'Handmade Ankara Dress',
-      price: '₦18,500',
+      price: '18,500 ℏ',
       coverImage: AppAssetImages.avatar7,
       location: 'Ibadan',
       images: <String>[AppAssetImages.avatar7, AppAssetImages.avatar4],
     ),
     MarketplaceProduct(
       title: 'PS5 with extra controller',
-      price: '₦470,000',
+      price: '470,000 ℏ',
       coverImage: AppAssetImages.avatar8,
       location: 'Festac, Lagos',
       images: <String>[AppAssetImages.avatar8, AppAssetImages.avatar5],
@@ -85,7 +85,7 @@ class MarketplacePage extends StatelessWidget {
     ),
     MarketplaceProduct(
       title: 'Premium Sound Bar',
-      price: '₦210,000',
+      price: '210,000 ℏ',
       coverImage: AppAssetImages.avatar9,
       location: 'Enugu',
       images: <String>[AppAssetImages.avatar9, AppAssetImages.avatar6],

@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { CreateHailingQuoteDto, CreateHailingRequestDto, UpdateHailingRequestDto } from './dto';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { CreateHailingQuoteDto, CreateHailingRequestDto, UpdateHailingRequestDto, RideActor } from './dto';
 import {
   BASE_FARE,
   DEFAULT_CURRENCY,
@@ -19,12 +19,17 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RideStatus, RideCancellationSource } from '../generated/prisma/client';
 import type { Ride } from '../generated/prisma/client';
 import { EventsGateway } from '../events/events.gateway';
+import { WalletsService } from '../wallets/wallets.service';
+import { HederaConsensusService } from '../hedera/consensus.service';
 
 @Injectable()
 export class LogisticsService {
+  private readonly RIDE_REQUEST_BUFFER_HBAR = 2;
   constructor(
     private prisma: PrismaService,
     private eventsGateway: EventsGateway,
+    private walletsService: WalletsService,
+    private consensusService: HederaConsensusService,
   ) {}
   calculateHailingQuote(dto: CreateHailingQuoteDto) {
     const distanceKm = Math.max(dto.distanceKm, 0);
@@ -124,6 +129,20 @@ export class LogisticsService {
   }
 
   async createHailingRequest(riderId: string, dto: CreateHailingRequestDto) {
+    const rideAmountHbar = Number(dto.price);
+    const requiredBalance = rideAmountHbar + this.RIDE_REQUEST_BUFFER_HBAR;
+
+    const walletBalance = await this.walletsService.getWalletBalance(riderId);
+
+    if (walletBalance < requiredBalance) {
+      throw new BadRequestException({
+        code: 'INSUFFICIENT_BALANCE',
+        message: 'Insufficient balance to request ride',
+        requiredBalance,
+        availableBalance: walletBalance,
+      });
+    }
+
     const ride = await this.prisma.ride.create({
       data: {
         riderId,
@@ -131,6 +150,13 @@ export class LogisticsService {
         status: RideStatus.REQUESTED,
       },
     });
+
+    try {
+      await this.walletsService.requestRideOnChain(riderId, ride.id, rideAmountHbar);
+    } catch (error) {
+      await this.prisma.ride.delete({ where: { id: ride.id } }).catch(() => undefined);
+      throw error;
+    }
 
     const response = this.toCreatedHailingResponse(ride);
 
@@ -145,7 +171,15 @@ export class LogisticsService {
   }
 
   async updateHailingRequest(rideId: string, dto: UpdateHailingRequestDto) {
+    const existingRide = await this.prisma.ride.findUnique({ where: { id: rideId } });
+
+    if (!existingRide) {
+      throw new NotFoundException('Ride not found');
+    }
+
     const updateData: any = {};
+    let shouldSubmitSummary = false;
+    let summaryInitiatedBy: RideActor | undefined;
 
     if (dto.status) {
       const statusMap: Record<string, RideStatus> = {
@@ -155,17 +189,55 @@ export class LogisticsService {
         completed: RideStatus.COMPLETED,
         canceled: RideStatus.CANCELED,
       };
+
+      if (dto.status === 'accepted') {
+        throw new BadRequestException('Use the accept endpoint to accept a ride');
+      }
+
       updateData.status = statusMap[dto.status];
     }
 
     if (dto.status === 'completed') {
+      if (!dto.initiated_by) {
+        throw new BadRequestException('initiated_by is required when completing a ride');
+      }
       updateData.reachedDestination = true;
     }
 
     if (dto.canceled_by) {
-      updateData.canceledBy = dto.canceled_by === 'rider' 
-        ? RideCancellationSource.RIDER 
+      updateData.canceledBy = dto.canceled_by === 'rider'
+        ? RideCancellationSource.RIDER
         : RideCancellationSource.DRIVER;
+    }
+
+    if (dto.status === 'canceled') {
+      if (!dto.canceled_by) {
+        throw new BadRequestException('canceled_by is required when canceling a ride');
+      }
+
+      const cancelerId = dto.canceled_by === 'rider' ? existingRide.riderId : existingRide.driverId;
+
+      if (!cancelerId) {
+        throw new BadRequestException('No wallet available to cancel this ride');
+      }
+
+      await this.walletsService.cancelRideOnChain(cancelerId, rideId, dto.canceled_by);
+
+      if (dto.canceled_by === 'driver') {
+        updateData.driverId = null;
+      }
+    }
+
+    if (dto.status === 'completed') {
+      const initiatorId = dto.initiated_by === 'driver' ? existingRide.driverId : existingRide.riderId;
+
+      if (!initiatorId) {
+        throw new BadRequestException('No wallet available to complete this ride');
+      }
+
+      await this.walletsService.completeRideOnChain(initiatorId, rideId);
+      shouldSubmitSummary = true;
+      summaryInitiatedBy = dto.initiated_by;
     }
 
     const ride = await this.prisma.ride.update({
@@ -180,10 +252,41 @@ export class LogisticsService {
       driverId: ride.driverId,
     });
 
+    if (shouldSubmitSummary) {
+      const summaryPayload = {
+        rideId,
+        riderId: ride.riderId,
+        driverId: ride.driverId,
+        status: ride.status.toLowerCase(),
+        initiatedBy: summaryInitiatedBy,
+        amountHbar: ride.price.toString(),
+        reachedDestination: ride.reachedDestination,
+        completedAt: new Date().toISOString(),
+      };
+
+      try {
+        await this.consensusService.submitRideSummary(summaryPayload);
+      } catch (error) {
+        console.error('❌ Failed to submit ride summary to Hedera Consensus Service:', error);
+      }
+    }
+
     return response;
   }
 
   async acceptRide(rideId: string, driverId: string) {
+    const existingRide = await this.prisma.ride.findUnique({ where: { id: rideId } });
+
+    if (!existingRide) {
+      throw new NotFoundException('Ride not found');
+    }
+
+    if (existingRide.status !== RideStatus.REQUESTED) {
+      throw new BadRequestException('Ride is not available for acceptance');
+    }
+
+    await this.walletsService.acceptRideOnChain(driverId, rideId);
+
     const ride = await this.prisma.ride.update({
       where: { id: rideId },
       data: {

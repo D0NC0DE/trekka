@@ -231,15 +231,27 @@ class ApiClient {
           final int? statusCode = error.response?.statusCode;
           final dynamic data = error.response?.data;
 
-          String message = 'Server error occurred';
+          Map<String, dynamic>? payload;
           if (data is Map<String, dynamic>) {
+            payload = data;
+          }
+
+          String message = 'Server error occurred';
+          if (payload != null) {
             message =
-                data['message'] as String? ??
-                data['error'] as String? ??
+                payload['message'] as String? ??
+                payload['error'] as String? ??
                 message;
           }
 
-          return ServerException(message: message, statusCode: statusCode);
+          final String? code = payload?['code'] as String?;
+
+          return ServerException(
+            message: message,
+            statusCode: statusCode,
+            code: code,
+            details: payload,
+          );
 
         case DioExceptionType.cancel:
           return const ServerException(message: 'Request cancelled');
