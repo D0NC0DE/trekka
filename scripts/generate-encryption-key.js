@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Generate a secure encryption key
+ * Generate a secure encryption key.
  * Run: node scripts/generate-encryption-key.js
  */
 
@@ -12,4 +12,3 @@ const encryptionKey = crypto.randomBytes(32).toString('base64');
 
 console.log('\n🔐 Generated Encryption Key:\n');
 console.log(encryptionKey);
-
