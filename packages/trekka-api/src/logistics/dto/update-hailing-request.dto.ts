@@ -1,17 +1,20 @@
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 
+export type RideUpdateStatus = 'accepted' | 'arrived' | 'in_progress' | 'completed' | 'canceled';
+export type RideActor = 'rider' | 'driver';
+
 export class UpdateHailingRequestDto {
   @IsEnum(['accepted', 'arrived', 'in_progress', 'completed', 'canceled'])
   @IsOptional()
-  status?: string;
+  status?: RideUpdateStatus;
 
   @IsEnum(['rider', 'driver'])
   @IsOptional()
-  initiated_by?: string;
+  initiated_by?: RideActor;
 
   @IsEnum(['rider', 'driver'])
   @IsOptional()
-  canceled_by?: string;
+  canceled_by?: RideActor;
 
   @IsString()
   @IsOptional()
@@ -25,4 +28,3 @@ export class UpdateHailingRequestDto {
   @IsOptional()
   pin_code?: string;
 }
-

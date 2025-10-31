@@ -3,13 +3,21 @@ class ServerException implements Exception {
   const ServerException({
     required this.message,
     this.statusCode,
+    this.code,
+    this.details,
   });
 
   final String message;
   final int? statusCode;
+  final String? code;
+  final Map<String, dynamic>? details;
 
   @override
-  String toString() => 'ServerException: $message (${statusCode ?? "unknown"})';
+  String toString() {
+    final String status = statusCode?.toString() ?? 'unknown';
+    final String codePart = code != null ? ' code=$code,' : '';
+    return 'ServerException:$codePart status=$status message=$message';
+  }
 }
 
 /// Exception thrown when there's a network connectivity issue
@@ -59,4 +67,3 @@ class AuthException implements Exception {
   @override
   String toString() => 'AuthException: $message';
 }
-

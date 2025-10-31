@@ -30,6 +30,10 @@ class LogisticsState extends Equatable {
     this.activeRide,
     this.isCompletingRide = false,
     this.errorMessage,
+    this.shouldPromptTopUp = false,
+    this.topUpAmount,
+    this.requiredBalance,
+    this.availableBalance,
   });
 
   final LogisticsStage stage;
@@ -50,6 +54,10 @@ class LogisticsState extends Equatable {
   final RideRequest? activeRide;
   final bool isCompletingRide;
   final String? errorMessage;
+  final bool shouldPromptTopUp;
+  final double? topUpAmount;
+  final double? requiredBalance;
+  final double? availableBalance;
 
   LogisticsState copyWith({
     Object? stage = _unset,
@@ -70,6 +78,10 @@ class LogisticsState extends Equatable {
     Object? activeRide = _unset,
     bool? isCompletingRide,
     Object? errorMessage = _unset,
+    bool? shouldPromptTopUp,
+    Object? topUpAmount = _unset,
+    Object? requiredBalance = _unset,
+    Object? availableBalance = _unset,
   }) {
     return LogisticsState(
       stage: identical(stage, _unset) ? this.stage : stage as LogisticsStage,
@@ -112,6 +124,16 @@ class LogisticsState extends Equatable {
       errorMessage: identical(errorMessage, _unset)
           ? this.errorMessage
           : errorMessage as String?,
+      shouldPromptTopUp: shouldPromptTopUp ?? this.shouldPromptTopUp,
+      topUpAmount: identical(topUpAmount, _unset)
+          ? this.topUpAmount
+          : topUpAmount as double?,
+      requiredBalance: identical(requiredBalance, _unset)
+          ? this.requiredBalance
+          : requiredBalance as double?,
+      availableBalance: identical(availableBalance, _unset)
+          ? this.availableBalance
+          : availableBalance as double?,
     );
   }
 
@@ -135,5 +157,9 @@ class LogisticsState extends Equatable {
     activeRide,
     isCompletingRide,
     errorMessage,
+    shouldPromptTopUp,
+    topUpAmount,
+    requiredBalance,
+    availableBalance,
   ];
 }

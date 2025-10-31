@@ -1,9 +1,10 @@
 import { network } from "hardhat";
 import dotenv from "dotenv";
+
 dotenv.config();
 
 const { ethers } = await network.connect({
-  network: "hedera"
+  network: "hedera",
 });
 
 const CORE_ADDRESSES = {
@@ -19,7 +20,7 @@ function requireAddress(value: string | undefined, label: string): string {
 }
 
 async function main() {
-  console.log("🚀 Deploying Trekka service contracts...");
+  console.log("🚀 Deploying Trekka Marketplace contract...");
 
   const escrowManagerAddress = requireAddress(
     CORE_ADDRESSES.escrowManager,
@@ -33,28 +34,33 @@ async function main() {
   console.log("Using EscrowManager:", escrowManagerAddress);
   console.log("Using ReputationSystem:", reputationSystemAddress);
 
-  const rideHailing = await ethers.deployContract("RideHailing", [
+  const marketplace = await ethers.deployContract("Marketplace", [
     escrowManagerAddress,
     reputationSystemAddress,
   ]);
-  await rideHailing.waitForDeployment();
-  console.log("RideHailing deployed:", await rideHailing.getAddress());
+
+  await marketplace.waitForDeployment();
+
+  const marketplaceAddress = await marketplace.getAddress();
+  console.log("Marketplace deployed:", marketplaceAddress);
 
   const escrowManager = await ethers.getContractAt(
     "EscrowManager",
     escrowManagerAddress,
   );
 
-  await escrowManager.getFunction("authorizeService")(await rideHailing.getAddress());
-  console.log("Authorized RideHailing on EscrowManager");
+  await escrowManager.getFunction("authorizeService")(marketplaceAddress);
+  console.log("Authorized Marketplace on EscrowManager");
 
   const reputationSystem = await ethers.getContractAt(
     "ReputationSystem",
     reputationSystemAddress,
   );
-  await reputationSystem.getFunction("authorizeService")(await rideHailing.getAddress());
-  console.log("Authorized RideHailing on ReputationSystem");
 
+  await reputationSystem.getFunction("authorizeService")(marketplaceAddress);
+  console.log("Authorized Marketplace on ReputationSystem");
+
+  console.log("✅ Marketplace deployment complete");
 }
 
 main().catch((error) => {

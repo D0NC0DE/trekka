@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:trekka/app/di/logistics_providers.dart';
 import 'package:trekka/app/di/storage_providers.dart';
+import 'package:trekka/core/error/exceptions.dart';
 import 'package:trekka/core/storage/auth_storage_service.dart';
 import 'package:trekka/features/logistics/data/models/place_autocomplete_prediction.dart';
 import 'package:trekka/features/logistics/data/models/route_info.dart';
@@ -369,6 +370,10 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
         activeRide: ride.copyWith(price: ridePrice),
         selectedPrice: ridePrice,
         stage: _stageForRideStatus(ride.status),
+        shouldPromptTopUp: false,
+        topUpAmount: null,
+        requiredBalance: null,
+        availableBalance: null,
       );
 
       await _subscribeToRideUpdates(ride.id);
@@ -376,10 +381,30 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
       return true;
     } catch (error) {
       debugPrint('Failed to create hailing request: $error');
-      state = state.copyWith(
-        isRequestingRide: false,
-        errorMessage: error.toString(),
-      );
+      if (error is ServerException && error.code == 'INSUFFICIENT_BALANCE') {
+        final Map<String, dynamic>? details = error.details;
+        final double? required = _toDouble(details?['requiredBalance']);
+        final double? available = _toDouble(details?['availableBalance']);
+        final double? shortfall =
+            (required != null && available != null)
+                ? (required - available).clamp(0, double.infinity)
+                : null;
+
+        state = state.copyWith(
+          isRequestingRide: false,
+          errorMessage: error.message,
+          shouldPromptTopUp: true,
+          topUpAmount: shortfall ?? required ?? price,
+          requiredBalance: required ?? price,
+          availableBalance: available,
+        );
+      } else {
+        state = state.copyWith(
+          isRequestingRide: false,
+          errorMessage: error.toString(),
+          shouldPromptTopUp: false,
+        );
+      }
       return false;
     }
   }
@@ -431,6 +456,10 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
       quote: null,
       selectedPrice: null,
       errorMessage: null,
+      shouldPromptTopUp: false,
+      topUpAmount: null,
+      requiredBalance: null,
+      availableBalance: null,
     );
   }
 
@@ -457,6 +486,31 @@ class LogisticsViewModel extends Notifier<LogisticsState> {
         merged.status == RideStatus.canceled) {
       _unsubscribeFromRideUpdates();
     }
+  }
+
+  void acknowledgeTopUpPrompt() {
+    if (!state.shouldPromptTopUp &&
+        state.topUpAmount == null &&
+        state.requiredBalance == null) {
+      return;
+    }
+
+    state = state.copyWith(
+      shouldPromptTopUp: false,
+      topUpAmount: null,
+      requiredBalance: null,
+      availableBalance: null,
+    );
+  }
+
+  double? _toDouble(Object? value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      return double.tryParse(value);
+    }
+    return null;
   }
 
   LogisticsStage _stageForRideStatus(RideStatus status) {

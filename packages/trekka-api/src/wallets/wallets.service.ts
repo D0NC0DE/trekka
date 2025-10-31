@@ -9,15 +9,21 @@ import {
     AccountCreateTransaction,
     Hbar,
     Status,
-    AccountBalanceQuery
+    AccountBalanceQuery,
+    ContractExecuteTransaction,
+    ContractFunctionParameters,
+    ContractId
 } from "@hashgraph/sdk";
 import { EncryptionService } from './encryption.service';
 import { SafeWallet, safeWalletSelect } from './types/wallet.types';
+import { createHash } from 'crypto';
 
 @Injectable()
 export class WalletsService implements OnModuleDestroy {
     private client: Client;
     private readonly INITIAL_BALANCE = 10;
+    private rideHailingContractId?: ContractId;
+    private readonly RIDE_HAILING_GAS_LIMIT = 500_000;
     constructor(
         private prisma: PrismaService,
         private configService: ConfigService,
@@ -49,6 +55,92 @@ export class WalletsService implements OnModuleDestroy {
         } catch (error) {
             console.error('❌ Failed to initialize Hedera client:', error);
             throw error;
+        }
+    }
+
+    private getRideHailingContractId(): ContractId {
+        if (this.rideHailingContractId) {
+            return this.rideHailingContractId;
+        }
+
+        const contractId = this.configService.get<string>('HEDERA_RIDE_HAILING_CONTRACT_ID');
+
+        if (!contractId) {
+            throw new Error('HEDERA_RIDE_HAILING_CONTRACT_ID must be set');
+        }
+
+        this.rideHailingContractId = ContractId.fromString(contractId);
+        return this.rideHailingContractId;
+    }
+
+    private toRideIdBytes(rideId: string): Uint8Array {
+        if (/^0x[0-9a-fA-F]{64}$/.test(rideId)) {
+            return Uint8Array.from(Buffer.from(rideId.slice(2), 'hex'));
+        }
+
+        const raw = Buffer.from(rideId, 'utf8');
+
+        if (raw.length === 32) {
+            return raw;
+        }
+
+        if (raw.length < 32) {
+            const padded = Buffer.alloc(32);
+            raw.copy(padded);
+            return padded;
+        }
+
+        return createHash('sha256').update(rideId).digest();
+    }
+
+    private logRideIdBytes(context: string, rideId: string, rideIdBytes: Uint8Array) {
+        console.log(`🔍 RideHailing ${context}:`, {
+            rideId,
+            rideIdHex: Buffer.from(rideIdBytes).toString('hex'),
+        });
+    }
+
+    private createClientForWallet(accountId: string, privateKey: PrivateKey): Client {
+        const client = Client.forTestnet();
+        client.setOperator(AccountId.fromString(accountId), privateKey);
+        return client;
+    }
+
+    private async executeRideHailingTransaction(
+        wallet: Wallet,
+        functionName: string,
+        parameters: ContractFunctionParameters,
+        payableAmount?: Hbar
+    ): Promise<void> {
+        const privateKey = this.getDecryptedPrivateKey(wallet);
+        const client = this.createClientForWallet(wallet.address, privateKey);
+
+        try {
+            let transaction = new ContractExecuteTransaction()
+                .setContractId(this.getRideHailingContractId())
+                .setGas(this.RIDE_HAILING_GAS_LIMIT)
+                .setFunction(functionName, parameters);
+
+            if (payableAmount) {
+                transaction = transaction.setPayableAmount(payableAmount);
+            }
+
+            const response = await transaction.execute(client);
+            const receipt = await response.getReceipt(client);
+
+            if (receipt.status !== Status.Success) {
+                throw new Error(`Transaction failed with status ${receipt.status.toString()}`);
+            }
+
+            console.log(`✅ RideHailing ${functionName} executed`, {
+                transactionId: response.transactionId.toString(),
+                status: receipt.status.toString(),
+            });
+        } catch (error) {
+            console.error(`❌ Failed to execute ${functionName} on RideHailing contract:`, error);
+            throw new InternalServerErrorException(`Failed to execute ${functionName} on RideHailing contract`);
+        } finally {
+            client.close();
         }
     }
 
@@ -154,6 +246,64 @@ export class WalletsService implements OnModuleDestroy {
             console.error('❌ Failed to get account balance:', error);
             throw new InternalServerErrorException('Failed to get account balance');
         }
+    }
+
+    async requestRideOnChain(userId: string, rideId: string, amountHbar: number): Promise<void> {
+        if (amountHbar <= 0) {
+            throw new InternalServerErrorException('Ride amount must be greater than zero');
+        }
+
+        const wallet = await this.ensureWalletExists(userId);
+        const rideIdBytes = this.toRideIdBytes(rideId);
+        this.logRideIdBytes('requestRide bytes', rideId, rideIdBytes);
+        const parameters = new ContractFunctionParameters().addBytes32(rideIdBytes);
+
+        await this.executeRideHailingTransaction(
+            wallet,
+            'requestRide',
+            parameters,
+            new Hbar(amountHbar)
+        );
+    }
+
+    async acceptRideOnChain(driverUserId: string, rideId: string): Promise<void> {
+        const wallet = await this.ensureWalletExists(driverUserId);
+        const rideIdBytes = this.toRideIdBytes(rideId);
+        this.logRideIdBytes('acceptRide bytes', rideId, rideIdBytes);
+        const parameters = new ContractFunctionParameters().addBytes32(rideIdBytes);
+
+        await this.executeRideHailingTransaction(
+            wallet,
+            'acceptRide',
+            parameters
+        );
+    }
+
+    async cancelRideOnChain(userId: string, rideId: string, canceledBy: 'rider' | 'driver'): Promise<void> {
+        const wallet = await this.ensureWalletExists(userId);
+        const rideIdBytes = this.toRideIdBytes(rideId);
+        const functionName = canceledBy === 'rider' ? 'cancelRideByRider' : 'cancelRideByDriver';
+        this.logRideIdBytes(`${functionName} bytes`, rideId, rideIdBytes);
+        const parameters = new ContractFunctionParameters().addBytes32(rideIdBytes);
+
+        await this.executeRideHailingTransaction(
+            wallet,
+            functionName,
+            parameters
+        );
+    }
+
+    async completeRideOnChain(userId: string, rideId: string): Promise<void> {
+        const wallet = await this.ensureWalletExists(userId);
+        const rideIdBytes = this.toRideIdBytes(rideId);
+        this.logRideIdBytes('completeRide bytes', rideId, rideIdBytes);
+        const parameters = new ContractFunctionParameters().addBytes32(rideIdBytes);
+      
+        await this.executeRideHailingTransaction(
+            wallet,
+            'completeRide',
+            parameters
+        );
     }
 
     async getWalletBalance(userId: string): Promise<number> {
