@@ -44,6 +44,7 @@ Future expansions:
 - **Hedera‑backed ops** — Server‑side interactions; client remains non‑custodial.
 - **Quest Engine** — Create/broadcast gigs; claim/bid; verify via GPS/QR/photo; settle payouts.
 - **Privacy & Anti‑Sybil** — Hashed IDs/DID off‑chain, zk‑friendly patterns, consent‑gated geo.
+- **Real-time WebSocket** — Authenticated WebSocket gateway for live updates and events.
 - **Observability** — Structured logging, health checks, readiness probes.
 - **Docs** — OpenAPI/Swagger at `/docs` in non‑prod.
 - **P2P Verticals** — Ride Hailing, Recycling, and Marketplace endpoints as first‑class modules.
@@ -140,6 +141,7 @@ npm run format
 ## 🗺️ Roadmap (Backend)
 
 - [x] Scaffold NestJS app, health, Swagger
+- [x] WebSocket gateway with JWT authentication
 - [ ] Ride Hailing module (driver/rider matching, pricing, settlement)
 - [ ] Recycling module (listings, bids, verified buyers)
 - [ ] Marketplace module (list/sell, on‑chain receipts)

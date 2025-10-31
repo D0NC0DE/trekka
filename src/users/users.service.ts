@@ -46,7 +46,7 @@ export class UsersService {
             otpPurpose?: OtpPurpose;
         }
     ): Promise<SafeUser> {
-        const reactivatedUser = await this.prisma.user.update({
+        const reactivatedUser = await this.prisma.extendedPrismaClient().user.update({
             where: { id: userId },
             data: {
                 deletedAt: null,
@@ -72,7 +72,7 @@ export class UsersService {
         otpExpiresAt?: Date;
         otpPurpose?: OtpPurpose;
     }): Promise<SafeUser> {
-        const existingUser = await this.prisma.user.findUnique({
+        const existingUser = await this.prisma.extendedPrismaClient().user.findUnique({
             where: { email: data.email },
             select: { id: true, deletedAt: true },
         });
@@ -87,7 +87,7 @@ export class UsersService {
 
         const username = await this.generateUniqueUsername(data.email);
 
-        const user = await this.prisma.user.create({
+        const user = await this.prisma.extendedPrismaClient().user.create({
             data: {
                 email: data.email,
                 username,
@@ -107,7 +107,7 @@ export class UsersService {
     }
 
     async findByEmail(email: string): Promise<SafeUser | null> {
-        const user = await this.prisma.user.findUnique({
+        const user = await this.prisma.extendedPrismaClient().user.findUnique({
             where: { email, deletedAt: null },
             select: safeUserSelect,
         });
@@ -116,7 +116,7 @@ export class UsersService {
     }
 
     async findByUsername(username: string): Promise<SafeUser | null> {
-        const user = await this.prisma.user.findUnique({
+        const user = await this.prisma.extendedPrismaClient().user.findUnique({
             where: { username },
             select: safeUserSelect,
         });
@@ -125,7 +125,7 @@ export class UsersService {
     }
 
     async findById(id: string): Promise<SafeUser | null> {
-        const user = await this.prisma.user.findUnique({
+        const user = await this.prisma.extendedPrismaClient().user.findUnique({
             where: { id, deletedAt: null },
             select: safeUserSelect,
         });
@@ -134,7 +134,7 @@ export class UsersService {
     }
 
     async findByIdWithWallet(id: string): Promise<UserWithWallet | null> {
-        const user = await this.prisma.user.findUnique({
+        const user = await this.prisma.extendedPrismaClient().user.findUnique({
             where: { id, deletedAt: null },
             select: userWithWalletSelect,
         });
@@ -162,7 +162,7 @@ export class UsersService {
         expiresAt: Date,
         purpose: OtpPurpose
     ): Promise<SafeUser> {
-        const user = await this.prisma.user.update({
+        const user = await this.prisma.extendedPrismaClient().user.update({
             where: { id: userId },
             data: {
                 otpHash,
@@ -189,14 +189,14 @@ export class UsersService {
     }
 
     async findByEmailWithOtp(email: string): Promise<UserWithOtp | null> {
-        return await this.prisma.user.findUnique({
+        return await this.prisma.extendedPrismaClient().user.findUnique({
             where: { email },
             select: userWithOtpSelect,
         });
     }
 
     async incrementOtpAttempt(userId: string): Promise<void> {
-        await this.prisma.user.update({
+        await this.prisma.extendedPrismaClient().user.update({
             where: { id: userId },
             data: {
                 otpAttemptCount: {
@@ -211,7 +211,7 @@ export class UsersService {
         refreshTokenHash: string,
         refreshTokenExpiresAt: Date
     ): Promise<SafeUser> {
-        const user = await this.prisma.user.update({
+        const user = await this.prisma.extendedPrismaClient().user.update({
             where: { id: userId },
             data: {
                 isEmailVerified: true,
@@ -231,7 +231,7 @@ export class UsersService {
     }
 
     async clearRefreshToken(userId: string): Promise<void> {
-        await this.prisma.user.update({
+        await this.prisma.extendedPrismaClient().user.update({
             where: { id: userId },
             data: {
                 refreshTokenHash: null,
@@ -245,7 +245,7 @@ export class UsersService {
         refreshTokenHash: string,
         refreshTokenExpiresAt: Date
     ): Promise<void> {
-        await this.prisma.user.update({
+        await this.prisma.extendedPrismaClient().user.update({
             where: { id: userId },
             data: {
                 refreshTokenHash,
@@ -256,14 +256,14 @@ export class UsersService {
     }
 
     async findByIdWithRefreshToken(userId: string): Promise<UserWithRefreshToken | null> {
-        return this.prisma.user.findUnique({
+        return this.prisma.extendedPrismaClient().user.findUnique({
             where: { id: userId, deletedAt: null },
             select: userWithRefreshTokenSelect,
         });
     }
 
     async updateLastLogin(userId: string): Promise<void> {
-        await this.prisma.user.update({
+        await this.prisma.extendedPrismaClient().user.update({
             where: { id: userId },
             data: {
                 lastLoginAt: new Date(),
@@ -285,7 +285,7 @@ export class UsersService {
             }
         }
 
-        const updatedUser = await this.prisma.user.update({
+        const updatedUser = await this.prisma.extendedPrismaClient().user.update({
             where: { id: userId },
             data: {
                 ...(data.username && { username: data.username }),
@@ -304,7 +304,7 @@ export class UsersService {
             throw new NotFoundException('User not found');
         }
 
-        await this.prisma.user.update({
+        await this.prisma.extendedPrismaClient().user.update({
             where: { id: userId },
             data: {
                 deletedAt: new Date(),

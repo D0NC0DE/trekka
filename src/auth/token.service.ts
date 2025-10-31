@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TokenPayload, Tokens } from './types';
@@ -72,7 +72,7 @@ export class TokenService {
             });
             return payload;
         } catch (error) {
-            throw new Error('Invalid or expired refresh token');
+            throw new UnauthorizedException('Invalid or expired refresh token');
         }
     }
 
