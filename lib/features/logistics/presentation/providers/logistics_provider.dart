@@ -4,7 +4,7 @@ import 'package:trekka/features/logistics/presentation/viewmodels/logistics_stat
 import 'package:trekka/features/logistics/presentation/viewmodels/logistics_viewmodel.dart';
 
 /// Provider for logistics journey state
-final logisticsViewModelProvider = NotifierProvider<LogisticsViewModel, LogisticsState>(
-  LogisticsViewModel.new,
-);
-
+final logisticsViewModelProvider =
+    NotifierProvider<LogisticsViewModel, LogisticsState>(
+      LogisticsViewModel.new,
+    );

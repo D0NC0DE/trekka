@@ -9,4 +9,3 @@ final apiClientProvider = Provider<ApiClient>(
     enableLogging: EnvConfig.enableNetworkLogging,
   ),
 );
-

@@ -13,7 +13,8 @@ class PlacesAutocompleteException implements Exception {
 class PlacesAutocompleteDatasource {
   final Dio _dio = Dio();
   final String _apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
-  static const String _baseUrl = 'https://places.googleapis.com/v1/places:autocomplete';
+  static const String _baseUrl =
+      'https://places.googleapis.com/v1/places:autocomplete';
 
   /// Get place predictions based on input text
   Future<List<PlaceAutocompletePrediction>> getPlacePredictions({
@@ -22,7 +23,9 @@ class PlacesAutocompleteDatasource {
     String? regionCode,
   }) async {
     if (_apiKey.isEmpty) {
-      throw PlacesAutocompleteException('Google Maps API Key not found in .env');
+      throw PlacesAutocompleteException(
+        'Google Maps API Key not found in .env',
+      );
     }
 
     if (input.trim().isEmpty) {
@@ -30,9 +33,7 @@ class PlacesAutocompleteDatasource {
     }
 
     try {
-      final Map<String, dynamic> requestBody = {
-        'input': input,
-      };
+      final Map<String, dynamic> requestBody = {'input': input};
 
       // Add origin if provided
       if (origin != null) {
@@ -60,14 +61,18 @@ class PlacesAutocompleteDatasource {
 
       if (response.statusCode == 200) {
         final suggestions = response.data['suggestions'] as List<dynamic>?;
-        
+
         if (suggestions == null || suggestions.isEmpty) {
           return [];
         }
 
         final predictions = suggestions
             .where((s) => s['placePrediction'] != null)
-            .map((s) => PlaceAutocompletePrediction.fromJson(s as Map<String, dynamic>))
+            .map(
+              (s) => PlaceAutocompletePrediction.fromJson(
+                s as Map<String, dynamic>,
+              ),
+            )
             .toList();
 
         return predictions;
@@ -75,7 +80,9 @@ class PlacesAutocompleteDatasource {
 
       return [];
     } on DioException catch (e) {
-      throw PlacesAutocompleteException('Failed to get predictions: ${e.message}');
+      throw PlacesAutocompleteException(
+        'Failed to get predictions: ${e.message}',
+      );
     } catch (e) {
       throw PlacesAutocompleteException('An unexpected error occurred: $e');
     }

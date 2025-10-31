@@ -52,7 +52,7 @@ class InitialContent extends StatelessWidget {
           hintText: 'Where to go?',
           readOnly: true,
           onTap: () {
-            onNext(); 
+            onNext();
           },
         ),
       ],

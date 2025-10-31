@@ -39,4 +39,3 @@ class FloatingLocationButton extends StatelessWidget {
     );
   }
 }
-

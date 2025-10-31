@@ -56,8 +56,9 @@ class PlaceAutocompletePrediction extends Equatable {
 
     if (distance >= 1000) {
       final kmValue = distance / 1000;
-      final kmLabel =
-          kmValue >= 10 ? kmValue.toStringAsFixed(0) : kmValue.toStringAsFixed(1);
+      final kmLabel = kmValue >= 10
+          ? kmValue.toStringAsFixed(0)
+          : kmValue.toStringAsFixed(1);
       return '$kmLabel km';
     }
 

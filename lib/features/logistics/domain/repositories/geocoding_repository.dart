@@ -10,4 +10,3 @@ abstract class GeocodingRepository {
   /// Convert coordinates to address
   Future<GeocodingResult?> reverseGeocode(LatLng location);
 }
-
