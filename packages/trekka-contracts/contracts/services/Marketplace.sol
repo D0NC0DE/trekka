@@ -21,27 +21,18 @@ contract Marketplace is ReentrancyGuard {
     }
 
     struct Product {
-        string cid; // IPFS CID
         address seller;
         uint256 pricePerUnit;
-        uint256 availableQuantity;
-        uint256 listedAt;
+        uint256 quantity;
         bool exists;
     }
 
     struct Order {
-        bytes32 id;
-        string productCid;
         address buyer;
         address seller;
-        uint256 quantity;
-        uint256 totalAmount;
+        uint256 amount;
         OrderStatus status;
-        uint256 placedAt;
-        uint256 acceptedAt;
-        uint256 deliveredAt;
-        uint256 completedAt;
-        bytes32 completionPinHash;
+        bytes32 pinHash;
         bool exists;
     }
 
@@ -62,48 +53,24 @@ contract Marketplace is ReentrancyGuard {
     event ProductListed(
         string indexed cid,
         address indexed seller,
-        uint256 pricePerUnit,
-        uint256 quantity,
-        uint256 timestamp
+        uint256 price,
+        uint256 quantity
     );
-    event ProductUpdated(
-        string indexed cid,
-        uint256 pricePerUnit,
-        uint256 quantity,
-        uint256 timestamp
-    );
+    event ProductUpdated(string indexed cid, uint256 price, uint256 quantity);
     event OrderPlaced(
         bytes32 indexed orderId,
         string indexed productCid,
         address indexed buyer,
-        address seller,
-        uint256 quantity,
-        uint256 totalAmount,
-        uint256 timestamp
+        uint256 amount
     );
-    event OrderAccepted(
-        bytes32 indexed orderId,
-        address indexed seller,
-        uint256 timestamp
-    );
-    event OrderDelivered(
-        bytes32 indexed orderId,
-        bytes32 completionPinHash,
-        uint256 timestamp
-    );
+    event OrderAccepted(bytes32 indexed orderId, address indexed seller);
+    event OrderDelivered(bytes32 indexed orderId, bytes32 pinHash);
     event OrderCompleted(
         bytes32 indexed orderId,
-        address indexed buyer,
         address indexed seller,
-        uint256 totalAmount,
-        uint256 timestamp
+        uint256 amount
     );
-    event OrderCanceled(
-        bytes32 indexed orderId,
-        address indexed canceledBy,
-        OrderStatus status,
-        uint256 timestamp
-    );
+    event OrderCanceled(bytes32 indexed orderId, address indexed canceledBy);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner");
@@ -150,42 +117,27 @@ contract Marketplace is ReentrancyGuard {
         require(_quantity > 0, "Quantity must be greater than 0");
 
         if (!products[_cid].exists) {
-            // New product
             products[_cid] = Product({
-                cid: _cid,
                 seller: msg.sender,
                 pricePerUnit: _pricePerUnit,
-                availableQuantity: _quantity,
-                listedAt: block.timestamp,
+                quantity: _quantity,
                 exists: true
             });
 
             productCids.push(_cid);
             totalProducts++;
 
-            emit ProductListed(
-                _cid,
-                msg.sender,
-                _pricePerUnit,
-                _quantity,
-                block.timestamp
-            );
+            emit ProductListed(_cid, msg.sender, _pricePerUnit, _quantity);
         } else {
-            // Update existing product (only seller can update)
             require(
                 products[_cid].seller == msg.sender,
                 "Only seller can update"
             );
 
             products[_cid].pricePerUnit = _pricePerUnit;
-            products[_cid].availableQuantity = _quantity;
+            products[_cid].quantity = _quantity;
 
-            emit ProductUpdated(
-                _cid,
-                _pricePerUnit,
-                _quantity,
-                block.timestamp
-            );
+            emit ProductUpdated(_cid, _pricePerUnit, _quantity);
         }
     }
 
@@ -203,16 +155,12 @@ contract Marketplace is ReentrancyGuard {
 
         Product storage product = products[_productCid];
 
-        require(
-            product.availableQuantity >= _quantity,
-            "Insufficient quantity available"
-        );
+        require(product.quantity >= _quantity, "Insufficient quantity");
         require(msg.sender != product.seller, "Cannot buy own product");
 
-        uint256 totalAmount = product.pricePerUnit * _quantity;
-        require(msg.value == totalAmount, "Incorrect payment amount");
+        uint256 total = product.pricePerUnit * _quantity;
+        require(msg.value == total, "Incorrect payment amount");
 
-        // Create escrow
         escrowManager.createEscrow{value: msg.value}(
             _orderId,
             msg.sender,
@@ -220,35 +168,18 @@ contract Marketplace is ReentrancyGuard {
         );
 
         orders[_orderId] = Order({
-            id: _orderId,
-            productCid: _productCid,
             buyer: msg.sender,
             seller: product.seller,
-            quantity: _quantity,
-            totalAmount: totalAmount,
+            amount: total,
             status: OrderStatus.Placed,
-            placedAt: block.timestamp,
-            acceptedAt: 0,
-            deliveredAt: 0,
-            completedAt: 0,
-            completionPinHash: bytes32(0),
+            pinHash: bytes32(0),
             exists: true
         });
 
-        // Reduce available quantity
-        product.availableQuantity -= _quantity;
-
+        product.quantity -= _quantity;
         totalOrders++;
 
-        emit OrderPlaced(
-            _orderId,
-            _productCid,
-            msg.sender,
-            product.seller,
-            _quantity,
-            totalAmount,
-            block.timestamp
-        );
+        emit OrderPlaced(_orderId, _productCid, msg.sender, total);
     }
 
     /**
@@ -258,13 +189,11 @@ contract Marketplace is ReentrancyGuard {
         bytes32 _orderId
     ) external orderExists(_orderId) onlySeller(_orderId) nonReentrant {
         Order storage order = orders[_orderId];
-
         require(order.status == OrderStatus.Placed, "Order not available");
 
         order.status = OrderStatus.Accepted;
-        order.acceptedAt = block.timestamp;
 
-        emit OrderAccepted(_orderId, msg.sender, block.timestamp);
+        emit OrderAccepted(_orderId, msg.sender);
     }
 
     /**
@@ -272,18 +201,16 @@ contract Marketplace is ReentrancyGuard {
      */
     function markDelivered(
         bytes32 _orderId,
-        bytes32 _completionPinHash
+        bytes32 _pinHash
     ) external orderExists(_orderId) onlySeller(_orderId) nonReentrant {
         Order storage order = orders[_orderId];
-
         require(order.status == OrderStatus.Accepted, "Order must be accepted");
-        require(_completionPinHash != bytes32(0), "Invalid pin hash");
+        require(_pinHash != bytes32(0), "Invalid pin hash");
 
         order.status = OrderStatus.Delivered;
-        order.deliveredAt = block.timestamp;
-        order.completionPinHash = _completionPinHash;
+        order.pinHash = _pinHash;
 
-        emit OrderDelivered(_orderId, _completionPinHash, block.timestamp);
+        emit OrderDelivered(_orderId, _pinHash);
     }
 
     /**
@@ -296,99 +223,75 @@ contract Marketplace is ReentrancyGuard {
 
         require(
             msg.sender == order.buyer || msg.sender == order.seller,
-            "Only buyer or seller can complete"
+            "Only buyer or seller"
         );
-        require(
-            order.status == OrderStatus.Delivered,
-            "Order must be delivered"
-        );
+        require(order.status == OrderStatus.Delivered, "Must be delivered");
 
         order.status = OrderStatus.Completed;
-        order.completedAt = block.timestamp;
         completedOrders++;
 
-        // Award points to both parties
         reputationSystem.addPoints(order.buyer, 1);
         reputationSystem.addPoints(order.seller, 1);
 
-        // Release escrow to seller
         escrowManager.releaseEscrow(_orderId, order.seller);
 
-        emit OrderCompleted(
-            _orderId,
-            order.buyer,
-            order.seller,
-            order.totalAmount,
-            block.timestamp
-        );
+        emit OrderCompleted(_orderId, order.seller, order.amount);
     }
 
     /**
      * @notice Buyer cancels order
      */
     function cancelOrderByBuyer(
-        bytes32 _orderId
+        bytes32 _orderId,
+        string memory _productCid,
+        uint256 _quantity
     ) external orderExists(_orderId) onlyBuyer(_orderId) nonReentrant {
         Order storage order = orders[_orderId];
 
         require(
             order.status == OrderStatus.Placed ||
                 order.status == OrderStatus.Accepted,
-            "Cannot cancel at this stage"
+            "Cannot cancel"
         );
 
-        // Deduct point if order was accepted
         if (order.status == OrderStatus.Accepted) {
             reputationSystem.deductPoints(msg.sender, 1);
         }
 
         order.status = OrderStatus.CanceledByBuyer;
 
-        // Restore product quantity
-        products[order.productCid].availableQuantity += order.quantity;
+        products[_productCid].quantity += _quantity;
 
-        // Refund through escrow
         escrowManager.refundEscrow(_orderId);
 
-        emit OrderCanceled(
-            _orderId,
-            msg.sender,
-            OrderStatus.CanceledByBuyer,
-            block.timestamp
-        );
+        emit OrderCanceled(_orderId, msg.sender);
     }
 
     /**
      * @notice Seller cancels order
      */
     function cancelOrderBySeller(
-        bytes32 _orderId
+        bytes32 _orderId,
+        string memory _productCid,
+        uint256 _quantity
     ) external orderExists(_orderId) onlySeller(_orderId) nonReentrant {
         Order storage order = orders[_orderId];
 
         require(
             order.status == OrderStatus.Placed ||
                 order.status == OrderStatus.Accepted,
-            "Cannot cancel at this stage"
+            "Cannot cancel"
         );
 
-        // Deduct point from seller
         reputationSystem.deductPoints(msg.sender, 1);
 
         order.status = OrderStatus.CanceledBySeller;
 
-        // Restore product quantity
-        products[order.productCid].availableQuantity += order.quantity;
+        products[_productCid].quantity += _quantity;
 
-        // Refund buyer
         escrowManager.refundEscrow(_orderId);
 
-        emit OrderCanceled(
-            _orderId,
-            msg.sender,
-            OrderStatus.CanceledBySeller,
-            block.timestamp
-        );
+        emit OrderCanceled(_orderId, msg.sender);
     }
 
     /**
@@ -406,22 +309,11 @@ contract Marketplace is ReentrancyGuard {
     )
         external
         view
-        returns (
-            address seller,
-            uint256 pricePerUnit,
-            uint256 availableQuantity,
-            uint256 listedAt
-        )
+        returns (address seller, uint256 price, uint256 quantity)
     {
         require(products[_cid].exists, "Product does not exist");
-        Product storage product = products[_cid];
-
-        return (
-            product.seller,
-            product.pricePerUnit,
-            product.availableQuantity,
-            product.listedAt
-        );
+        Product storage p = products[_cid];
+        return (p.seller, p.pricePerUnit, p.quantity);
     }
 
     /**
@@ -433,33 +325,16 @@ contract Marketplace is ReentrancyGuard {
         external
         view
         returns (
-            string memory productCid,
             address buyer,
             address seller,
-            uint256 quantity,
-            uint256 totalAmount,
+            uint256 amount,
             OrderStatus status,
-            uint256 placedAt,
-            uint256 acceptedAt,
-            uint256 deliveredAt,
-            uint256 completedAt
+            bytes32 pinHash
         )
     {
         require(orders[_orderId].exists, "Order does not exist");
-        Order storage order = orders[_orderId];
-
-        return (
-            order.productCid,
-            order.buyer,
-            order.seller,
-            order.quantity,
-            order.totalAmount,
-            order.status,
-            order.placedAt,
-            order.acceptedAt,
-            order.deliveredAt,
-            order.completedAt
-        );
+        Order storage o = orders[_orderId];
+        return (o.buyer, o.seller, o.amount, o.status, o.pinHash);
     }
 
     /**

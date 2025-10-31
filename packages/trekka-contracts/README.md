@@ -37,7 +37,18 @@ The smart-contract layer is split into reusable core primitives and domain-speci
 
 **Hedera Testnet (EVM):** `0x2B76D0F307EF754EF41741d2a6f3eAe4F6edc9CE`
 
-Upcoming services (Courier, Recycling, Marketplace) reuse the same core contracts and will publish their own addresses after deployment.
+### Marketplace
+
+- IPFS-backed product catalog with escrow-protected orders.
+- Leverages completion pins and the reputation system for dispute resolution.
+
+**Hedera Testnet (ID):** `0.0.7173124`
+
+**Hedera Testnet (EVM):** `0x0Aad7DCd751Bd24E2fADb4E563FAF29624076D40`
+
+###
+
+Upcoming services (Courier, Recycling) reuse the same core contracts and will publish their own addresses after deployment.
 
 ---
 
