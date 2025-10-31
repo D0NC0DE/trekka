@@ -1,6 +1,10 @@
 import { network } from "hardhat";
+import dotenv from "dotenv";
+dotenv.config();
 
-const { ethers } = await network.connect();
+const { ethers } = await network.connect({
+  network: "hedera"
+});
 
 const CORE_ADDRESSES = {
   escrowManager: process.env.CORE_ESCROW_MANAGER_ADDRESS,

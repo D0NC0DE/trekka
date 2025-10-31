@@ -11,14 +11,18 @@ The smart-contract layer is split into reusable core primitives and domain-speci
 - Releases payouts based on milestones confirmed by service contracts.
 - Enforces single source of truth for custody across verticals.
 
-**Hedera Testnet (placeholder):** `0x8f5a8d9b1e4c3f2a7b6c5d4e3f1a2b3c4d5e6f7a`
+**Hedera Testnet (ID):** `0.0.7167779`
+
+**Hedera Testnet (EVM):** `0x0404dF8365111b34C7Ec46C4805462b384E8B224`
 
 ### ReputationSystem
 - Maintains participant reputation scores across all Trekka services.
 - Exposes role-gated upsert functions for the API backend.
 - Provides query helpers for clients to display trust metrics.
 
-**Hedera Testnet (placeholder):** `0x2c4d6e8f1a3b5c7d9e0f1a2b3c4d5e6f7a8b9c0d`
+**Hedera Testnet (ID):** `0.0.7167780`
+
+**Hedera Testnet (EVM):** `0x71660Df400Cb33c3032234a71625738b4A283d39`
 
 ---
 
@@ -29,7 +33,9 @@ The smart-contract layer is split into reusable core primitives and domain-speci
 - Issues completion tokens for proof-of-ride flows.
 - Writes reputation deltas back to the core system after settlement.
 
-**Hedera Testnet (placeholder):** `0x7e6d5c4b3a291817262524232221201f1e1d1c1b`
+**Hedera Testnet (ID):** `0.0.7167785`
+
+**Hedera Testnet (EVM):** `0x2B76D0F307EF754EF41741d2a6f3eAe4F6edc9CE`
 
 Upcoming services (Courier, Recycling, Marketplace) reuse the same core contracts and will publish their own addresses after deployment.
 

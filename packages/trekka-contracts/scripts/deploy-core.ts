@@ -1,6 +1,8 @@
 import { network } from "hardhat";
 
-const { ethers } = await network.connect();
+const { ethers } = await network.connect({
+  network: "hedera"
+});
 
 async function main() {
   console.log("🚀 Deploying Trekka core contracts...");
