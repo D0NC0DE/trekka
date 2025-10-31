@@ -18,20 +18,20 @@ class PlacesAutocompleteRepositoryImpl implements PlacesAutocompleteRepository {
   }) {
     final requestRegionCode = regionCode?.toUpperCase();
 
-    return datasource.getPlacePredictions(
-      input: input,
-      origin: origin,
-      regionCode: requestRegionCode,
-    ).then((predictions) {
-      final sortedPredictions = [...predictions]
-        ..sort(
-          (a, b) {
-            final distanceA = a.distanceMeters ?? 0;
-            final distanceB = b.distanceMeters ?? 0;
-            return distanceA.compareTo(distanceB);
-          },
-        );
-      return sortedPredictions;
-    });
+    return datasource
+        .getPlacePredictions(
+          input: input,
+          origin: origin,
+          regionCode: requestRegionCode,
+        )
+        .then((predictions) {
+          final sortedPredictions = [...predictions]
+            ..sort((a, b) {
+              final distanceA = a.distanceMeters ?? 0;
+              final distanceB = b.distanceMeters ?? 0;
+              return distanceA.compareTo(distanceB);
+            });
+          return sortedPredictions;
+        });
   }
 }

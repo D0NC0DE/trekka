@@ -19,8 +19,8 @@ class MapPolylineBuilder {
       return <Polyline>{};
     }
 
-    final List<LatLng>? polylinePoints =
-        logisticsState.routeInfo!.decodePolyline();
+    final List<LatLng>? polylinePoints = logisticsState.routeInfo!
+        .decodePolyline();
 
     if (polylinePoints == null || polylinePoints.isEmpty) {
       return <Polyline>{};
@@ -48,4 +48,3 @@ class MapPolylineBuilder {
         stage == LogisticsStage.inProgress;
   }
 }
-

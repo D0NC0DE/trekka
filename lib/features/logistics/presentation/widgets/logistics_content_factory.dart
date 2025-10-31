@@ -61,7 +61,7 @@ class LogisticsContentFactory {
         );
 
       case LogisticsStage.complete:
-        return CompleteRideContent(onComplete: onNext);
+        return CompleteRideContent(onComplete: onNext, onCancel: onCancel);
     }
   }
 }

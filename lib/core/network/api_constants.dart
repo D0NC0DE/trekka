@@ -31,4 +31,11 @@ class ApiConstants {
   static const String walletsMe = '$walletsBase/me';
   static const String walletsBalance = '$walletsMe/balance';
   static const String walletsAddress = '$walletsMe/address';
+
+  // Logistics endpoints
+  static const String logisticsBase = '$apiVersion/logistics';
+  static const String logisticsHailingBase = '$logisticsBase/hailing';
+  static const String logisticsHailingQuotes = '$logisticsHailingBase/quotes';
+  static const String logisticsHailingRequests =
+      '$logisticsHailingBase/requests';
 }
