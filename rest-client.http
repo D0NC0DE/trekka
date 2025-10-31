@@ -1,4 +1,4 @@
-@BASE_URL = http://localhost:3001
+@BASE_URL = http://localhost:3000
 @API_VERSION = /api/v1
 
 #### === WELCOME ===
@@ -6,9 +6,8 @@ GET {{BASE_URL}}
 
 #### === AUTHENTICATION ===
 @AUTH_URL = {{BASE_URL}}{{API_VERSION}}/auth
-@ACCESS_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJqcjNiaGt6ZGsxcnQ3OWx0YjA5ejA3M2MiLCJlbWFpbCI6Im5pbGVrMjE5MzNAZWx5Z2lmdHMuY29tIiwidXNlcm5hbWUiOiJjb29sdXNlcjQ1NiIsImlhdCI6MTc2MTE0MzA0NCwiZXhwIjoxNzYxMTQzOTQ0fQ.YpZZcSrcEV12v084LuzYC2N2QGur_7X9lGXBGFNEu1Y
-@REFRESH_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySQiOiJqcjNiaGt6ZGsxcnQ3OWx0YjA5ejA3M2MiLCJlbWFpbCI6Im5pbGVrMjE5MzNAZWx5Z2lmdHMuY29tIiwidXNlcm5hbWUiOiJjb29sdXNlcjQ1NiIsImlhdCI6MTc2MTE0MzA0NCwiZXhwIjoxNzYxNzQ3ODQ0fQ.WPziLAmq9B_LoH9Hs50qfMrmJbnnCfqaLRskCaiF15c
-### Authenticate a user with google
+@ACCESS_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlbGhmcGpvYXhxNjlndWV6a20yeXZqMzQiLCJlbWFpbCI6InJhdGFnaWYyMTRAYW1ldGl0YXMuY29tIiwidXNlcm5hbWUiOiJyYXRhZ2lmMjE0IiwiaWF0IjoxNzYxODQ0OTg5LCJleHAiOjE3NjE4NDU4ODl9.uOX8Uzcx5HMvGvNV7FUxo6wGeHnAPzPyCASZ6ym6gGU
+@REFRESH_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlbGhmcGpvYXhxNjlndWV6a20yeXZqMzQiLCJlbWFpbCI6InJhdGFnaWYyMTRAYW1ldGl0YXMuY29tIiwidXNlcm5hbWUiOiJyYXRhZ2lmMjE0IiwiaWF0IjoxNzYxODQ0OTg5LCJleHAiOjE3NjI0NDk3ODl9.bZpHkuJnMcv7NH-O8n6a7oqK-3jRMnP_8EnGSdb7awM
 POST {{AUTH_URL}}/google
 
 ### Authenticate a user with email and otp
@@ -16,7 +15,7 @@ POST {{AUTH_URL}}/email/request
 Content-Type: application/json
 
 {
-  "email": "nilek21933@elygifts.com"
+  "email": "ratagif214@ametitas.com"
 }
 
 ### Resend a user's otp
@@ -24,7 +23,7 @@ POST {{AUTH_URL}}/email/resend
 Content-Type: application/json
 
 {
-  "email": "nilek21933@elygifts.com"
+  "email": "ratagif214@ametitas.com"
 }
 
 ### verify a user's otp
@@ -32,8 +31,8 @@ POST {{AUTH_URL}}/email/verify
 Content-Type: application/json
 
 { 
-  "email": "nilek21933@elygifts.com",
-  "otp": "5F6165D0"
+  "email": "ratagif214@ametitas.com",
+  "otp": "2C242DA8"
 }
 
 ### logout a user
@@ -134,3 +133,136 @@ POST {{WALLET_URL}}/export/verify
 POST {{WALLET_URL}}/export/resend
 
 //TODO: Admin endpoints for managing wallets
+
+
+
+#### === Logistics (Hailing) ===
+@LOGISTICS_URL = {{BASE_URL}}{{API_VERSION}}/logistics
+@LOGISTICS_HAILING_URL = {{LOGISTICS_URL}}/hailing
+@LOGISTICS_HAILING_REQUESTS_URL = {{LOGISTICS_HAILING_URL}}/requests
+@LOGISTICS_HAILING_QUOTES_URL = {{LOGISTICS_HAILING_URL}}/quotes
+@HAILING_REQUEST_ID = 123
+@COMPLETION_TOKEN = sample-driver-token
+@PIN_CODE = 4321
+@LAT = 6.4481
+@LNG = 3.3915
+@COMPLETED_AT = 2024-04-30T13:45:00Z
+@RIDER_COMPLETION_TOKEN = sample-rider-token
+@RIDER_PIN_CODE = 9876
+
+### Create a logistics hailing quote
+POST {{LOGISTICS_HAILING_QUOTES_URL}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "estimatedTimeMinutes": 13,
+  "distanceKm": 3.4,
+  "vehicleClass": "normal",
+  "extras": 0,
+  "priority": false
+}
+
+### Create a logistics hailing request
+POST {{LOGISTICS_HAILING_REQUESTS_URL}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "origin": {
+    "latitude": 6.5244,
+    "longitude": 3.3792
+  },
+  "destination": {
+    "latitude": 6.4474,
+    "longitude": 3.3903
+  },
+  "estimated_time_minutes": 25,
+  "distance_km": 7.5,
+  "price": 10000
+}
+
+### Accept a logistics hailing request
+PATCH {{LOGISTICS_HAILING_REQUESTS_URL}}/{{HAILING_REQUEST_ID}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "status": "accepted"
+}
+// Response: return completion_token = encrypt(destLat, destLng, radius, issuedAt) to both rider and driver along status update
+
+### Mark a logistics hailing request as arrived
+PATCH {{LOGISTICS_HAILING_REQUESTS_URL}}/{{HAILING_REQUEST_ID}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "status": "arrived",
+  "initiated_by": "driver"
+}
+
+### Mark a logistics hailing request as in progress
+PATCH {{LOGISTICS_HAILING_REQUESTS_URL}}/{{HAILING_REQUEST_ID}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "status": "in_progress",
+  "initiated_by": "driver"
+}
+
+### Cancel a logistics hailing request as the rider
+PATCH {{LOGISTICS_HAILING_REQUESTS_URL}}/{{HAILING_REQUEST_ID}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "status": "canceled",
+  "canceled_by": "rider",
+  "reason": "Change of plans"
+}
+
+### Cancel a logistics hailing request as the driver
+PATCH {{LOGISTICS_HAILING_REQUESTS_URL}}/{{HAILING_REQUEST_ID}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "status": "canceled",
+  "canceled_by": "driver",
+  "reason": "Vehicle issues"
+}
+
+### Mark a logistics hailing request as completed
+PATCH {{LOGISTICS_HAILING_REQUESTS_URL}}/{{HAILING_REQUEST_ID}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "status": "completed",
+  "initiated_by": "driver",
+  "completion_token": "{{COMPLETION_TOKEN}}",
+  "pin_code": "{{PIN_CODE}}",
+   "location": {
+    "latitude": {{LAT}},
+    "longitude": {{LNG}}
+  },
+  "completed_at": "{{COMPLETED_AT}}"
+}
+
+### Mark a logistics hailing request as completed by the rider
+PATCH {{LOGISTICS_HAILING_REQUESTS_URL}}/{{HAILING_REQUEST_ID}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "status": "completed",
+  "initiated_by": "rider",
+  "completion_token": "{{COMPLETION_TOKEN}}",
+  "location": {
+    "latitude": {{LAT}},
+    "longitude": {{LNG}}
+  },
+  "completed_at": "{{COMPLETED_AT}}"
+}

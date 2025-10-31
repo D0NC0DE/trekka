@@ -11,6 +11,8 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guard/auth.guard';
 // import { StorageModule } from './storage/storage.module';
+import { LogisticsModule } from './logistics/logistics.module';
+import { EventsModule } from './events/events.module';
 @Module({
   imports: [
     ThrottlerModule.forRoot([
@@ -39,6 +41,8 @@ import { AuthGuard } from './auth/guard/auth.guard';
     WalletsModule,
     PrismaModule,
     EmailModule,
+    LogisticsModule,
+    EventsModule,
     // StorageModule
   ],
   controllers: [AppController],
