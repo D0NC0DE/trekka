@@ -43,7 +43,7 @@ class _ConfirmRequestContentState extends ConsumerState<ConfirmRequestContent> {
     super.dispose();
   }
 
-  String _formatPrice(double value) => '₦${value.toStringAsFixed(0)}';
+  String _formatPrice(double value) => '${value.toStringAsFixed(2)} ℏ';
 
   void _updatePrice(double value) {
     final double sanitized = value.clamp(0, double.infinity);

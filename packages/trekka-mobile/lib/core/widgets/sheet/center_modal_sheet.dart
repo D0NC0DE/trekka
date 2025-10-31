@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import 'package:trekka/core/design/gradients.dart';
@@ -121,6 +122,9 @@ class CenterModalWalletTopUpSheet extends StatelessWidget {
     required this.walletAddress,
     this.dismissible = true,
     this.onDismiss,
+    this.onRefresh,
+    this.onAddFunds,
+    this.onRequestFromFriend,
     super.key,
   });
 
@@ -128,12 +132,33 @@ class CenterModalWalletTopUpSheet extends StatelessWidget {
   final String walletAddress;
   final bool dismissible;
   final VoidCallback? onDismiss;
+  final VoidCallback? onRefresh;
+  final VoidCallback? onAddFunds;
+  final VoidCallback? onRequestFromFriend;
 
-  static const double _qrSize = 92;
+  static const double _qrSize = 120;
+
+  void _copyWalletAddress(BuildContext context) {
+    final String trimmed = walletAddress.trim();
+    if (trimmed.isEmpty) return;
+
+    Clipboard.setData(ClipboardData(text: trimmed));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Wallet address copied to clipboard'),
+        behavior: SnackBarBehavior.floating,
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
+    final bool hasWalletAddress =
+        walletAddress.trim().isNotEmpty && walletAddress.contains('.');
+    final String displayAddress =
+        hasWalletAddress ? walletAddress : 'Wallet address unavailable';
 
     return CenterModalSheet(
       dismissible: dismissible,
@@ -155,41 +180,69 @@ class CenterModalWalletTopUpSheet extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           _DashedBorderContainer(
-            backgroundColor: AppColors.primaryBright.withOpacity(0.5),
+            backgroundColor: AppColors.primaryBright.withOpacity(0.35),
             borderColor: AppColors.white50,
-            borderRadius: AppRadius.xs,
-            dashPattern: const <double>[2, 2],
-            padding: const EdgeInsets.all(AppSpacing.md),
-            strokeWidth: 1,
+            borderRadius: AppRadius.sm,
+            dashPattern: const <double>[4, 3],
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            strokeWidth: 1.4,
             child: SizedBox(
               width: _qrSize,
               height: _qrSize,
-              child: QrImageView(
-                data: walletAddress,
-                gapless: false,
-                backgroundColor: Colors.transparent,
-                eyeStyle: const QrEyeStyle(
-                  color: AppColors.white,
-                  eyeShape: QrEyeShape.square,
-                ),
-                dataModuleStyle: const QrDataModuleStyle(
-                  color: AppColors.white,
-                  dataModuleShape: QrDataModuleShape.square,
-                ),
-              ),
+              child: hasWalletAddress
+                  ? QrImageView(
+                      data: walletAddress,
+                      gapless: false,
+                      backgroundColor: Colors.transparent,
+                      eyeStyle: const QrEyeStyle(
+                        color: AppColors.white,
+                        eyeShape: QrEyeShape.square,
+                      ),
+                      dataModuleStyle: const QrDataModuleStyle(
+                        color: AppColors.white,
+                        dataModuleShape: QrDataModuleShape.square,
+                      ),
+                    )
+                  : const _QrPlaceholder(),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          SelectableText(
-            walletAddress,
-            textAlign: TextAlign.center,
-            style: textTheme.bodySmall?.copyWith(
-                  color: AppColors.white50,
-                ) ??
-                const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.white50,
-                ),
+          WalletAddressDisplay(
+            address: displayAddress,
+            onCopy: hasWalletAddress ? () => _copyWalletAddress(context) : null,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Other methods',
+              style: textTheme.bodyMedium?.copyWith(
+                    color: AppColors.white,
+                    fontWeight: AppFontWeights.semiBold,
+                  ) ??
+                  const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.white,
+                  ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.smLg),
+          _GradientQuickActionButton(
+            icon: Icons.credit_card,
+            label: 'Add funds with bank/card',
+            onTap: onAddFunds,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          _GradientQuickActionButton(
+            icon: Icons.group_add,
+            label: 'Request from friend',
+            onTap: onRequestFromFriend,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          _RefreshButton(
+            label: 'Refresh after payment',
+            onTap: onRefresh,
           ),
         ],
       ),
@@ -204,6 +257,9 @@ Future<T?> showCenterModalWalletTopUpSheet<T>({
   required String walletAddress,
   bool dismissible = true,
   VoidCallback? onDismiss,
+  VoidCallback? onRefresh,
+  VoidCallback? onAddFunds,
+  VoidCallback? onRequestFromFriend,
 }) {
   return showDialog<T>(
     context: context,
@@ -215,6 +271,9 @@ Future<T?> showCenterModalWalletTopUpSheet<T>({
         walletAddress: walletAddress,
         dismissible: dismissible,
         onDismiss: onDismiss,
+        onRefresh: onRefresh,
+        onAddFunds: onAddFunds,
+        onRequestFromFriend: onRequestFromFriend,
       );
     },
   );
@@ -324,6 +383,219 @@ class _DashedBorderContainer extends StatelessWidget {
         ),
         padding: padding,
         child: child,
+      ),
+    );
+  }
+}
+
+class WalletAddressDisplay extends StatelessWidget {
+  const WalletAddressDisplay({
+    required this.address,
+    this.onCopy,
+  });
+
+  final String address;
+  final VoidCallback? onCopy;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bool isCopyEnabled = onCopy != null;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        border: Border.all(color: AppColors.white50, width: 1.4),
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  address,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                        color: AppColors.white,
+                        fontWeight: AppFontWeights.semiBold,
+                      ) ??
+                      const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.white,
+                      ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.smMd),
+              GestureDetector(
+                onTap: isCopyEnabled ? onCopy : null,
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.xs),
+                  decoration: BoxDecoration(
+                    color: AppColors.white.withOpacity(isCopyEnabled ? 0.2 : 0.08),
+                    borderRadius: BorderRadius.circular(AppRadius.xs),
+                    border: Border.all(
+                      color: AppColors.white50,
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.copy_rounded,
+                    size: 18,
+                    color: isCopyEnabled ? AppColors.white : AppColors.white50,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Tap copy to share or fund manually',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppColors.white50,
+                ) ??
+                const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.white50,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GradientQuickActionButton extends StatelessWidget {
+  const _GradientQuickActionButton({
+    required this.icon,
+    required this.label,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isEnabled = onTap != null;
+    final TextStyle textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: AppColors.white,
+          fontWeight: AppFontWeights.semiBold,
+        ) ??
+        const TextStyle(
+          fontSize: 15,
+          fontWeight: AppFontWeights.semiBold,
+          color: AppColors.white,
+        );
+
+    return GestureDetector(
+      onTap: isEnabled ? onTap : null,
+      child: Opacity(
+        opacity: isEnabled ? 1 : 0.6,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          decoration: BoxDecoration(
+            gradient: AppGradients.logisticsActionButton,
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+            border: Border.all(color: AppColors.primaryBright, width: 2),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(icon, color: AppColors.white, size: 18),
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(
+                child: Text(
+                  label,
+                  style: textStyle,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RefreshButton extends StatelessWidget {
+  const _RefreshButton({
+    required this.label,
+    this.onTap,
+  });
+
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isEnabled = onTap != null;
+    final TextStyle textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: AppColors.deepTeal,
+          fontWeight: AppFontWeights.semiBold,
+        ) ??
+        const TextStyle(
+          fontSize: 15,
+          fontWeight: AppFontWeights.semiBold,
+          color: AppColors.deepTeal,
+        );
+
+    return GestureDetector(
+      onTap: isEnabled ? onTap : null,
+      child: Opacity(
+        opacity: isEnabled ? 1 : 0.6,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+            border: Border.all(color: AppColors.primaryBright, width: 2),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: textStyle,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QrPlaceholder extends StatelessWidget {
+  const _QrPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white25,
+        borderRadius: BorderRadius.circular(AppRadius.xs),
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.qr_code_2_rounded,
+          color: AppColors.white50,
+          size: 36,
+        ),
       ),
     );
   }
