@@ -1,0 +1,52 @@
+model RideHailingProvider {
+    id              String    @id @default(cuid(2))
+    userId          String    @unique
+    user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    displayName     String
+    vehiclePlate    String
+    vehicleModel    String
+    vehicleFuelType FuelType?
+    color           String?
+    year            Int?
+    rating          Decimal   @default(0) @db.Decimal(3, 2)
+    reviewCount     Int       @default(0)
+    completedOrders Int       @default(0)
+    createdAt       DateTime  @default(now())
+    updatedAt       DateTime  @updatedAt
+
+    @@map("ride_hailing_providers")
+}
+
+enum FuelType {
+    ELECTRIC
+    GAS
+    DIESEL
+    PETROL
+}
+
+// model RecyclingProvider {
+//   id              String              @id @default(cuid(2))
+//   userId          String              @unique
+//   user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   displayName     String
+//   materials       RecyclingMaterial[] @default([])
+//   baseRate        Decimal             @default(0) @db.Decimal(10, 2) // Base charge per unit (kg, bag, etc.)
+//   pricingNotes    String?
+//   rating          Decimal             @default(0) @db.Decimal(3, 2)
+//   reviewCount     Int                 @default(0)
+//   completedOrders Int                 @default(0)
+//   createdAt       DateTime            @default(now())
+//   updatedAt       DateTime            @updatedAt
+
+//   @@map("recycling_providers")
+// }
+
+// enum RecyclingMaterial {
+//   PLASTIC
+//   METAL
+//   GLASS
+//   PAPER
+//   ELECTRONICS
+//   ORGANIC
+//   OTHER
+// }
