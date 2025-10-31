@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +53,6 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
   late final Animation<Offset> _sheetSlideAnimation;
   bool _isMapInteracting = false;
   Timer? _sheetRestoreTimer;
-  Timer? _driverAcceptanceTimer;
   AnimatedDriverMarkerController? _driverMarkerController;
   AnimatedPickupMarkerController? _pickupMarkerController;
   Set<Marker> _nearbyDriverMarkers = {};
@@ -96,7 +94,6 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
     _mapController?.dispose();
     _sheetAnimationController.dispose();
     _sheetRestoreTimer?.cancel();
-    _driverAcceptanceTimer?.cancel();
     _driverMarkerController?.dispose();
     _pickupMarkerController?.dispose();
     // _positionStreamSubscription?.cancel();
@@ -378,147 +375,174 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
     });
   }
 
-  void _handleNextStage() {
+  void _setCurrentStage(LogisticsStage stage, {bool notifyViewModel = true}) {
+    if (!mounted) return;
     setState(() {
-      if (_currentStage == LogisticsStage.enterPickupLocation) {
-        _currentStage = LogisticsStage.confirmPickupLocation;
-        final pickupLocation = ref
-            .read(logisticsViewModelProvider)
-            .userLocation;
-        if (_mapController != null && pickupLocation != null) {
-          _mapController!.animateCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(target: pickupLocation, zoom: _userZoom, tilt: 20),
-            ),
-          );
-        }
-        return;
-      }
-
-      if (_currentStage == LogisticsStage.confirmPickupLocation) {
-        _currentStage = LogisticsStage.confirmRequest;
-        final logisticsState = ref.read(logisticsViewModelProvider);
-        final pickupLocation = logisticsState.userLocation;
-        final destinationLocation = logisticsState.destinationLocation;
-
-        if (_mapController != null &&
-            pickupLocation != null &&
-            destinationLocation != null) {
-          // Fit both markers in view
-          _fitBoundsToRoute(pickupLocation, destinationLocation);
-        } else if (_mapController != null && pickupLocation != null) {
-          _mapController!.animateCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(target: pickupLocation, zoom: _userZoom, tilt: 20),
-            ),
-          );
-        }
-        _driverAcceptanceTimer?.cancel();
-        return;
-      }
-
-      final int currentIndex = _stageFlow.indexOf(_currentStage);
-      if (currentIndex == -1) {
-        _currentStage = LogisticsStage.initial;
-        return;
-      }
-
-      final bool isLastStage = currentIndex >= _stageFlow.length - 1;
-      _currentStage = isLastStage
-          ? LogisticsStage.initial
-          : _stageFlow[currentIndex + 1];
-
-      if (_currentStage == LogisticsStage.lookingForDriver) {
-        final pickupLocation = ref
-            .read(logisticsViewModelProvider)
-            .userLocation;
-        if (_mapController != null && pickupLocation != null) {
-          _mapController!.animateCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(target: pickupLocation, zoom: _userZoom, tilt: 20),
-            ),
-          );
-        }
-        _startNearbyDriverAnimation();
-        _scheduleDriverAcceptance();
-      } else {
-        _stopNearbyDriverAnimation();
-      }
-
-      // Adjust camera tilt when entering inProgress stage
-      if (_currentStage == LogisticsStage.inProgress) {
-        final pickupLocation = ref
-            .read(logisticsViewModelProvider)
-            .userLocation;
-        if (_mapController != null && pickupLocation != null) {
-          _mapController!.animateCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(target: pickupLocation, zoom: _userZoom, tilt: 50),
-            ),
-          );
-        }
-      }
-
-      //  // Start compass rotation when entering inProgress stage
-      // if (_currentStage == LogisticsStage.inProgress) {
-      //   _startCompassRotation();
-      // } else {
-      //   _stopCompassRotation();
-      // }
+      _currentStage = stage;
     });
+
+    _applyStageSideEffects(stage);
+
+    if (notifyViewModel) {
+      ref.read(logisticsViewModelProvider.notifier).setStage(stage);
+    }
+  }
+
+  void _applyStageSideEffects(LogisticsStage stage) {
+    if (stage == LogisticsStage.lookingForDriver) {
+      final pickupLocation = ref.read(logisticsViewModelProvider).userLocation;
+      if (_mapController != null && pickupLocation != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(target: pickupLocation, zoom: _userZoom, tilt: 20),
+          ),
+        );
+      }
+      _startNearbyDriverAnimation();
+    } else {
+      _stopNearbyDriverAnimation();
+    }
+
+    if (stage == LogisticsStage.inProgress) {
+      final pickupLocation = ref.read(logisticsViewModelProvider).userLocation;
+      if (_mapController != null && pickupLocation != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(target: pickupLocation, zoom: _userZoom, tilt: 50),
+          ),
+        );
+      }
+    }
+  }
+
+  void _handleNextStage() {
+    if (_currentStage == LogisticsStage.confirmRequest) {
+      final currentState = ref.read(logisticsViewModelProvider);
+      if (currentState.isRequestingRide) {
+        return;
+      }
+      ref.read(logisticsViewModelProvider.notifier).requestRide().then((
+        bool success,
+      ) {
+        if (!success || !mounted) return;
+        final LogisticsStage stage = ref.read(logisticsViewModelProvider).stage;
+        _setCurrentStage(stage, notifyViewModel: false);
+      });
+      return;
+    }
+
+    if (_currentStage == LogisticsStage.inProgress) {
+      final currentState = ref.read(logisticsViewModelProvider);
+      if (currentState.isCompletingRide || currentState.activeRide == null) {
+        return;
+      }
+
+      ref.read(logisticsViewModelProvider.notifier).completeRide().then((
+        bool success,
+      ) {
+        if (!success || !mounted) return;
+        final LogisticsStage stage = ref.read(logisticsViewModelProvider).stage;
+        _setCurrentStage(stage, notifyViewModel: false);
+      });
+      return;
+    }
+
+    if (_currentStage == LogisticsStage.enterPickupLocation) {
+      _setCurrentStage(LogisticsStage.confirmPickupLocation);
+      final pickupLocation = ref.read(logisticsViewModelProvider).userLocation;
+      if (_mapController != null && pickupLocation != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(target: pickupLocation, zoom: _userZoom, tilt: 20),
+          ),
+        );
+      }
+      return;
+    }
+
+    if (_currentStage == LogisticsStage.confirmPickupLocation) {
+      _setCurrentStage(LogisticsStage.confirmRequest);
+      final logisticsState = ref.read(logisticsViewModelProvider);
+      final pickupLocation = logisticsState.userLocation;
+      final destinationLocation = logisticsState.destinationLocation;
+
+      if (_mapController != null &&
+          pickupLocation != null &&
+          destinationLocation != null) {
+        _fitBoundsToRoute(pickupLocation, destinationLocation);
+      } else if (_mapController != null && pickupLocation != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(target: pickupLocation, zoom: _userZoom, tilt: 20),
+          ),
+        );
+      }
+      return;
+    }
+
+    final int currentIndex = _stageFlow.indexOf(_currentStage);
+    if (currentIndex == -1) {
+      _setCurrentStage(LogisticsStage.initial);
+      return;
+    }
+
+    final bool isLastStage = currentIndex >= _stageFlow.length - 1;
+    if (isLastStage) {
+      ref.read(logisticsViewModelProvider.notifier).resetRideFlow();
+      _setCurrentStage(LogisticsStage.initial, notifyViewModel: false);
+      return;
+    }
+
+    final LogisticsStage nextStage = _stageFlow[currentIndex + 1];
+
+    _setCurrentStage(nextStage);
   }
 
   void _handleBackStage() {
-    _driverAcceptanceTimer?.cancel();
     // _stopCompassRotation();
     if (!_currentStage.canGoBack) return;
 
-    setState(() {
-      if (_currentStage == LogisticsStage.confirmPickupLocation) {
-        _currentStage = LogisticsStage.initial;
-        if (_mapController != null && _userLocation != null) {
-          _mapController!.animateCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(target: _userLocation!, zoom: _userZoom, tilt: 20),
-            ),
-          );
-        }
-        return;
+    if (_currentStage == LogisticsStage.confirmPickupLocation) {
+      _setCurrentStage(LogisticsStage.initial);
+      if (_mapController != null && _userLocation != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(target: _userLocation!, zoom: _userZoom, tilt: 20),
+          ),
+        );
       }
+      return;
+    }
 
-      if (_currentStage == LogisticsStage.enterPickupLocation) {
-        _currentStage = LogisticsStage.confirmPickupLocation;
-        return;
-      }
+    if (_currentStage == LogisticsStage.enterPickupLocation) {
+      _setCurrentStage(LogisticsStage.confirmPickupLocation);
+      return;
+    }
 
-      if (_currentStage == LogisticsStage.confirmRequest) {
-        _currentStage = LogisticsStage.confirmPickupLocation;
-        if (_mapController != null && _userLocation != null) {
-          _mapController!.animateCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(target: _userLocation!, zoom: _userZoom, tilt: 20),
-            ),
-          );
-        }
-        return;
+    if (_currentStage == LogisticsStage.confirmRequest) {
+      _setCurrentStage(LogisticsStage.confirmPickupLocation);
+      if (_mapController != null && _userLocation != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(target: _userLocation!, zoom: _userZoom, tilt: 20),
+          ),
+        );
       }
+      return;
+    }
 
-      final int currentIndex = _stageFlow.indexOf(_currentStage);
-      if (currentIndex > 0) {
-        _currentStage = _stageFlow[currentIndex - 1];
-      }
-    });
+    final int currentIndex = _stageFlow.indexOf(_currentStage);
+    if (currentIndex > 0) {
+      _setCurrentStage(_stageFlow[currentIndex - 1]);
+    }
   }
 
   void _handleCancelRide() {
-    _driverAcceptanceTimer?.cancel();
     _stopNearbyDriverAnimation();
     // _stopCompassRotation();
     if (_currentStage == LogisticsStage.lookingForDriver ||
         _currentStage == LogisticsStage.waitingForDriver) {
-      setState(() {
-        _currentStage = LogisticsStage.confirmRequest;
-      });
+      _setCurrentStage(LogisticsStage.confirmRequest);
       final logisticsState = ref.read(logisticsViewModelProvider);
       final pickupLocation = logisticsState.userLocation;
       final destinationLocation = logisticsState.destinationLocation;
@@ -536,9 +560,8 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
       return;
     }
 
-    setState(() {
-      _currentStage = LogisticsStage.initial;
-    });
+    ref.read(logisticsViewModelProvider.notifier).resetRideFlow();
+    _setCurrentStage(LogisticsStage.initial, notifyViewModel: false);
     final origin = ref.read(logisticsViewModelProvider).userLocation;
     if (_mapController != null && origin != null) {
       _mapController!.animateCamera(
@@ -550,60 +573,30 @@ class _LogisticsPageState extends ConsumerState<LogisticsPage>
   }
 
   void _handleEditPickup() {
-    _driverAcceptanceTimer?.cancel();
     setState(() {
       _currentStage = LogisticsStage.enterPickupLocation;
     });
     ref.read(logisticsViewModelProvider.notifier).clearPredictions();
   }
 
-  void _scheduleDriverAcceptance() {
-    _driverAcceptanceTimer?.cancel();
-    final int randomMillis = Random().nextInt(10000) + 20000; // 20-30 seconds
-    _driverAcceptanceTimer = Timer(Duration(milliseconds: randomMillis), () {
-      if (!mounted) return;
-      if (_currentStage != LogisticsStage.lookingForDriver) return;
-
-      // TODO: Replace with WebSocket driver acceptance listener.
-      _handleNextStage();
-
-      // After transitioning to waitingForDriver, schedule arrival
-      _scheduleDriverArrival();
-      _driverAcceptanceTimer = null;
-    });
-  }
-
-  void _scheduleDriverArrival() {
-    _driverAcceptanceTimer?.cancel();
-    final int randomMillis = Random().nextInt(10000) + 20000; // 20-30 seconds
-    _driverAcceptanceTimer = Timer(Duration(milliseconds: randomMillis), () {
-      if (!mounted) return;
-      if (_currentStage != LogisticsStage.waitingForDriver) return;
-
-      // Auto-transition to driver arrived
-      _handleNextStage();
-
-      // After transitioning to driverArrived, schedule trip start
-      _scheduleTripStart();
-      _driverAcceptanceTimer = null;
-    });
-  }
-
-  void _scheduleTripStart() {
-    _driverAcceptanceTimer?.cancel();
-    final int randomMillis = Random().nextInt(3000) + 2000; // 2-5 seconds
-    _driverAcceptanceTimer = Timer(Duration(milliseconds: randomMillis), () {
-      if (!mounted) return;
-      if (_currentStage != LogisticsStage.driverArrived) return;
-
-      // Auto-transition to in progress
-      _handleNextStage();
-      _driverAcceptanceTimer = null;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    ref.listen<LogisticsStage>(
+      logisticsViewModelProvider.select((state) => state.stage),
+      (LogisticsStage? previous, LogisticsStage next) {
+        if (next == _currentStage) {
+          return;
+        }
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || next == _currentStage) {
+            return;
+          }
+          _setCurrentStage(next, notifyViewModel: false);
+        });
+      },
+    );
+
     final logisticsState = ref.watch(logisticsViewModelProvider);
     final pickupSummary = AddressFormatter.formatWithFallback(
       logisticsState.userAddress,

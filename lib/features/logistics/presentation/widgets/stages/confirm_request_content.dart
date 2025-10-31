@@ -22,19 +22,17 @@ class ConfirmRequestContent extends ConsumerStatefulWidget {
 }
 
 class _ConfirmRequestContentState extends ConsumerState<ConfirmRequestContent> {
-  // TODO: Get from backend
   static const double _priceStep = 50;
-  static const double _initialPrice = 4500;
   static const int _numberOfPassengers = 4;
 
   late final TextEditingController _priceController;
   late final FocusNode _priceFocusNode;
-  double _currentPrice = _initialPrice;
+  double _currentPrice = 0;
 
   @override
   void initState() {
     super.initState();
-    _priceController = TextEditingController(text: _formatPrice(_initialPrice));
+    _priceController = TextEditingController(text: _formatPrice(_currentPrice));
     _priceFocusNode = FocusNode();
   }
 
@@ -48,8 +46,12 @@ class _ConfirmRequestContentState extends ConsumerState<ConfirmRequestContent> {
   String _formatPrice(double value) => '₦${value.toStringAsFixed(0)}';
 
   void _updatePrice(double value) {
+    final double sanitized = value.clamp(0, double.infinity);
+    ref
+        .read(logisticsViewModelProvider.notifier)
+        .updateSelectedPrice(sanitized);
     setState(() {
-      _currentPrice = value.clamp(0, double.infinity);
+      _currentPrice = sanitized;
       _priceController
         ..text = _formatPrice(_currentPrice)
         ..selection = TextSelection.collapsed(
@@ -91,6 +93,35 @@ class _ConfirmRequestContentState extends ConsumerState<ConfirmRequestContent> {
       'Fetching destination...',
     );
 
+    final double? selectedPrice = state.selectedPrice;
+    if (!_priceFocusNode.hasFocus && selectedPrice != null) {
+      final bool hasChanged = (selectedPrice - _currentPrice).abs() > 0.5;
+      if (hasChanged) {
+        _currentPrice = selectedPrice;
+        _priceController
+          ..text = _formatPrice(selectedPrice)
+          ..selection = TextSelection.collapsed(
+            offset: _priceController.text.length,
+          );
+      }
+    }
+
+    final bool isQuoteLoading = state.isFetchingQuote;
+    final double? suggestedPrice = state.quote?.recommendedPrice;
+    final String suggestionLabel;
+    if (isQuoteLoading) {
+      suggestionLabel = 'Fetching quote...';
+    } else if (suggestedPrice != null) {
+      suggestionLabel = 'Suggested price: ${_formatPrice(suggestedPrice)}';
+    } else {
+      suggestionLabel = 'Suggested price unavailable';
+    }
+
+    final bool isRequesting = state.isRequestingRide;
+    final bool canConfirm =
+        !isRequesting && (selectedPrice != null && selectedPrice > 0);
+    final String confirmLabel = isRequesting ? 'Confirming...' : 'Confirm ride';
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -122,14 +153,21 @@ class _ConfirmRequestContentState extends ConsumerState<ConfirmRequestContent> {
                 onDecrease: _handleDecrease,
                 onIncrease: _handleIncrease,
                 onChanged: _handlePriceChanged,
-                suggestedLabel:
-                    'Suggested price: ${_formatPrice(_initialPrice)}',
+                suggestedLabel: suggestionLabel,
               ),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.smLg),
-        GradientActionButton(label: 'Confirm ride', onTap: widget.onConfirm),
+        GradientActionButton(
+          label: confirmLabel,
+          onTap: () {
+            if (canConfirm) {
+              widget.onConfirm();
+            }
+          },
+          isActive: canConfirm,
+        ),
       ],
     );
   }
@@ -148,7 +186,7 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-  
+
     return BottomBorderCard(
       child: Row(
         children: [
@@ -167,7 +205,10 @@ class _SummaryCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  AddressFormatter.formatWithFallback(address, 'Fetching address...'),
+                  AddressFormatter.formatWithFallback(
+                    address,
+                    'Fetching address...',
+                  ),
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: AppColors.white,
                     fontWeight: AppFontWeights.semiBold,
@@ -319,6 +360,8 @@ class _PriceAdjuster extends StatelessWidget {
                   suggestedLabel,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: AppColors.midnightGreen,
+                    fontSize: AppSpacing.smMd,
+                    height: 2,
                   ),
                   textAlign: TextAlign.center,
                 ),

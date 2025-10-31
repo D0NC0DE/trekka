@@ -9,9 +9,14 @@ import 'package:trekka/core/widgets/input/app_multiline_text_field.dart';
 import 'package:trekka/core/widgets/snackbar/app_snackbar.dart';
 
 class CompleteRideContent extends StatefulWidget {
-  const CompleteRideContent({required this.onComplete, super.key});
+  const CompleteRideContent({
+    required this.onComplete,
+    this.onCancel,
+    super.key,
+  });
 
   final VoidCallback onComplete;
+  final VoidCallback? onCancel;
 
   @override
   State<CompleteRideContent> createState() => _CompleteRideContentState();
@@ -62,10 +67,7 @@ class _CompleteRideContentState extends State<CompleteRideContent> {
     });
   }
 
-  bool get _hasProvidedFeedback =>
-      _selectedReviews.isNotEmpty || _commentController.text.trim().isNotEmpty;
-
-  bool get _canSubmit => _rating > 0 && _hasProvidedFeedback;
+  bool get _canSubmit => _rating > 0;
 
   void _handleSubmitTap() {
     if (_canSubmit) {
@@ -75,18 +77,12 @@ class _CompleteRideContentState extends State<CompleteRideContent> {
     }
   }
 
-  void _showFeedbackMessage() {
-    String message;
-    
-    if (_rating == 0 && !_hasProvidedFeedback) {
-      message = 'Please rate your driver and share your experience. You\'ll both earn rewards! 🎁';
-    } else if (_rating == 0) {
-      message = 'Please rate your driver to continue. Earn rewards together! ⭐';
-    } else {
-      message = 'Please share your experience with a quick review or comment. Both get rewards! 💬';
-    }
+  void _handleCancelTap() {
+    widget.onCancel?.call();
+  }
 
-    AppSnackbar.showInfo(context, message);
+  void _showFeedbackMessage() {
+    AppSnackbar.showInfo(context, 'Please rate your driver to continue. ⭐');
   }
 
   @override
@@ -176,7 +172,7 @@ class _CompleteRideContentState extends State<CompleteRideContent> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Quick reviews',
+                  'Add a quick review (optional)',
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: AppColors.white,
                   ),
@@ -226,7 +222,7 @@ class _CompleteRideContentState extends State<CompleteRideContent> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Additional comments (optional)',
+                  'Share more (optional)',
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: AppColors.white,
                   ),
@@ -242,21 +238,45 @@ class _CompleteRideContentState extends State<CompleteRideContent> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              SizedBox(
-                width: double.infinity,
-                child: GradientActionButton(
-                  label: 'Submit rating',
-                  onTap: _handleSubmitTap,
-                  isActive: true,
-                  gradient: _canSubmit
-                      ? AppGradients.completeRideButtonActive
-                      : AppGradients.completeRideButtonInactive,
-                  borderColor: _canSubmit
-                      ? AppColors.primaryBright
-                      : AppColors.logisticsActionInactive,
-                ),
+              Row(
+                children: <Widget>[
+                  if (widget.onCancel != null)
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _handleCancelTap,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.white,
+                          side: BorderSide(
+                            color: AppColors.white.withValues(alpha: 0.7),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.md,
+                          ),
+                          textStyle: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: AppFontWeights.medium,
+                          ),
+                        ),
+                        child: const Text('Skip'),
+                      ),
+                    ),
+                  if (widget.onCancel != null)
+                    const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: GradientActionButton(
+                      label: 'Submit rating',
+                      onTap: _handleSubmitTap,
+                      isActive: _canSubmit,
+                      gradient: _canSubmit
+                          ? AppGradients.completeRideButtonActive
+                          : AppGradients.completeRideButtonInactive,
+                      borderColor: _canSubmit
+                          ? AppColors.primaryBright
+                          : AppColors.logisticsActionInactive,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.lg),
             ],
           ),
         ),

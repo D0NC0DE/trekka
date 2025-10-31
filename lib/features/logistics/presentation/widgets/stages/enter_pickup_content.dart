@@ -125,10 +125,8 @@ class _EnterPickupLocationContentState
           padding: const EdgeInsets.only(left: 4),
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () => showComingSoon(
-              context,
-              featureLabel: 'Select pickup on map',
-            ),
+            onTap: () =>
+                showComingSoon(context, featureLabel: 'Select pickup on map'),
             child: Row(
               children: <Widget>[
                 Image.asset(

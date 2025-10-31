@@ -7,16 +7,12 @@ import 'package:trekka/features/auth/data/repositories/auth_repository_impl.dart
 import 'package:trekka/features/auth/domain/repositories/auth_repository.dart';
 
 /// Provider for AuthRemoteDataSource
-final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>(
-  (ref) {
-    if (EnvConfig.useMocks) {
-      return const AuthMockDataSource();
-    }
-    return AuthRemoteDataSourceImpl(
-      apiClient: ref.watch(apiClientProvider),
-    );
-  },
-);
+final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
+  if (EnvConfig.useMocks) {
+    return const AuthMockDataSource();
+  }
+  return AuthRemoteDataSourceImpl(apiClient: ref.watch(apiClientProvider));
+});
 
 /// Provider for AuthRepository
 final authRepositoryProvider = Provider<AuthRepository>(
@@ -24,4 +20,3 @@ final authRepositoryProvider = Provider<AuthRepository>(
     remoteDataSource: ref.watch(authRemoteDataSourceProvider),
   ),
 );
-
