@@ -47,6 +47,14 @@ async function main() {
 
   await escrowManager.getFunction("authorizeService")(await rideHailing.getAddress());
   console.log("Authorized RideHailing on EscrowManager");
+
+  const reputationSystem = await ethers.getContractAt(
+    "ReputationSystem",
+    reputationSystemAddress,
+  );
+  await reputationSystem.getFunction("authorizeService")(await rideHailing.getAddress());
+  console.log("Authorized RideHailing on ReputationSystem");
+
 }
 
 main().catch((error) => {
