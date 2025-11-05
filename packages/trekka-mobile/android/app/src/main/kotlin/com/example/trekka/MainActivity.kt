@@ -1,4 +1,4 @@
-package com.trekka.app
+package com.trekka.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 
