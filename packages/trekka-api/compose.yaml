@@ -22,7 +22,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.local
     container_name: trekka_api
     restart: unless-stopped
     env_file:

@@ -141,6 +141,8 @@ cd packages/trekka-api
 docker compose up --build
 ```
 
+The Compose stack now references `packages/trekka-api/Dockerfile.local`, which is scoped for local development so cloud platforms such as DigitalOcean App Platform ignore it and continue using their default build packs.
+
 Make sure Docker Desktop (or your Docker daemon) is running before you run the command. The stack starts Postgres, applies Prisma migrations, seeds the demo driver wallet, and runs the NestJS server in watch mode on `http://localhost:3000`.
 
 ### API without Docker
