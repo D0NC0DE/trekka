@@ -1,202 +1,297 @@
 # Trekka Monorepo
 
-Trekka is a **decentralized geo playground** built on **Hedera Hashgraph**. This repository hosts both the Flutter mobile client and the NestJS API that powers quests, verification, payouts, and the gamified ecosystem.
+Trekka is a decentralized geo playground built on Hedera Hashgraph. Riders and drivers exchange value directly while we keep their sensitive information off-chain, give them verifiable proofs on-chain, and move steadily toward a fully non-custodial experience. This repository contains the Flutter mobile client (privacy-intensive UX) and the NestJS API (privacy-sensitive coordination that should not live on the blockchain).
 
-It’s a gamified peer-to-peer playground where Africans — and eventually the world — can exchange value directly without middlemen, but with trust, fun, and fairness.
+## Beta Access (Latest Builds)
 
----
+<p align="center">
+  <a href="https://testflight.apple.com/join/TzzHMJjU">
+    <img src="https://img.shields.io/badge/iOS%20TestFlight-Join%20Beta-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download Trekka on iOS TestFlight" />
+  </a>
+  <a href="https://www.trekkaweb.com/downloads/trekka-latest.apk">
+    <img src="https://img.shields.io/badge/Android%20APK-Download-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download Trekka Android APK" />
+  </a>
+</p>
 
-## Hedera Integration
+Anyone—builders, partners, or curious riders—can install the current Trekka beta without setting up a dev environment. Open the TestFlight link directly on your iPhone/iPad or download the APK on Android and approve the install prompt. Revisit this section for refreshed builds after each release.
 
-### Hedera Consensus Service (HCS)
-We stream immutable ride life-cycle summaries (and the upcoming marketplace sales receipts) to Hedera Consensus Service topics so regulators, riders, and partners can audit Trekka without touching our primary database. `LogisticsService` pushes a structured completion payload for every ride that settles on-chain through the shared `HederaConsensusService`, which signs and submits `TopicMessageSubmitTransaction` calls against the configured topic (`HEDERA_RIDE_SUMMARY_TOPIC_ID`). The same helper backs the sales stream once the marketplace API exposes settlements, meaning both mobility and commerce events land on a tamper-evident ledger with ~5 second finality.
-- **Transaction Types:** `TopicMessageSubmitTransaction` for runtime logging, with `TopicCreateTransaction` handled by `packages/trekka-api/scripts/create-consensus-topic.ts` when provisioning new topics.
-- **Economic Justification:** HCS’ predictable ~$0.0001 per message lets us notarize hundreds of micro-events daily without inflating delivery fees, while ABFT consensus gives partners deterministic finality that satisfies compliance teams in lower-margin African markets.
-
-### Hedera Smart Contract Service (EVM)
-Ride escrow, marketplace orders, and cross-vertical reputation all settle on Hedera’s EVM layer. The backend `WalletsService` keeps user wallets synced and executes `ContractExecuteTransaction` calls into the deployed contracts — RideHailing for trip state, EscrowManager for custody, and Marketplace for IPFS-backed orders — using IDs configured in environment variables (see `packages/trekka-contracts/contracts/**`). This gives the mobile app instant proof that funds are locked, released, or refunded based on the contract events, and lets us reuse the same primitives for future courier/recycling verticals.
-- **Transaction Types:** `ContractExecuteTransaction` (ride request, accept, cancel, complete), plus the deployment scripts that drive `ethers.deployContract` workflows and authorize services against EscrowManager/ReputationSystem.
-- **Economic Justification:** Hedera’s fixed gas schedule keeps escrow updates far below $0.01 even during congestion, so we can clear payments in real time without charging surge-like network fees; native finality prevents double-spend disputes that would otherwise erode trust in cash-light regions.
-
-### Hedera Account Service (Crypto)
-Every Trekka participant receives an on-ledger wallet that the API seeds and manages. We call `AccountCreateTransaction` while encrypting the private key with per-user AAD, cache balances through `AccountBalanceQuery`, and reuse those keys to sign smart-contract calls on behalf of riders or drivers. Seed scripts pre-provision demo drivers so the mobile MVP can showcase the full Hedera flow without manual setup.
-- **Transaction Types:** `AccountCreateTransaction` for wallet provisioning, `AccountBalanceQuery` for live HBAR telemetry, and HBAR transfers embedded in contract executions.
-- **Economic Justification:** Creating and topping up accounts costs pennies, making it viable to onboard drivers who may hold only a few dollars’ worth of float while still guaranteeing custody and compliance through ledger-backed operations.
-
-### Decentralized Storage (IPFS + Storacha)
-Product metadata and proof artifacts are stored off-chain using IPFS CIDs referenced directly in the Marketplace contract. The API’s `StorageService` is wired to pin new assets through Storacha/Web3.Storage once credentials are present, so marketplace listings, delivery proofs, and compliance documents stay content-addressable, redundant, and verifiable by any stakeholder.
-- **Operational Benefit:** Off-chain binaries stay lightweight while the on-chain footprint remains minimal, but the CID linkage still guarantees integrity for dispute resolution.
-
-### Hedera Deployment IDs (Testnet)
-Keep these in sync with environment variables such as `HEDERA_RIDE_HAILING_CONTRACT_ID` and `HEDERA_RIDE_SUMMARY_TOPIC_ID`.
-
-| Component        | Hedera ID      | Hedera EVM Address                       |
-|-----------------|----------------|------------------------------------------|
-| EscrowManager   | `0.0.7167779`  | `0x0404dF8365111b34C7Ec46C4805462b384E8B224` |
-| ReputationSystem| `0.0.7167780`  | `0x71660Df400Cb33c3032234a71625738b4A283d39` |
-| RideHailing     | `0.0.7167785`  | `0x2B76D0F307EF754EF41741d2a6f3eAe4F6edc9CE` |
-| Marketplace     | `0.0.7173124`  | `0x0Aad7DCd751Bd24E2fADb4E563FAF29624076D40` |
-
-Additional Hedera resources:
-- Ride summary topic (`HEDERA_RIDE_SUMMARY_TOPIC_ID`): `0.0.7171590`
-- Any new marketplace or sales topics should follow the same naming convention when provisioned.
-
-## Repo Layout
+## Repository Layout
 
 ```
 .
 ├─ packages/
-│  ├─ trekka-mobile/   # Flutter app (consumer + provider experiences)
-│  └─ trekka-api/      # NestJS backend (quests, payouts, verification)
+│  ├─ trekka-mobile/     # Flutter client (logistics hailing, marketplace, quests)
+│  ├─ trekka-api/        # NestJS backend (identity, payouts, verification)
+│  └─ trekka-contracts/  # Hedera smart contracts (escrow, marketplace, rewards)
+└─ scripts/            # Shared development helpers (dev runner, bootstrap, etc.)
 ```
 
-Each package keeps its own source, tooling, and tests. Shared policies and workflows live at the repo root.
+### Docs & Pitch Materials
 
----
+- [Pitch Deck](docs/pitch-deck.pdf)
+- [Certification](docs/certificate.pdf)
 
-## Prerequisites
+## Architecture Snapshot (MVP/MLP)
 
-- **Flutter** 3.22+ and **Dart** 3.4+ (for `trekka-mobile`)
-- **Node.js** 20+ and npm (or pnpm/yarn) for `trekka-api`
-- Git, an IDE (VS Code / Android Studio / JetBrains), and a configured device or emulator
-- Optional: Access to staging Hedera credentials and database for end-to-end flows
+- We are shipping an MVP/MLP: no CI/CD pipelines, background job runners, queues, or caches yet. The focus is on validating rider <> driver flows, escrow, and Hedera integrations.
+- The Flutter app owns privacy-intensive logic (PII capture, local state, wallet UX). The API only processes privacy-sensitive data we cannot share publicly, then coordinates with Hedera services.
+- Everything that benefits from public verifiability—escrow operations, settlement receipts, loyalty points, proof-of-ride images—lands on Hedera (Consensus, Smart Contract, or IPFS-backed storage).
+- Short term goal: keep server state minimal; medium term goal: ship a fully non-custodial experience where users control their keys and data end to end.
 
----
+### Product Surface Today
 
-## Quick Start
+- **Logistics Hailing (development):** riders request transport, drivers accept rides, escrow settles automatically via Hedera smart contracts. Eco-friendly trips (EV fleets, early arrivals) earn green sustainability credits.
+- **Marketplace (development):** peers list geo-tagged assets, services, and digital subscriptions (e.g., connectivity bundles, AI assistant seats). Each purchase emits a Hedera consensus receipt so buyers can audit transactions.
+- **Recycling (coming soon):** collectors post availability, households schedule pickups, and payouts settle on-chain with proof of delivery. Verified recyclers mint sustainability credits as NFTs to redeem once the marketplace opens.
+- **Quest — Physical (coming soon):** location-based missions reward users with on-chain points and collectible NFTs once DePIN signals (trusted hardware, Helium/beacon attestations) confirm presence without leaking raw location data.
+- **Quest — Online (coming soon):** remote tasks (content, referrals, education) issue rewards tied to Hedera tokens so communities can verify completions asynchronously.
+- **Logistics Courier (coming soon):** the mobility rails power parcel delivery with zero-custody hand-offs, notarized delivery proofs, and optional sustainability bonuses for eco routes.
+
+### Sustainability & Incentive Layer
+
+- **Green credits:** every recycler, eco-friendly driver, or energy-conscious quest participant mints a non-transferable credit NFT that can later be converted once the sustainability marketplace is live. Credits stack across all verticals to make greener choices tangible.
+- **NFT utility:** collectibles celebrate milestones (first 100 sustainable rides, top marketplace sellers), unlock premium quests, and evolve with user reputation. We tie issuance to verifiable on-chain events so rewards stay scarce and meaningful.
+- **DePIN integrations:** physical quests and courier proofs can rely on decentralized hardware (e.g., Helium, GPS beacons, secure sensors) to attest presence securely while keeping raw location private.
+- **Receipt NFTs:** marketplace buyers can opt into an on-chain receipt NFT that mirrors the printable invoice. Metadata references a hashed order payload plus an encrypted IPFS proof, giving both auditability and a loyalty hook for future perks.
+
+## 🧱 Trekka Architecture Diagram
+
+```mermaid
+flowchart LR
+  subgraph Client["Client Layer"]
+    Mobile["Mobile App (Flutter)"]
+  end
+
+  subgraph App["Application Layer"]
+    Backend["NestJS API / Indexer"]
+    ReadDB[("Read DB / Postgres / Elastic")]
+  end
+
+  subgraph Hedera["Hedera Services"]
+    HederaCrypto["Hedera Crypto Service\n(AccountCreate, AccountBalance)"]
+    HederaSC["Hedera Smart Contracts (EVM)\n(Escrow, Marketplace, Rewards)"]
+    HCS["Hedera Consensus Service (HCS)\n(TopicMessageSubmitTransaction)"]
+    Mirror["Hedera Mirror Nodes\n(Event stream & tx history)"]
+  end
+
+  subgraph Storage["Decentralized Storage"]
+    IPFS["IPFS / Web3.Storage / Storacha"]
+  end
+
+  Mobile -->|"HTTP API: auth, product/ride actions"| Backend
+  Mobile -->|"Uploads media (images, proofs)"| IPFS
+  Mobile -->|"Wallet actions (sign locally or via relayer)"| HederaCrypto
+
+  Backend -->|"ContractExecuteTransaction\n(requestRide, placeOrder, acceptRide)"| HederaSC
+  Backend -->|"TopicMessageSubmitTransaction\n(ride summaries, receipts, proofs)"| HCS
+  Backend -->|"AccountCreateTransaction / AccountBalanceQuery"| HederaCrypto
+
+  HederaSC -->|"Emit contract events / logs"| Mirror
+  HCS -->|"Replicated consensus messages"| Mirror
+
+  Mirror -->|"Stream events & txs (mirror node API)"| Backend
+  Backend -->|"Index & enrich (fetch IPFS CIDs) → store"| ReadDB
+  ReadDB -->|"Serve paginated listings / leaderboards"| Backend
+  Backend -->|"Serve product listings, order state, receipts"| Mobile
+
+  IPFS -->|"Serve metadata & proofs (CID)"| Backend
+  IPFS -->|"Serve metadata & proofs (CID)"| Mobile
+
+  privacy["Keep PII on-device or encrypted; do *not* push raw coords or PII to HCS/contracts."]
+  privacy -.-> Mobile
+```
+
+![Trekka data flow diagram](docs/architecture-diagram.png)
+
+## Privacy & Data Philosophy
+
+- Sensitive personal data stays on the device; the API never stores more than it must for account recovery or regulatory obligations.
+- Any logic that can be auditable runs on Hedera:
+  - Escrow and ride lifecycle smart contracts guarantee payouts.
+  - Consensus messages notarize trip summaries and receipts.
+  - Reward points and badges map to on-chain state.
+  - Proof artifacts are pinned to IPFS so riders can decide what is public.
+- The API encrypts Hedera private keys with per-user additional authenticated data (AAD) and only decrypts inside secure server flows (`packages/trekka-api/src/wallets/wallets.service.ts:231`).
+
+## Local Setup
+
+### Prerequisites
+
+- Node.js 20+ and npm (API)
+- Flutter 3.22+ / Dart 3.4+ (mobile)
+- Docker Desktop (for the Postgres + API stack)
+- Git, a preferred IDE
+- Hedera Testnet account + operator key (obtain from <https://portal.hedera.com>)
+
+### Install Dependencies
 
 ```bash
 git clone https://github.com/trekka-hq/trekka.git
 cd trekka
+./scripts/bootstrap.sh            # Installs npm dependencies and runs flutter pub get
 ```
 
-### Install Dependencies for All Packages
+### Configure Environment Variables
+
+1. Copy the API example config and populate secrets:
+   ```bash
+   cd packages/trekka-api
+   cp .env.example .env
+   ```
+2. Required values:
+   - `HEDERA_OPERATOR_ID` / `HEDERA_OPERATOR_KEY` (from Hedera portal)
+   - Database credentials (leave defaults for Docker: `trekka_postgres`)
+   - JWT secrets, encryption key, mail + storage keys as needed
+   - Generate a strong `ENCRYPTION_KEY` with `npm run generate:key` inside `packages/trekka-api`
+3. Optional overrides exist for ports (`PORT`/`DB_PORT`) and seeded demo data.
+
+## Running the Apps
+
+### API with Docker Compose (recommended)
 
 ```bash
-./scripts/bootstrap.sh
+cd packages/trekka-api
+docker compose up --build
 ```
 
-The script runs `npm install` for `packages/trekka-api` and `flutter pub get` for `packages/trekka-mobile`.
+The Compose stack now references `packages/trekka-api/Dockerfile.local`, which is scoped for local development so cloud platforms such as DigitalOcean App Platform ignore it and continue using their default build packs.
 
-### Bootstrap the Flutter App
-```bash
-cd packages/trekka-mobile
-flutter pub get
-```
+Make sure Docker Desktop (or your Docker daemon) is running before you run the command. The stack starts Postgres, applies Prisma migrations, seeds the demo driver wallet, and runs the NestJS server in watch mode on `http://localhost:3000`.
 
-### Bootstrap the API
+### API without Docker
+
 ```bash
 cd packages/trekka-api
 npm install
-```
-
----
-
-## Running the Projects
-
-### Mobile (`packages/trekka-mobile`)
-
-```bash
-# With staging API
-flutter run \
-  --dart-define=API_BASE_URL=https://staging.api.trekka.app \
-  --dart-define=USE_MOCKS=false
-
-# Demo / investor mode (no backend)
-flutter run --dart-define=USE_MOCKS=true
-```
-
-Key runtime flags:
-- `API_BASE_URL` – backend endpoint (omit to use defaults or mocks)
-- `USE_MOCKS=true|false` – switch repositories to in-memory data sources for demos
-
-### API (`packages/trekka-api`)
-
-```bash
-# Development (watch mode)
+npm run prisma:generate
+npm run prisma:migrate
+npm run prisma:seed
 npm run start:dev
-
-# Production build and run
-npm run build && npm run start:prod
 ```
 
-Required environment variables (set via shell or a local `.env` that is not committed):
-- `PORT` – default `3000`
-- `NODE_ENV` – `development|staging|production`
-- `API_BASE_URL` – used for Swagger docs metadata
-- `HEDERA_NETWORK` – e.g., `testnet`
-- `HEDERA_OPERATOR_ID` / `HEDERA_OPERATOR_KEY`
-- `DB_URL` – database connection string
+Ensure your local Postgres instance matches `.env` settings.
 
-Swagger UI is available at `http://localhost:3000/docs` in non-production environments.
+### Mobile App
 
----
+```bash
+cd packages/trekka-mobile
+flutter run --dart-define=API_BASE_URL=http://localhost:3000 --dart-define=USE_MOCKS=false
+```
+
+Flip `USE_MOCKS=true` to run entirely offline for demos.
 
 ### Combined Dev Runner
 
-A helper script is available to launch the API and mobile app together:
-
 ```bash
-# From repo root
+# from repo root
 ./scripts/dev.sh
 ```
 
-The script will:
-
-- start the API in watch mode (`npm run start:dev`)
-- launch the Flutter app pointing at `http://localhost:3000` by default
-- shut the API down when you exit the Flutter process
-
-Override defaults by exporting environment variables before running:
+This script spins up the Docker Compose API stack, waits for the server to respond, then launches the Flutter app. It stops the containers when you exit Flutter. Environment overrides:
 
 ```bash
 API_BASE_URL=https://staging.api.trekka.app USE_MOCKS=false ./scripts/dev.sh
+SKIP_DB_SEED=true ./scripts/dev.sh    # Skip Prisma seed if you already provisioned wallets
 ```
 
----
+### Helpful Utilities
 
-## Testing & Quality
+- `npm run generate:key` (inside `packages/trekka-api`) produces a 32-byte encryption key tailored for wallet AAD.
+- `npm run hedera:create-topic -- "Optional memo"` provisions a new Hedera Consensus topic using the credentials in `.env`.
+- `npm run prisma:studio` opens the Prisma data browser against your local database.
 
-### Flutter
-```bash
-flutter test                     # Unit + widget tests
-flutter test integration_test    # Integration tests (device/emulator required)
-flutter analyze                  # Static analysis
-dart format --set-exit-if-changed .
-```
-
-Optional code generation (if `freezed`/`json_serializable` are introduced later):
-```bash
-flutter pub run build_runner build --delete-conflicting-outputs
-```
+## Testing
 
 ### API
+
 ```bash
+cd packages/trekka-api
 npm run lint
-npm run format
-npm run test         # Unit tests
-npm run test:e2e     # E2E tests
-npm run test:cov     # Coverage report
+npm run test
+npm run test:e2e
+npm run test:cov
 ```
 
----
+### Mobile
+
+```bash
+cd packages/trekka-mobile
+flutter analyze
+flutter test
+flutter test integration_test    # Requires device / emulator
+```
+
+## Hedera Integration
+
+Trekka leans on multiple Hedera services to keep the platform trustless while respecting user privacy.
+
+### Hedera Consensus Service (HCS)
+
+- Purpose: append-only audit trail of ride life cycles, payouts, and upcoming marketplace receipts so regulators and riders can verify operations.
+- Implementation: `HederaConsensusService` (`packages/trekka-api/src/hedera/consensus.service.ts`) submits structured JSON to `HEDERA_RIDE_SUMMARY_TOPIC_ID` via `TopicMessageSubmitTransaction`.
+- Why Hedera: predictable ~$0.0001 per message and ~5 second finality give us tamper-evident proofs without exploding operating costs—a critical requirement for thin-margin mobility corridors in Africa.
+
+### Hedera Smart Contract Service (EVM)
+
+- Purpose: escrow fares, enforce ride state transitions, account for rewards, and eventually coordinate additional verticals (recycling, deliveries).
+- Implementation: `WalletsService` (`packages/trekka-api/src/wallets/wallets.service.ts`) signs `ContractExecuteTransaction` calls (`requestRide`, `acceptRide`, `completeRide`, cancel variants) with user wallets, capping gas to 500k to avoid runaway costs.
+- Why Hedera: predictable gas pricing (<$0.01) and finality backed by ABFT consensus let us automate escrow releases without exposing riders to chain congestion or speculative fees, which is essential for price-sensitive commuters.
+
+### Hedera Account Service (Crypto)
+
+- Purpose: provision non-custodial wallets per rider/driver, top them up, and expose balances to the mobile client.
+- Implementation: during signup and database seeding we call `AccountCreateTransaction` to generate accounts, encrypt the private key with per-user AAD, and store the ciphertext (`packages/trekka-api/src/wallets/wallets.service.ts:152`, `packages/trekka-api/prisma/seed.ts:50`). `AccountBalanceQuery` keeps wallet balances fresh, and the mobile app signs its own transfers once we move to full non-custody.
+- Why Hedera: account creation costs only a few cents and provides native HBAR support, letting us give every rider/driver a ledger-backed wallet from day one without running our own custody infrastructure.
+
+### Decentralized Storage (IPFS + Storacha / Web3.Storage)
+
+- Purpose: host proof artifacts (ride completion images, compliance docs) without leaking PII.
+- Implementation: scaffolding under `packages/trekka-api/src/storage` will pin assets to IPFS-backed gateways using keys declared in `.env` (`S3_STORAGE_KEY`, `S3_STORAGE_PROOF`) once Storacha credentials are wired. Mobile clients decide which artifacts to publish.
+- Why decentralized storage: content-addressed proofs give riders control over what becomes public, and Hedera contracts can reference the same CID for dispute resolution without us warehousing large binaries.
+
+### Hedera Mirror Nodes
+
+- Purpose: independent verification of on-chain actions (ride settlement receipts, consensus timestamps) for auditors, partners, and the mobile client.
+- Implementation: downstream analytics services poll mirror-node APIs to materialize ride history dashboards and reconcile loyalty payouts (integration hooks live in upcoming reporting modules).
+- Why Hedera: mirror nodes deliver the same ABFT-guaranteed data stream without us running consensus infrastructure, enabling transparent reporting at negligible cost.
+
+### Deployment IDs (Testnet)
+
+| Component         | Hedera ID     | Hedera EVM Address                       |
+|-------------------|---------------|-------------------------------------------|
+| EscrowManager     | `0.0.7167779` | `0x0404dF8365111b34C7Ec46C4805462b384E8B224` |
+| ReputationSystem  | `0.0.7167780` | `0x71660Df400Cb33c3032234a71625738b4A283d39` |
+| RideHailing       | `0.0.7167785` | `0x2B76D0F307EF754EF41741d2a6f3eAe4F6edc9CE` |
+| Marketplace       | `0.0.7173124` | `0x0Aad7DCd751Bd24E2fADb4E563FAF29624076D40` |
+| Ride summary topic| `0.0.7171590` | — |
+
+Keep `.env` in sync with the latest contract/topic IDs before deploying a new build.
+
+### Operational Cheatsheet
+
+| Flow | Hedera API | Location & Purpose |
+|------|------------|--------------------|
+| Wallet provisioning | `AccountCreateTransaction`, encrypted key storage | `packages/trekka-api/src/wallets/wallets.service.ts:152` creates user wallets, stores ciphertext with AAD, and seeds initial balances. |
+| Contract interactions | `ContractExecuteTransaction` (`requestRide`, `acceptRide`, `cancelRideByRider/Driver`, `completeRide`) | `packages/trekka-api/src/wallets/wallets.service.ts:109` signs transactions per wallet, enforces gas usage, and logs transaction IDs. |
+| Balance telemetry | `AccountBalanceQuery` | `packages/trekka-api/src/wallets/wallets.service.ts:238` refreshes balances before returning wallet info. |
+| Consensus logging | `TopicMessageSubmitTransaction` | `packages/trekka-api/src/hedera/consensus.service.ts:54` broadcasts ride summaries to HCS. |
+| Demo provisioning | `AccountCreateTransaction` (seed script) | `packages/trekka-api/prisma/seed.ts:50` bootstraps a pioneer driver with 100 HBAR for dev/demo use. |
+| Topic creation tooling | `TopicCreateTransaction` | `packages/trekka-api/scripts/create-consensus-topic.ts:1` CLI helper to mint new topics with your operator key. |
+
+Every Hedera interaction requires valid credentials. Reuse the same operator account on testnet; production will rotate dedicated operators per service.
 
 ## Contributing
 
-- We follow a lightweight **Gitflow**: `main` (stable) ← `dev` (integration) ← feature branches (`feature/*`, `bugfix/*`, `hotfix/*`).
-- Commits use **Conventional Commits** with **emoji prefixes** (e.g., `🌍 feat: add quest feed`, `🛠️ fix: resolve map crash`).
-- See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for architecture rules, PR checklists, and security policy spanning both mobile and API codebases.
-
----
+- Workflow: `main` (stable) ← `dev` (integration) ← feature branches (`feature/*`, `bugfix/*`, `hotfix/*`).
+- Commits follow Conventional Commits with emoji prefixes (e.g., `🌍 feat: add quest feed`).
+- See `CONTRIBUTING.md` for PR checklists, security notes, and the hackathon access policy.
 
 ## Support & Links
 
 - Issues: <https://github.com/trekka-hq/trekka/issues>  
 - Discussions: <https://github.com/trekka-hq/trekka/discussions>  
-- Engineering: `dev@trekka.app` • Security: `security@trekka.app` • Product: `pm@trekka.app`
-
----
+- Engineering: `dev@trekkaweb.com` • Security: `security@trekkaweb.com` • Product: `pm@trekkaweb.com`
 
 ## License
 
-Proprietary — Internal/Invited Use Only. You may not fork, resell, package, or otherwise profit from this codebase, nor present it as your own work, without prior written permission. Refer to [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the hackathon access window and contributor obligations.
+Proprietary — Internal/Invited Use Only. You may not fork, resell, package, or otherwise profit from this codebase without prior written permission. Refer to `CONTRIBUTING.md` for the hackathon access window and contributor obligations.
