@@ -2,6 +2,17 @@
 
 Trekka is a decentralized geo playground built on Hedera Hashgraph. Riders and drivers exchange value directly while we keep their sensitive information off-chain, give them verifiable proofs on-chain, and move steadily toward a fully non-custodial experience. This repository contains the Flutter mobile client (privacy-intensive UX) and the NestJS API (privacy-sensitive coordination that should not live on the blockchain).
 
+## Beta Access (Latest Builds)
+
+Anyone—builders, partners, or curious riders—can install the current Trekka beta without setting up a dev environment:
+
+| Platform | Download |
+|----------|----------|
+| 🍏 **iOS TestFlight** | <https://testflight.apple.com/join/TzzHMJjU> (open on your device and tap “Start Testing”). |
+| 🤖 **Android APK** | <https://www.trekkaweb.com/downloads/trekka-latest.apk> (download, then approve installs from unknown sources when prompted). |
+
+Links reflect the most recent beta rollouts. Revisit this section for refreshed builds after each release.
+
 ## Repository Layout
 
 ```
