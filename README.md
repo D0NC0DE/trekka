@@ -4,14 +4,16 @@ Trekka is a decentralized geo playground built on Hedera Hashgraph. Riders and d
 
 ## Beta Access (Latest Builds)
 
-Anyone—builders, partners, or curious riders—can install the current Trekka beta without setting up a dev environment:
+<p align="center">
+  <a href="https://testflight.apple.com/join/TzzHMJjU">
+    <img src="https://img.shields.io/badge/iOS%20TestFlight-Join%20Beta-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download Trekka on iOS TestFlight" />
+  </a>
+  <a href="https://www.trekkaweb.com/downloads/trekka-latest.apk">
+    <img src="https://img.shields.io/badge/Android%20APK-Download-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download Trekka Android APK" />
+  </a>
+</p>
 
-| Platform | Download |
-|----------|----------|
-| 🍏 **iOS TestFlight** | <https://testflight.apple.com/join/TzzHMJjU> (open on your device and tap “Start Testing”). |
-| 🤖 **Android APK** | <https://www.trekkaweb.com/downloads/trekka-latest.apk> (download, then approve installs from unknown sources when prompted). |
-
-Links reflect the most recent beta rollouts. Revisit this section for refreshed builds after each release.
+Anyone—builders, partners, or curious riders—can install the current Trekka beta without setting up a dev environment. Open the TestFlight link directly on your iPhone/iPad or download the APK on Android and approve the install prompt. Revisit this section for refreshed builds after each release.
 
 ## Repository Layout
 
